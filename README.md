@@ -10,3 +10,6 @@ Git-Hired is a web application built on NodeJS, AngularJS, and mySQL to deliver 
 # Optional
 ## mySQL Workbench
     sudo apt-get install mysql-workbench
+    
+# Setup
+    npm update
