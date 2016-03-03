@@ -1,16 +1,20 @@
-function sidebar_directive() {
+module.exports =function() {
+	var controller = function($scope) {
+	}
 	return {
 		templateUrl: 'sidebar/sidebar.template.html'
 		, scope: {
-			show: "="
+			model: "="
 		}
+
 		, link: function($scope, $element, $attrs) {
-			$scope.$watch('show', function() {
-				$element.toggleClass("toggled");
-				
-			});
+			$scope.$watch('model', function(properties) {
+				$element.toggleClass("toggled", properties.show);
+			}, true);
 
 			
 		}
+
+		, controller: ['$scope', controller]
 	}
 }

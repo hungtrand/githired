@@ -1,21 +1,20 @@
 <div class="container-fluid">
 	<div class="navbar-header">
-		<!-- <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 		<span class="icon-bar"></span>
 		<span class="icon-bar"></span>
 		<span class="icon-bar"></span>
-		</button> -->
-		<a class="navbar-brand hidden-sm hidden-xs text-warning text-capitalize" href="#">
-			<span><img src="images/temp-logo.png" height="24px;" />	GitHired</span>
+		</button>
+		<a class="navbar-brand text-warning text-capitalize" href="#">
+			<span><img src="images/temp-logo.png" height="24px;" />	<span class=" hidden-xs">GitHired</span></span>
 		</a>
+
+		<div class="navbar-left hidden-sm hidden-md hidden-lg col-xs-9" 
+			style="margin-top: 5px;" gh-search></div>
 		
 	</div>
 	
 	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-		<ul class="nav navbar-nav">
-			<li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-		</ul>
-		<div class="navbar-form navbar-left" gh-search></div>
 		<ul class="nav navbar-nav navbar-right">
 			<li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account <span class="caret"></span></a>
@@ -34,12 +33,20 @@
 				</ul>
 			</li>
 			<li>
-				<a href="#menu-toggle" id="menu-toggle" 
+				<a href="#menu-toggle" id="menu-toggle"
+					ng-click="vEllipsisToggle()"
 					style="padding-right: 20px; padding-top: 5px;">
-					<h4><i class="fa fa-ellipsis-v text-danger"></i></h4>
+					<h4>
+						<i class="fa fa-list text-danger" ng-if="!vEllipsis"></i>
+						<i class="fa fa-ellipsis-v text-success" ng-if="vEllipsis"></i>
+					</h4>
 				</a>
 			</li>
 		</ul>
+
+		<div class="navbar-right hidden-xs col-sm-6 col-md-8 col-lg-9" 
+			style="margin-top: 5px;" gh-search></div>
+		
 	</div>
 	<!--/.nav-collapse -->
 </div>

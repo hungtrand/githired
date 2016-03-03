@@ -1,7 +1,6 @@
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
 
-var searchBar_controller = require("./search/searchBar.controller");
 var searchInput_directive = require("./search/searchInput.directive");
 
 var gmap_directive = require("./gmap/gmap.directive");
@@ -19,14 +18,13 @@ window.init = function() {
 
 	app
 		.directive('ghNavbar', [navbar_directive])
-		.directive('ghSidbar', [sidebar_directive])
+		.directive('ghSidebar', [sidebar_directive])
 		.directive('ghGmap', [gmap_directive])
 		.directive('ghSearch', [searchInput_directive]);
 
 	app
-		.controller('main_controller', ['$scope', main_controller])
+		.controller('main_controller', ['$scope', 'messenger_service', main_controller])
 		.controller('gmapController', ['$scope', gmap_controller])
-		.controller('searchBarController', ['$scope', searchBar_controller]);
 
 	angular.bootstrap(document, ['githired']);
 

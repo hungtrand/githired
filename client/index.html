@@ -11,9 +11,10 @@
 	</head>
 	<body>
 		<div class="container-fluid">
-			<nav gh-navbar class="navbar navbar-default navbar-fixed-top" style="height: 50px;" ng-controller="searchBarController">
+			<nav gh-navbar class="navbar navbar-default navbar-fixed-top" style="height: 50px;">
 				
 			</nav>
+
 			<section ng-controller="gmapController">
 				
 				<div gh-gmap id="gmap"></div>
@@ -39,7 +40,7 @@
 				
 			</section>
 			
-			<div gh-sidebar show="navbarShow"></div>
+			<div id="sidebar-wrapper" gh-sidebar model="sidebarModel"></div>
 		</div>
 		
 		

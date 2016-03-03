@@ -1,6 +1,8 @@
 module.exports = function() {
 	var service = {
-		navbarShow: false
+		sidebar: {
+			show: false
+		}
 	}
 
 	return service;
