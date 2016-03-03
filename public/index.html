@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" ng-controller="main_controller">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="index.css">
+		<title>Git Hired</title>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<nav gh-navbar class="navbar navbar-default navbar-fixed-top" style="height: 50px;" ng-controller="searchBarController">
+				
+			</nav>
+			<section ng-controller="gmapController">
+				
+				<div gh-gmap id="gmap"></div>
+				
+				<div class="btn-group" style="position: absolute; top: 60px; left: 10px;">
+					<button type="button" class="btn btn-default btnSettings dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<i class="fa fa-gear"></i> <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu">
+						<li>
+							<a href="javascript:void(0);">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="showMarkers"
+										ng-value="showMarkers" ng-model="showMarkers" checked/>
+										Show markers
+									</label>
+								</div>
+							</a>
+						</li>
+					</ul>
+				</div>
+				
+			</section>
+			
+			<div gh-sidebar show="navbarShow"></div>
+		</div>
+		
+		
+	</body>
+	<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="lib/typeahead/typeahead.bundle.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+	<script src="https://code.angularjs.org/1.4.9/angular-resource.min.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+	<script src="app.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIawGAPo5-aceyFyRehx8zMFoun4xq764&libraries=geometry,visualization&callback=window.init" async defer></script>
+</html>

@@ -1,0 +1,44 @@
+<form class="form-horizontal text-center" action="javascript:void(0);">
+	<div class="form-group">
+		<div class="col-xs-12">
+			<div class="input-group">
+				<span id="searchLog" class="input-group-btn" >
+					<button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 15px;">
+					<i class="fa fa-list"></i> <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu">
+						<li ng-repeat="(keyword, selected) in searchLog">
+							<a href="javascript:void(0);">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="searchLogItem"
+										ng-value="keyword" ng-model="selected" checked ng-change="sendQuery()"/>
+										{{ keyword }}
+									</label>
+								</div>
+							</a>
+						</li>
+						<li role="separator" class="divider"></li>
+						<li>
+							<a href="#" ng-click="clear()">
+								<span class="text-danger"><i class="fa fa-trash"></i> Clear</span>
+							</a>
+						</li>
+					</ul>
+				</span>
+
+				<input type="text" class="form-control inputSearch" placeholder="Search for job"
+					style="margin-top: 3px; height: 35px;"
+					ng-model="searchInput"
+					ng-disabled="waiting" />
+
+				<span class="input-group-btn">
+					<button type="submit" class="btn btn-primary btnSearch"
+						ng-disabled="waiting" style="font-size: 15px;">
+							<i ng-class="{ 'glyphicon glyphicon-search': !waiting, 'fa fa-spin fa-spinner': waiting }"></i>
+					</button>
+				</span>
+			</div>
+		</div>
+	</div>
+</form>
