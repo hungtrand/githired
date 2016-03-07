@@ -3,8 +3,8 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json')
 	    , browserify: {
 		    js: {
-                src: "client/app.js"
-                , dest: "public/app.js"
+                src: "client/app_dev.js"
+                , dest: "client/app.js"
             }
 	    }
 
@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 // This copies all the html and css into the dist/ folder
                 expand: true,
                 cwd: 'client/',
-                src: ['**/*.html', '**/*.css', '**/*.png', '**/*.ico', '**/*.png', '**/*.json', 'lib/**'],
+                src: ['**/*.html', '**/*.css', '**/*.png', '**/*.ico', '**/*.png', '**/*.json', '**/*.ttf', '**/*.woff', '**/*.woff2', 'lib/**'],
                 dest: 'public'
             }
         }
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         , uglify: {
             my_target: {
                 files: {
-                    "public/app.js": ["public/app.js"]
+                    "public/app.js": ["client/app.js"]
                 }
             }
         }

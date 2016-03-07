@@ -8,6 +8,10 @@ module.exports = function() {
 		$scope.$on('searchBar.input.submit', function(evt, keywords) {
 			$scope.$broadcast("status.waiting");
 		});
+
+		$scope.triggerSignup = function() {
+			messenger.signup.show = true;
+		}
 	}
 
 	return {
