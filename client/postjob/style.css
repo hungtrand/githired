@@ -13,6 +13,16 @@ input[type="jtitle"]{
 	width: 50%;
 	padding: 10px;
 }
+.form{
+  margin-left: auto ;
+  margin-right: auto ;
+}
+.jumbotron{
+	padding-left: 10px;
+	padding-right: 20px;
+	min-width: 320px;
+	border-radius: 7px;
+}
 
 textarea {
 	border-radius: 7px;
@@ -21,7 +31,6 @@ textarea {
 	min-width: 300px;
 	width: 90%;
 	padding: 10px;
-	margin-right: 0px;
 }
 .input-group[type="wage"]{
 	min-width: 160px;
