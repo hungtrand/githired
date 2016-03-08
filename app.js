@@ -12,7 +12,7 @@ var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var port = process.env.PORT || 80,
-    ip = process.env.IP;
+    ip = process.env.IP || 'localhost';
 server.listen(port, ip);
 console.log("HTTP Servicing: " + (ip || 'localhost') + ':' + port);
 // uncomment after placing your favicon in /public
