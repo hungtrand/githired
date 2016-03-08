@@ -1,0 +1,56 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+input[type="jtitle"]{
+	min-width: 250px;
+	max-width: 500px;
+	width: 50%;
+	padding: 10px;
+}
+.form{
+  margin-left: auto ;
+  margin-right: auto ;
+}
+.jumbotron{
+	padding-left: 10px;
+	padding-right: 20px;
+	min-width: 320px;
+	border-radius: 7px;
+}
+
+textarea {
+	border-radius: 7px;
+	border: 2px solid #858585;
+	display: block;
+	min-width: 300px;
+	width: 90%;
+	padding: 10px;
+}
+.input-group[type="wage"]{
+	min-width: 160px;
+	max-width: 200px;
+	width: 50%;
+	padding: 2px;
+}
+button[type="submit"]{
+	border: 0;
+	padding: 15px;
+	background: #45AD00;
+	color: white;
+	border-radius: 5px;
+	margin-right: 20px;
+}
+button[type="cancel"]{
+	border: 0;
+	padding: 15px;
+	background: #FC3838;
+	color: white;
+	border-radius: 5px;
+	margin-right: 20px;
+}
