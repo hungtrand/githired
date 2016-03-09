@@ -14,7 +14,7 @@ var messenger_service = require("./messenger.service");
 var main_controller = require("./main.controller");
 
 window.init = function() {
-	var app = angular.module('githired', ['ngResource']);
+	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
 
 	app
 		.service('messenger_service', [messenger_service])

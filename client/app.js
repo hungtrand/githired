@@ -15,7 +15,7 @@ var messenger_service = require("./messenger.service");
 var main_controller = require("./main.controller");
 
 window.init = function() {
-	var app = angular.module('githired', ['ngResource']);
+	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
 
 	app
 		.service('messenger_service', [messenger_service])
@@ -320,9 +320,21 @@ module.exports = function() {
 				return false;
 			}
 
-			signup_service.signup();
-			console.log('submitted');
+			if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
+				$scope.formError = 'employment';
+				return false;
+			}
+
+			$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
+			$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
+			$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
+
+			signup_service.signup($scope.model);	
 		}
+
+		$scope.$watch('model', function() {
+			$scope.formError = '';
+		}, true);
 
 	}
 

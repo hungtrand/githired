@@ -11,9 +11,21 @@ module.exports = function() {
 				return false;
 			}
 
-			signup_service.signup();
-			console.log('submitted');
+			if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
+				$scope.formError = 'employment';
+				return false;
+			}
+
+			$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
+			$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
+			$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
+
+			signup_service.signup($scope.model);	
 		}
+
+		$scope.$watch('model', function() {
+			$scope.formError = '';
+		}, true);
 
 	}
 
