@@ -11,9 +11,9 @@ var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var port = process.env.PORT || 80,
-    ip = process.env.IP || 'localhost';
+    ip = process.env.IP || '0.0.0.0';
 server.listen(port, ip);
-console.log("HTTP Servicing: " + (ip || 'localhost') + ':' + port);
+console.log("HTTP Servicing: " + (ip || '0.0.0.0') + ':' + port);
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'images/favicon.ico')));
 app.use(logger('dev'));
