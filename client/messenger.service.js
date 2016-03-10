@@ -1,5 +1,5 @@
 module.exports = function() {
-	var service = {
+	var models = {
 		sidebar: {
 			show: false
 		}
@@ -7,8 +7,26 @@ module.exports = function() {
 			show: false
 		}
 
-		, getSignupModel: function() {
-			return this.signup;
+		, user: null
+	}
+
+	var service = {
+
+		getSidebar: function() {
+			return models.sidebar;
+		}
+		
+		, getSignup: function() {
+			return models.signup;
+		}
+
+		, getUser: function() {
+			return models.user;
+		}
+
+		,setUser: function(user) {
+			var self = this;
+			models.user = angular.extend({}, user);
 		}
 	}
 

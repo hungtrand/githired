@@ -44,7 +44,7 @@ window.init = function() {
 	}).resize();
 
 };
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":6,"./search/searchInput.directive":7,"./sidebar/sidebar.directive":8,"./signup/signup.service":9,"./signup/signupForm.directive":10}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./search/searchInput.directive":8,"./sidebar/sidebar.directive":9,"./signup/signup.service":11,"./signup/signupForm.directive":12}],2:[function(require,module,exports){
 module.exports = function($scope) {
 	
 }
@@ -129,11 +129,11 @@ module.exports = function() {
 }
 },{}],4:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
-	$scope.sidebarModel = messenger.sidebar;
+	$scope.sidebarModel = messenger.getSidebar();
 }
 },{}],5:[function(require,module,exports){
 module.exports = function() {
-	var service = {
+	var models = {
 		sidebar: {
 			show: false
 		}
@@ -141,29 +141,62 @@ module.exports = function() {
 			show: false
 		}
 
-		, getSignupModel: function() {
-			return this.signup;
+		, user: null
+	}
+
+	var service = {
+
+		getSidebar: function() {
+			return models.sidebar;
+		}
+		
+		, getSignup: function() {
+			return models.signup;
+		}
+
+		, getUser: function() {
+			return models.user;
+		}
+
+		,setUser: function(user) {
+			var self = this;
+			models.user = angular.extend({}, user);
 		}
 	}
 
 	return service;
 }
 },{}],6:[function(require,module,exports){
-module.exports = function() {
-	var controller = function($scope, messenger) {
-		$scope.vEllipsisToggle = function() {
-			messenger.sidebar.show = !messenger.sidebar.show;
-			$scope.vEllipsis = messenger.sidebar.show;
-		}
+module.exports = function($scope, messenger) {
+	// models
+	$scope.user = messenger.getUser();
+	$scope.sidebar = messenger.getSidebar();
+	$scope.signup = messenger.getSignup();
 
-		$scope.$on('searchBar.input.submit', function(evt, keywords) {
-			$scope.$broadcast("status.waiting");
-		});
+	// events handlers
+	$scope.$on('searchBar.input.submit', function(evt, keywords) {
+		$scope.$broadcast("status.waiting");
+	});
 
-		$scope.triggerSignup = function() {
-			messenger.signup.show = true;
-		}
+	$scope.$on('models.user.updated', function(evt, user) {
+		$scope.user = messenger.getUser();
+	});
+
+	// helpers
+	$scope.vEllipsisToggle = function() {
+		$scope.sidebar.show = !$scope.sidebar.show;
+		$scope.vEllipsis = $scope.sidebar.show;
 	}
+
+	$scope.triggerSignup = function() {
+		$scope.signup.show = true;
+	}
+
+	
+}
+},{}],7:[function(require,module,exports){
+module.exports = function() {
+	var controller = require("./navbar.controller");
 
 	return {
 		templateUrl: 'navbar/navbar.template.html'
@@ -173,7 +206,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{}],7:[function(require,module,exports){
+},{"./navbar.controller":6}],8:[function(require,module,exports){
 module.exports = function() {
 
 	var suggestions = new Bloodhound({
@@ -274,7 +307,7 @@ module.exports = function() {
 		}]
 	}
 }
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope) {
 	}
@@ -295,7 +328,68 @@ module.exports =function() {
 		, controller: ['$scope', controller]
 	}
 }
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+module.exports = function($scope, signup_service, messenger) {
+	$scope.messenger = messenger;
+	$scope.model = messenger.getSignup();
+	$scope.formError = '';
+	$scope.error = '';
+	$scope.status = 'standby';
+
+	var validate = function() {
+		if ($scope.model.password !== $scope.model.confPassword) {
+			$scope.formError = "password";
+			return false;
+		}
+
+		if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
+			$scope.formError = 'employment';
+			return false;
+		}
+
+		return true;
+	}
+
+	$scope.submit = function() {
+		$scope.error = '';
+		$scope.formError = '';
+		$scope.status = 'waiting';
+		
+		if (!validate()) return false;
+		
+		$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
+		$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
+		$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
+
+		signup_service.signup(
+			$scope.model
+			, function(response) {
+				if (response.UserId > 0) {
+					messenger.setUser(response);
+					$scope.$emit('models.user.updated', response);
+					$scope.$broadcast('models.user.updated', response);
+					$scope.status = 'success';
+				} else {
+					if (angular.isArray(response.error)) {
+						$scope.error = response.error.join('\n');
+					} else {
+						$scope.error = response;
+					}
+					$scope.status = 'standby';
+				}
+			}
+			, function(error) {
+				$scope.error = error;
+				$scope.status = 'standby';
+			}
+		);
+	}
+
+	$scope.$watch('model', function() {
+		$scope.formError = '';
+	}, true);
+}
+},{}],11:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/signup/'
@@ -306,37 +400,9 @@ module.exports = function($resource, $rootScope) {
 
 	return client;
 }
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function() {
-	var controller = function($scope, signup_service, messenger) {
-		$scope.messenger = messenger;
-		$scope.model = messenger.getSignupModel();
-		$scope.formError = '';
-
-		$scope.submit = function() {
-			$scope.formError = '';
-			if ($scope.model.password !== $scope.model.confPassword) {
-				$scope.formError = "password";
-				return false;
-			}
-
-			if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
-				$scope.formError = 'employment';
-				return false;
-			}
-
-			$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
-			$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
-			$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
-
-			signup_service.signup($scope.model);	
-		}
-
-		$scope.$watch('model', function() {
-			$scope.formError = '';
-		}, true);
-
-	}
+	var controller = require('./signup.controller');
 
 	return {
 		templateUrl: 'signup/signup.form.html'
@@ -354,6 +420,14 @@ module.exports = function() {
 				}
 			}, true);
 
+			$scope.$watch('status', function(newStatus) {
+				if ($scope.status == 'success') {
+					setTimeout(function() {
+						modal.modal('hide');
+					}, 1000);
+				}
+			});
+
 			modal.on('hidden.bs.modal', function() {
 				$scope.model.show = false;
 				setTimeout(function() { $scope.$apply(); }, 100);
@@ -363,4 +437,4 @@ module.exports = function() {
 		, controller: ['$scope', 'signup_service', 'messenger_service', controller]
 	}
 }
-},{}]},{},[1]);
+},{"./signup.controller":10}]},{},[1]);

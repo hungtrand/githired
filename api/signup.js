@@ -19,7 +19,7 @@ router.post("/", function(req, res, next) {
 	user
 		.save()
 		.then(function(results) {
-    		res.send(JSON.stringify(results[0]));
+    		res.send(JSON.stringify(results.dataValues));
 		})
 		.catch(function(err) {
 			res.send(JSON.stringify(err));

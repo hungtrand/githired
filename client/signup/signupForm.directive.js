@@ -1,33 +1,5 @@
 module.exports = function() {
-	var controller = function($scope, signup_service, messenger) {
-		$scope.messenger = messenger;
-		$scope.model = messenger.getSignupModel();
-		$scope.formError = '';
-
-		$scope.submit = function() {
-			$scope.formError = '';
-			if ($scope.model.password !== $scope.model.confPassword) {
-				$scope.formError = "password";
-				return false;
-			}
-
-			if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
-				$scope.formError = 'employment';
-				return false;
-			}
-
-			$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
-			$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
-			$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
-
-			signup_service.signup($scope.model);	
-		}
-
-		$scope.$watch('model', function() {
-			$scope.formError = '';
-		}, true);
-
-	}
+	var controller = require('./signup.controller');
 
 	return {
 		templateUrl: 'signup/signup.form.html'
@@ -44,6 +16,14 @@ module.exports = function() {
 					modal.modal('hide');
 				}
 			}, true);
+
+			$scope.$watch('status', function(newStatus) {
+				if ($scope.status == 'success') {
+					setTimeout(function() {
+						modal.modal('hide');
+					}, 1000);
+				}
+			});
 
 			modal.on('hidden.bs.modal', function() {
 				$scope.model.show = false;

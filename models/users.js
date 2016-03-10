@@ -5,6 +5,7 @@ var usersContext = database.define('users', {
 	UserId: {
 		type: Sequelize.INTEGER
 		, primaryKey: true
+		, autoIncrement: true
 	}
 	, FirstName: Sequelize.STRING
 	, LastName: Sequelize.STRING

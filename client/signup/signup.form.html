@@ -75,10 +75,17 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="alert alert-danger" ng-if="error">{{ error }}</div>
+                <pre class="alert alert-danger" ng-if="error">{{ error }}</pre>
 
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary"><i class="fa fa-send"></i> Submit</button>
+                <button type="submit" class="btn"
+                    ng-class="{ 'btn-primary': status=='standby', 'btn-success': status=='success', 'btn-default': status=='waiting' }" 
+                    ng-disabled="status=='waiting' || status=='success'" 
+                    ng-switch="status">
+                    <span ng-switch-when="standby"><i class="fa fa-send"></i> Submit</span>
+                    <span ng-switch-when="success"><i class="fa fa-ok"></i> Success!</span>
+                    <span ng-switch-when="waiting"><i class="fa fa-spinner fa-spin"></i> Processing...</span>
+                </button>
             </div>
         </div>
         <!-- /.modal-content -->
