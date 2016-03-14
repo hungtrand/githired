@@ -24,9 +24,17 @@ module.exports = function() {
 			return models.user;
 		}
 
-		,setUser: function(user) {
+		, setUser: function(user) {
 			var self = this;
 			models.user = angular.extend({}, user);
+		}
+
+		, setJobPost: function() {
+			// do something...
+		}
+
+		, getJobPost: function() {
+			// do something...
 		}
 	}
 
