@@ -5,10 +5,9 @@ module.exports = function() {
 		templateUrl: 'postjob/postjob.form.html'
 
 		, link: function($scope, $element, $attrs) {
-			$element.find('.modal').modal('hide');
-
+			var modal = $element.find('.modal');
+			
 			$scope.$watch('model', function(newValue, oldValue) {
-				var modal = $element.find('.modal');
 				if (newValue.show) {
 					modal.modal('show');
 				} else {
@@ -18,7 +17,7 @@ module.exports = function() {
 
 			modal.on('hidden.bs.modal', function() {
 				$scope.model.show = false;
-				$scope.$apply();
+				setTimeout(function() { $scope.$apply(); }, 100);
 			});
 		}
 
