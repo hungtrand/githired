@@ -10,6 +10,9 @@ var gmap_controller = require("./gmap/gmap.controller");
 var signup_directive = require("./signup/signupForm.directive");
 var signup_service = require("./signup/signup.service");
 
+var postjob_directive = require("./postjob/postjobForm.directive");
+var postjob_service = require("./postjob/postjob.service");
+
 var messenger_service = require("./messenger.service");
 
 var main_controller = require("./main.controller");
@@ -28,6 +31,7 @@ window.init = function() {
 		.directive('ghGmap', [gmap_directive])
 		.directive('ghSearch', [searchInput_directive])
 		.directive('ghSignupForm', [signup_directive])
+		.directive('ghPostJobForm', [postjob_directive])
 	;
 
 	app
@@ -44,7 +48,7 @@ window.init = function() {
 	}).resize();
 
 };
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./search/searchInput.directive":8,"./sidebar/sidebar.directive":9,"./signup/signup.service":11,"./signup/signupForm.directive":12}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signup/signup.service":14,"./signup/signupForm.directive":15}],2:[function(require,module,exports){
 module.exports = function($scope) {
 	
 }
@@ -137,7 +141,12 @@ module.exports = function() {
 		sidebar: {
 			show: false
 		}
+
 		, signup: {
+			show: false
+		}
+
+		, postJob: {
 			show: false
 		}
 
@@ -158,9 +167,17 @@ module.exports = function() {
 			return models.user;
 		}
 
-		,setUser: function(user) {
+		, setUser: function(user) {
 			var self = this;
 			models.user = angular.extend({}, user);
+		}
+
+		, setPostJob: function() {
+			// do something...
+		}
+
+		, getPostJob: function() {
+			return models.postJob;
 		}
 	}
 
@@ -172,6 +189,7 @@ module.exports = function($scope, messenger) {
 	$scope.user = messenger.getUser();
 	$scope.sidebar = messenger.getSidebar();
 	$scope.signup = messenger.getSignup();
+	$scope.postjob = messenger.getPostJob();
 
 	// events handlers
 	$scope.$on('searchBar.input.submit', function(evt, keywords) {
@@ -192,6 +210,9 @@ module.exports = function($scope, messenger) {
 		$scope.signup.show = true;
 	}
 
+	$scope.showPostJob = function() {
+		$scope.postjob.show = true;
+	}
 	
 }
 },{}],7:[function(require,module,exports){
@@ -207,6 +228,49 @@ module.exports = function() {
 	}
 }
 },{"./navbar.controller":6}],8:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+	$scope.model = messenger.getPostJob();
+}
+},{}],9:[function(require,module,exports){
+module.exports = function($resource, $rootScope) {
+	var client = $resource(
+		'/api/postjob/'
+		, {}
+		, {
+			postjob: { method: 'POST' }
+		});
+	
+	return client;
+}
+},{}],10:[function(require,module,exports){
+module.exports = function() {
+	var controller = require('./postjob.controller');
+
+	return {
+		templateUrl: 'postjob/postjob.form.html'
+
+		, link: function($scope, $element, $attrs) {
+			$element.find('.modal').modal('hide');
+
+			$scope.$watch('model', function(newValue, oldValue) {
+				var modal = $element.find('.modal');
+				if (newValue.show) {
+					modal.modal('show');
+				} else {
+					modal.modal('hide');
+				}
+			}, true);
+
+			modal.on('hidden.bs.modal', function() {
+				$scope.model.show = false;
+				$scope.$apply();
+			});
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./postjob.controller":8}],11:[function(require,module,exports){
 module.exports = function() {
 
 	var suggestions = new Bloodhound({
@@ -307,7 +371,7 @@ module.exports = function() {
 		}]
 	}
 }
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope) {
 	}
@@ -328,7 +392,7 @@ module.exports =function() {
 		, controller: ['$scope', controller]
 	}
 }
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function($scope, signup_service, messenger) {
 	$scope.messenger = messenger;
 	$scope.model = messenger.getSignup();
@@ -389,7 +453,7 @@ module.exports = function($scope, signup_service, messenger) {
 		$scope.formError = '';
 	}, true);
 }
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/signup/'
@@ -400,7 +464,7 @@ module.exports = function($resource, $rootScope) {
 
 	return client;
 }
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -437,4 +501,4 @@ module.exports = function() {
 		, controller: ['$scope', 'signup_service', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":10}]},{},[1]);
+},{"./signup.controller":13}]},{},[1]);

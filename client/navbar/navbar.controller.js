@@ -3,6 +3,7 @@ module.exports = function($scope, messenger) {
 	$scope.user = messenger.getUser();
 	$scope.sidebar = messenger.getSidebar();
 	$scope.signup = messenger.getSignup();
+	$scope.postjob = messenger.getPostJob();
 
 	// events handlers
 	$scope.$on('searchBar.input.submit', function(evt, keywords) {
@@ -23,5 +24,8 @@ module.exports = function($scope, messenger) {
 		$scope.signup.show = true;
 	}
 
+	$scope.showPostJob = function() {
+		$scope.postjob.show = true;
+	}
 	
 }

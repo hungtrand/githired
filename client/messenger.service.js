@@ -3,7 +3,12 @@ module.exports = function() {
 		sidebar: {
 			show: false
 		}
+
 		, signup: {
+			show: false
+		}
+
+		, postJob: {
 			show: false
 		}
 
@@ -24,9 +29,17 @@ module.exports = function() {
 			return models.user;
 		}
 
-		,setUser: function(user) {
+		, setUser: function(user) {
 			var self = this;
 			models.user = angular.extend({}, user);
+		}
+
+		, setPostJob: function() {
+			// do something...
+		}
+
+		, getPostJob: function() {
+			return models.postJob;
 		}
 	}
 

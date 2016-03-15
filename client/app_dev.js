@@ -9,6 +9,9 @@ var gmap_controller = require("./gmap/gmap.controller");
 var signup_directive = require("./signup/signupForm.directive");
 var signup_service = require("./signup/signup.service");
 
+var postjob_directive = require("./postjob/postjobForm.directive");
+var postjob_service = require("./postjob/postjob.service");
+
 var messenger_service = require("./messenger.service");
 
 var main_controller = require("./main.controller");
@@ -27,6 +30,7 @@ window.init = function() {
 		.directive('ghGmap', [gmap_directive])
 		.directive('ghSearch', [searchInput_directive])
 		.directive('ghSignupForm', [signup_directive])
+		.directive('ghPostJobForm', [postjob_directive])
 	;
 
 	app
