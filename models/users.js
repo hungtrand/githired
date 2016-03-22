@@ -1,5 +1,5 @@
 var Sequelize = require("sequelize");
-var database = require("./../database")
+var database = require("./../database");
 
 var usersContext = database.define('users', {
 	UserId: {
