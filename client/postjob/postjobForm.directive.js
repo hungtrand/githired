@@ -21,6 +21,6 @@ module.exports = function() {
 			});
 		}
 
-		, controller: ['$scope', 'messenger_service', controller]
+		, controller: ['$scope', 'postjob_service', 'messenger_service', controller]
 	}
 }

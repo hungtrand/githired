@@ -22,6 +22,7 @@ window.init = function() {
 	app
 		.service('messenger_service', [messenger_service])
 		.service('signup_service', ['$resource', '$rootScope', signup_service])
+		.service('postjob_service', ['$resource', '$rootScope', postjob_service]);
 	;
 
 	app
