@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var usersContext = require('./../models/jobs');
+var jobsContext = require('./../models/jobs');
 
 router.post("/", function(req, res, next) {
 	res.setHeader('Content-Type', 'application/json');

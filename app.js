@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var apiSignup = require('./api/signup');
+var apiPostJob = require('./api/postjob');
 
 // var users = require('./routes/users');
 var app = express();
@@ -32,6 +33,7 @@ if (app.get('env') === 'development') {
 
 // Dynamically handle api calls
 app.use('/api/signup', apiSignup);
+app.use('/api/postjob', apiPostJob);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

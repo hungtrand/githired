@@ -13,4 +13,4 @@ var jobsContext = database.define('jobs', {
 	, MaximumWage: Sequelize.INTEGER
 });
 
-modules.exports = jobsContext;
+module.exports = jobsContext;
