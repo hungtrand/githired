@@ -1,4 +1,4 @@
-<form class="modal fade" tabindex="-1" role="dialog">
+<form class="form-horizontal modal fade" action="javascript:void(0)" ng-submit="submitPostJob()" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -11,58 +11,94 @@
                 
                 <div class="form-group">
                     <label class="col-sm-12">Job Title</label>
-                    <div class="col-sm-10 col-offset-sm-2">
-                        <input type="text" class="form-control" id="inputJobTitle" placeholder="Enter Job Title" />
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" id="inputJobTitle" 
+                            ng-model="model.newJob.jobTitle"
+                            placeholder="Enter Job Title" required />
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label class="col-sm-12">Job Description</label>
-                    <div class="col-sm-10 col-offset-sm-2">
-                        <textarea type="text" class="form-control" id="inputJobDescription" placeholder="Enter Job Description..."></textarea>
+                    <div class="col-sm-12">
+                        <textarea type="text" class="form-control" id="inputJobDescription" 
+                            ng-model="model.newJob.jobDescription"
+                            placeholder="Enter Job Description..." required></textarea>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3">Location</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" ng-model="model.newJob.jobAddress.street" placeholder="Street" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3">&nbsp;</div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" ng-model="model.newJob.jobAddress.city" placeholder="City" />
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" ng-model="model.newJob.jobAddress.state" placeholder="State" />
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" ng-model="model.newJob.jobAddress.postal" placeholder="Postal Code" />
+                    </div>
+                </div>
+
                 <div class="form-group">
                     
-                    <label class="col-sm-3 control-label">The wage is...</label>
+                    <label class="col-sm-4 text-left">The wage is...</label>
+                    <div class="col-sm-4 text-left">
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="wageType" id="inputIsRangeWage" ng-model="model.newJob.jobWageType" value="range" required /> a range
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 text-left">
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="wageType" id="inputIsSetWage" ng-model="model.newJob.jobWageType" value="set" required /> set amount
+                            </label>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="form-group ng-animate nga-default nga-stagger nga-slide-left-add nga-fade-remove" 
+                    ng-if="model.newJob.jobWageType=='range'">
+                    <label class="col-sm-3">Amount Range:</label>
                     <div class="col-sm-4">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" id="inputIsRangeWage" /> a range
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-sm-4 col-offset-sm-1">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" id="inputIsSetWage" /> set
-                            </label>
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                <div class="form-group">
-                    <label class="col-sm-12">Amount Range</label>
-                    <div class="input-group">
-                        <span class="input-group-addon">$</span>
-                        <input type="text" id="minWage" class="form-control" placeholder="Minimum Wage" />
-                    </div>
-                    <div class="input-group">~
-                    </div>
-                    <div class="input-group">
-                        <span class="input-group-addon">$</span>
-                        <input type="text" id="maxWage" class="form-control" placeholder="Maximum Wage" >
-                    </div>
-                </div>
-                
-                <div class="form-inline">
-                    <div class="form-group">
-                        <label class="col-sm-12">Set Amount
-                        </label>
                         <div class="input-group">
                             <span class="input-group-addon">$</span>
-                            <input type="text" id="setWage" class="form-control" placeholder="Set Wage" />
+                            <input type="number" id="minWage" class="form-control" 
+                                ng-model="model.newJob.jobMinWage"
+                                placeholder="Minimum Wage" required />
+                        </div>
+                    </div>
+                    <div class="col-sm-1">~</div>
+                    <div class="col-sm-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">$</span>
+                            <input type="number" id="maxWage" class="form-control" 
+                                ng-model="model.newJob.jobMaxWage"
+                                placeholder="Maximum Wage" required >
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="form-group ng-animate nga-default nga-stagger nga-slide-left-add nga-fade-remove" 
+                    ng-if="model.newJob.jobWageType=='set'">
+                    <label class="col-sm-4">Set Amount:</label>
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon">$</span>
+                            <input type="number" id="setWage" class="form-control" 
+                                ng-model="model.newJob.jobSetWage"
+                                placeholder="Set Wage" required />
                         </div>
                     </div>
                 </div>
@@ -70,7 +106,7 @@
             <div class="modal-footer">
             <pre class="alert alert-danger" ng-if="error">{{ error }}</pre>
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn">
+            <button type="submit" class="btn btn-primary">
             <span>
                 <i class="fa fa-send"></i> Post Job
             </span>

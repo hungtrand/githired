@@ -1,4 +1,4 @@
-module.exports = function() {
+module.exports = function($rootScope) {
 	var models = {
 		sidebar: {
 			show: false
@@ -9,8 +9,10 @@ module.exports = function() {
 		}
 
 		, postJob: {
-			show: false
+			newJob: null
 		}
+
+		, jobs: []
 
 		, user: null
 	}
@@ -34,12 +36,32 @@ module.exports = function() {
 			models.user = angular.extend({}, user);
 		}
 
-		, setPostJob: function() {
-			// do something...
+		, setNewJobAtAddress: function(objAddress) {
+			var self = this;
+			models.postJob.newJob = {
+				jobTitle: ''
+				, jobDescription: ''
+				, jobAddress: objAddress
+				, jobWageType: null
+				, jobMinWage: ''
+				, jobMaxWage: ''
+				, jobSetWage: ''
+			}
+
+			$rootScope.$broadcast('models.postJob.newJob', 'updated');
+		} 
+
+		, addJob: function(newJob) {
+			models.jobs.push(newJob);
+			$rootScope.$broadcast('models.jobs', 'updated');
 		}
 
 		, getPostJob: function() {
 			return models.postJob;
+		}
+
+		, getJobs: function() {
+			return models.jobs;
 		}
 	}
 

@@ -7,16 +7,20 @@ module.exports = function() {
 		, link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
 			
-			$scope.$watch('model', function(newValue, oldValue) {
-				if (newValue.show) {
-					modal.modal('show');
-				} else {
-					modal.modal('hide');
-				}
-			}, true);
+			$scope.show = function() {
+				modal.modal('show');
+			};
+
+			$scope.hide = function() {
+				modal.modal('hide');
+			};
+
+			modal.on('shown.bs.modal', function() {
+				setTimeout(function() { $scope.$apply() }, 500);
+			});
 
 			modal.on('hidden.bs.modal', function() {
-				$scope.model.show = false;
+				$scope.model.newJob = null;
 				setTimeout(function() { $scope.$apply(); }, 100);
 			});
 		}

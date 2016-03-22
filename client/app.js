@@ -21,7 +21,7 @@ window.init = function() {
 	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
 
 	app
-		.service('messenger_service', [messenger_service])
+		.service('messenger_service', ['$rootScope', messenger_service])
 		.service('signup_service', ['$resource', '$rootScope', signup_service])
 	;
 
@@ -36,7 +36,6 @@ window.init = function() {
 
 	app
 		.controller('main_controller', ['$scope', 'messenger_service', main_controller])
-		.controller('gmapController', ['$scope', gmap_controller])
 	;
 
 	angular.bootstrap(document, ['githired']);
@@ -49,18 +48,31 @@ window.init = function() {
 
 };
 },{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signup/signup.service":14,"./signup/signupForm.directive":15}],2:[function(require,module,exports){
-module.exports = function($scope) {
+module.exports = function($scope, messenger) {
+	if (messenger) {
+		$scope.jobs = messenger.getJobs();
+	}
 	
+	$scope.requestPostJob = function(objAddress) {
+		messenger.setNewJobAtAddress(objAddress);
+	}
+
+	$scope.$on('models.jobs', function(evt, eventType) {
+		if (eventType == 'updated') {
+			$scope.jobs = messenger.getJobs();
+		}
+	});
 }
 },{}],3:[function(require,module,exports){
 module.exports = function() {
+	var controller = require('./gmap.controller');
 	/***** Private properties ******/
 	var mapOptions = {
 		center: new google.maps.LatLng(37.335268, -121.881361),
 		zoom: 13,
 	};
 
-	var map;
+	var map, geocoder;
 	var markers = [];
 
 	function clearMarkers(markerList) {
@@ -69,17 +81,14 @@ module.exports = function() {
 		});
 	}
 
-	function markerFactory(title, lat, lng, info) {
+	function markerFactory(title, pos, info) {
 		var newMarker = new google.maps.Marker({
 			map: map,
 			draggable: false,
 			title: title,
 
 			animation: google.maps.Animation.DROP,
-			position: {
-				lat: lat,
-				lng: lng
-			}
+			position: pos
 		});
 
 		var infowindow = new google.maps.InfoWindow({
@@ -93,16 +102,62 @@ module.exports = function() {
 		return newMarker;
 	}
 
+	var extractAddress = function(arrAddress) {
+		var itemRoute = '';
+		var itemLocality = '';
+		var itemCountry = '';
+		var itemPc = '';
+		var itemSnumber = '';
+		var itemState = '';
+
+		// iterate through address_component array
+		angular.forEach(arrAddress, function(address_component, i) {
+
+			if (address_component.types[0] == "route") {
+				itemRoute = address_component.long_name;
+			}
+
+			if (address_component.types[0] == "locality") {
+				itemLocality = address_component.long_name;
+			}
+
+			if (address_component.types[0] == "country") {
+				itemCountry = address_component.long_name;
+			}
+
+			if (address_component.types[0] == "administrative_area_level_1") {
+				itemState = address_component.long_name;
+			}
+
+			if (address_component.types[0] == "postal_code") {
+				itemPc = address_component.long_name;
+			}
+
+			if (address_component.types[0] == "street_number") {
+				itemSnumber = address_component.long_name;
+			}
+			//return false; // break the loop   
+		});
+
+		return {
+			number: itemSnumber,
+			street: itemRoute,
+			city: itemLocality,
+			state: itemState,
+			country: itemCountry,
+			postal: itemPc
+		}
+	}
+
 
 	/****** directive properties ********/
 	return {
-		scope: {
-			data: '='
-		},
+		controller: ['$scope', 'messenger_service', controller],
 		link: function($scope, $element, $attrs) {
 			map = new google.maps.Map($element[0], mapOptions);
+			geocoder = new google.maps.Geocoder();
 
-			$scope.$watch('data', function(newData, oldData) {
+			$scope.$watch('jobs', function(newData, oldData) {
 				if (!oldData) oldData = [];
 				if (!newData) newData = [];
 				if (newData.length < oldData.length) {
@@ -110,33 +165,64 @@ module.exports = function() {
 				}
 
 				for (var i = oldData.length, l = newData.length; i < l; i++) {
-					var tweet = newData[i];
+					var job = newData[i];
 
-					if (!tweet.coordinates) return false;
-					var lat = tweet.coordinates[0];
-					var lng = tweet.coordinates[1];
+					if (job.coordinates) {
+						var lat = job.coordinates[0];
+						var lng = job.coordinates[1];
 
-					var contentString = tweet.text;
-					var icon = 'img/markers/earthquake-3.png';
+						var contentString = job.text;
+						var icon = 'images/favicon.ico';
+						var pos = {
+							lat: lat,
+							lng: lng
+						}
+					} else if (job.jobAddress) {
+						var pos = job.jobAddress.latLng;
+					}
+					
 
-					var marker = markerFactory('Job: ', lat, lng, contentString);
+					var marker = markerFactory('Job: ', pos, contentString);
 
 					markers.push(marker);
 				}
 
 				setTimeout(function() {
-					$scope.$apply(), 300
+					$scope.$apply(), 200
 				});
 			}, true);
+
+			google.maps.event.addListener(map, 'click', function(e) {
+				geocoder.geocode({
+						'latLng': e.latLng
+					},
+					function(results, status) {
+						var address = "";
+						if (status == google.maps.GeocoderStatus.OK) {
+							if (results[0]) {
+								address = {
+									formattedAddress: results[0].formatted_address,
+									latLng: e.latLng
+								}
+
+								angular.extend(address, extractAddress(results[0].address_components));
+
+								$scope.requestPostJob(address);
+							}
+						} else {
+							// TODO handle error
+						}
+					});
+			});
 		}
 	}
 }
-},{}],4:[function(require,module,exports){
+},{"./gmap.controller":2}],4:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
 	$scope.sidebarModel = messenger.getSidebar();
 }
 },{}],5:[function(require,module,exports){
-module.exports = function() {
+module.exports = function($rootScope) {
 	var models = {
 		sidebar: {
 			show: false
@@ -147,8 +233,10 @@ module.exports = function() {
 		}
 
 		, postJob: {
-			show: false
+			newJob: null
 		}
+
+		, jobs: []
 
 		, user: null
 	}
@@ -172,12 +260,32 @@ module.exports = function() {
 			models.user = angular.extend({}, user);
 		}
 
-		, setPostJob: function() {
-			// do something...
+		, setNewJobAtAddress: function(objAddress) {
+			var self = this;
+			models.postJob.newJob = {
+				jobTitle: ''
+				, jobDescription: ''
+				, jobAddress: objAddress
+				, jobWageType: null
+				, jobMinWage: ''
+				, jobMaxWage: ''
+				, jobSetWage: ''
+			}
+
+			$rootScope.$broadcast('models.postJob.newJob', 'updated');
+		} 
+
+		, addJob: function(newJob) {
+			models.jobs.push(newJob);
+			$rootScope.$broadcast('models.jobs', 'updated');
 		}
 
 		, getPostJob: function() {
 			return models.postJob;
+		}
+
+		, getJobs: function() {
+			return models.jobs;
 		}
 	}
 
@@ -230,6 +338,19 @@ module.exports = function() {
 },{"./navbar.controller":6}],8:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.model = messenger.getPostJob();
+	$scope.show = false;
+
+	$scope.$on('models.postJob.newJob', function(evt, eventType) {
+		if (eventType == 'updated') {
+			$scope.show();
+		}
+	});
+
+	$scope.submitPostJob = function() {
+		console.log('submitted');
+		messenger.addJob($scope.model.newJob);
+		$scope.hide();
+	}
 }
 },{}],9:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
@@ -252,16 +373,20 @@ module.exports = function() {
 		, link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
 			
-			$scope.$watch('model', function(newValue, oldValue) {
-				if (newValue.show) {
-					modal.modal('show');
-				} else {
-					modal.modal('hide');
-				}
-			}, true);
+			$scope.show = function() {
+				modal.modal('show');
+			};
+
+			$scope.hide = function() {
+				modal.modal('hide');
+			};
+
+			modal.on('shown.bs.modal', function() {
+				setTimeout(function() { $scope.$apply() }, 500);
+			});
 
 			modal.on('hidden.bs.modal', function() {
-				$scope.model.show = false;
+				$scope.model.newJob = null;
 				setTimeout(function() { $scope.$apply(); }, 100);
 			});
 		}

@@ -20,7 +20,7 @@ window.init = function() {
 	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
 
 	app
-		.service('messenger_service', [messenger_service])
+		.service('messenger_service', ['$rootScope', messenger_service])
 		.service('signup_service', ['$resource', '$rootScope', signup_service])
 	;
 
@@ -35,7 +35,6 @@ window.init = function() {
 
 	app
 		.controller('main_controller', ['$scope', 'messenger_service', main_controller])
-		.controller('gmapController', ['$scope', gmap_controller])
 	;
 
 	angular.bootstrap(document, ['githired']);
