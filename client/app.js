@@ -152,6 +152,8 @@ module.exports = function() {
 		}
 
 		, user: null
+
+		, job: null
 	}
 
 	var service = {

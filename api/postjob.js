@@ -12,7 +12,16 @@ router.post("/", function(req, res, next) {
 		, MaximumWage: req.body["maxWage"]
 	});
 
-	console.log(job);
+	// console.log(job);
+	job
+		.save()
+		.then(function(results) {
+			res.send(JSON.stringify(results.dataValues));
+		})
+		.catch(function(err) {
+			res.send(JSON.stringify(err));
+		})
+	;
 });
 
 module.exports = router;
