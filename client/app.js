@@ -85,6 +85,7 @@ module.exports = function() {
 		var newMarker = new google.maps.Marker({
 			map: map,
 			draggable: false,
+		    icon: 'images/logo32.png',
 			title: title,
 
 			animation: google.maps.Animation.DROP,
@@ -109,7 +110,7 @@ module.exports = function() {
 		var itemPc = '';
 		var itemSnumber = '';
 		var itemState = '';
-
+	    
 		// iterate through address_component array
 		angular.forEach(arrAddress, function(address_component, i) {
 
@@ -166,13 +167,15 @@ module.exports = function() {
 
 				for (var i = oldData.length, l = newData.length; i < l; i++) {
 					var job = newData[i];
+				    var contentString = job.jobAddress.formattedAddress;
+					        contentString += '<br /><br />' + job.jobDescription;
+				    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
+				    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
 
 					if (job.coordinates) {
 						var lat = job.coordinates[0];
 						var lng = job.coordinates[1];
-
-						var contentString = job.text;
-						var icon = 'images/favicon.ico';
+						
 						var pos = {
 							lat: lat,
 							lng: lng
@@ -182,7 +185,7 @@ module.exports = function() {
 					}
 					
 
-					var marker = markerFactory('Job: ', pos, contentString);
+					var marker = markerFactory(job.jobTitle, pos, contentString);
 
 					markers.push(marker);
 				}
@@ -217,6 +220,7 @@ module.exports = function() {
 		}
 	}
 }
+
 },{"./gmap.controller":2}],4:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
 	$scope.sidebarModel = messenger.getSidebar();

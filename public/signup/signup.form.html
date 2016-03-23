@@ -7,35 +7,85 @@
             </div>
             <div class="modal-body">
 
+                <div class="form-group" ng-class="{ 'has-error': formError=='employment' }">
+                    <label class="col-sm-2 control-label">I am ... </label>
+                    <div class="col-sm-5">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="inputIsEmployer" ng-model="model.isEmployer">
+                                posting job
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-5 col-offset-lg-1">
+                        <div class="checkbox">
+                            <label> 
+                                <input type="checkbox" id="inputIsEmployee" ng-model="model.isEmployee">
+                                seeking job
+                            </label>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="form-group nga-default ng-animate nga-slide-left-add nga-slide-right-remove" ng-if="model.isEmployee">
+                    <label class="col-xs-12 col-sm-2 control-label">Name</label>
+                    <div class="col-xs-6 col-sm-5">
+                        <input type="text" class="form-control" id="inputFirstName" placeholder="First Name" required
+                            ng-model="model.firstName">
+                    </div>
+
+                    <div class="col-xs-6 col-sm-5">
+                        <input type="text" class="form-control" id="inputLastName" placeholder="Last Name" required
+                            ng-model="model.lastName">
+                    </div>
+                </div>
+
+                <div class="form-group nga-default ng-animate nga-slide-left-add nga-slide-right-remove" ng-animate ng-if="model.isEmployer">
+                    <label for="inputCompany" class="col-sm-2 control-label">Company</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputCompany" placeholder="Commpany" required
+                            ng-model="model.company">
+                    </div>
+                </div>
+
+
                 <div class="form-group">
-                    <label for="inputEmail" class="col-lg-2 control-label">Email</label>
-                    <div class="col-lg-10">
+                    <label for="inputEmail" class="col-sm-2 control-label">Email</label>
+                    <div class="col-sm-10">
                         <input type="email" class="form-control" id="inputEmail" placeholder="Email" required
                             ng-model="model.email">
                     </div>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error': formError=='password' }">
-                    <label for="inputPassword" class="col-lg-2 control-label">Password</label>
-                    <div class="col-lg-10">
+                    <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+                    <div class="col-sm-10">
                         <input type="password" class="form-control" id="inputPassword" placeholder="Password" required
                             ng-model="model.password">
                     </div>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error': formError=='password' }">
-                    <label for="inputPassword" class="col-lg-2 control-label">Confirm Password</label>
-                    <div class="col-lg-10">
+                    <label for="inputPassword" class="col-sm-2 control-label">Confirm Password</label>
+                    <div class="col-sm-10">
                         <input type="password" class="form-control" id="confPassword" placeholder="Confirm Password" required
                             ng-model="model.confPassword">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="alert alert-danger" ng-if="error">{{ error }}</div>
+                <pre class="alert alert-danger" ng-if="error">{{ error }}</pre>
 
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary"><i class="fa fa-send"></i> Submit</button>
+                <button type="submit" class="btn"
+                    ng-class="{ 'btn-primary': status=='standby', 'btn-success': status=='success', 'btn-default': status=='waiting' }" 
+                    ng-disabled="status=='waiting' || status=='success'" 
+                    ng-switch="status">
+                    <span ng-switch-when="standby"><i class="fa fa-send"></i> Submit</span>
+                    <span ng-switch-when="success"><i class="fa fa-ok"></i> Success!</span>
+                    <span ng-switch-when="waiting"><i class="fa fa-spinner fa-spin"></i> Processing...</span>
+                </button>
             </div>
         </div>
         <!-- /.modal-content -->
