@@ -1,4 +1,5 @@
 var Sequelize = require("sequelize");
+
 var database = require("./../database");
 
 var jobsContext = database.define('jobs', {
@@ -8,8 +9,11 @@ var jobsContext = database.define('jobs', {
 		autoIncrement: true,
 		allowNull: false
 	}
+	, JobTitle: Sequelize.STRING
 	, JobDescription: Sequelize.STRING 
 	, MinimumPrice: Sequelize.DOUBLE
+	, MaximumWage: Sequelize.DOUBLE
+	, SetWage: Sequelize.DOUBLE
 	, JobType: Sequelize.STRING
 	, Position: Sequelize.STRING
 	, StartingDate: Sequelize.DATE
@@ -22,3 +26,4 @@ var jobsContext = database.define('jobs', {
 });
 
 module.exports = jobsContext
+
