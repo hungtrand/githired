@@ -3,27 +3,28 @@ var Sequelize = require("sequelize");
 var database = require("./../database");
 
 var jobsContext = database.define('jobs', {
-	JobId: {
+	jobId: {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
 		allowNull: false
 	}
-	, JobTitle: Sequelize.STRING
-	, JobDescription: Sequelize.STRING 
-	, MinimumPrice: Sequelize.DOUBLE
-	, MaximumWage: Sequelize.DOUBLE
-	, SetWage: Sequelize.DOUBLE
-	, JobType: Sequelize.STRING
-	, Position: Sequelize.STRING
-	, StartingDate: Sequelize.DATE
-	, EndDate: Sequelize.DATE
-	, Location: Sequelize.STRING
-	, Timestamp: {
+	, jobTitle: Sequelize.STRING
+	, jobDescription: Sequelize.STRING 
+	, minimumPrice: Sequelize.DOUBLE
+	, maximumWage: Sequelize.DOUBLE
+	, setWage: Sequelize.DOUBLE
+	, jobType: Sequelize.STRING
+	, position: Sequelize.STRING
+	, startingDate: Sequelize.DATE
+	, endDate: Sequelize.DATE
+	, location: Sequelize.STRING
+	, timestamp: {
 		type: Sequelize.DATE
 		, Timestamp: true 
 	}
 });
 
-module.exports = jobsContext
+jobsContext.sync();
+module.exports = jobsContext;
 

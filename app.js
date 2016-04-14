@@ -4,7 +4,20 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+
+// models -- not being used in this page, simply being present to sync tables with the database
+var usersContext = require('./models/users');
+var jobsContext = require('./models/jobs');
+var skillsContext = require('./models/skills');
+var bidsContext = require('./models/bids');
+var commentsContext = require('./models/comments');
+var jobAcceptancesContext = require('./models/jobAcceptances');
+var userSkillsContext = require('./models/userSkills');
+var jobSkillsContext = require('./models/jobSkills')
+//
+
 var apiSignup = require('./api/signup');
+var apiUser = require('./api/user');
 
 // var users = require('./routes/users');
 var app = express();
@@ -32,6 +45,7 @@ if (app.get('env') === 'development') {
 
 // Dynamically handle api calls
 app.use('/api/signup', apiSignup);
+app.use('/api/user', apiUser);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

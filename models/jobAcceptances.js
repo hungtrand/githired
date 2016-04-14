@@ -3,10 +3,10 @@ var database = require("./../database");
 var usersContext = require("./users");
 var jobsContext = require("./jobs");
 
-var bidsContext = database.define('bids', {
-	bidId: {
+var jobAcceptancesContext = database.define('jobAcceptances', {
+	acceptanceId: {
 		type: Sequelize.INTEGER
-		, primaryKey: true
+		,primaryKey: true
 		, autoIncrement: true
 		, allowNull: false
 	}
@@ -15,19 +15,19 @@ var bidsContext = database.define('bids', {
 		type: Sequelize.DATE
 		, Timestamp: true
 	}
-	, 
+	, finalized: Sequelize.BOOLEAN
+
 });
 
-bidsContext.belongsTo(
+jobAcceptancesContext.belongsTo(
 	usersContext, 
 	{ foreignKey: 'fk_userId', targetKey: 'userId' }
 );
 
-bidsContext.belongsTo(
+jobAcceptancesContext.belongsTo(
 	jobsContext, 
 	{ foreignKey: 'fk_jobId', targetKey: 'jobId' }
 );
 
-bidsContext.sync();
-
-module.exports = bidsContext;
+jobAcceptancesContext.sync();
+module.exports = jobAcceptancesContext;

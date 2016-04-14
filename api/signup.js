@@ -7,11 +7,11 @@ router.post("/", function(req, res, next) {
 	res.setHeader('Content-Type', 'application/json');
 
 	var user = usersContext.build({
-		FirstName: req.body["firstName"]
-		, LastName: req.body["lastName"]
-		, Company: req.body["company"]
-		, Email: req.body["email"]
-		, Password: req.body["password"]
+		firstName: req.body["firstName"]
+		, lastName: req.body["lastName"]
+		, company: req.body["company"]
+		, email: req.body["email"]
+		, password: req.body["password"]
 		, isEmployer: req.body["isEmployer"]
 		, isEmployee: req.body["isEmployee"]
 	});

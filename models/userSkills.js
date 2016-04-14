@@ -1,16 +1,30 @@
 var Sequelize = require("sequelize");
 var database = require("./../database");
+var usersContext = require("./users");
+var skillsContext = require("./skills");
 
-var userSkills = database.define('userSkills', {
-	UserSkillId: {
+var userSkillsContext = database.define('userSkills', {
+	userSkillId: {
 		type: Sequelize.INTEGER
 		, primaryKey: true
 		, autoIncrement: true
 		, allowNull: false
 	}
-	, Description: Sequelize.STRING
-	, YearsOfExperiences: Sequelize.INTEGER
+	, description: Sequelize.STRING
+	, yearsOfExperience: Sequelize.INTEGER
 });
 
-module.exports = userSkills;
+userSkillsContext.belongsTo(
+	usersContext, 
+	{ foreignKey: 'fk_userId', targetKey: 'userId' }
+);
+
+userSkillsContext.belongsTo(
+	skillsContext, 
+	{ foreignKey: 'fk_skillId', targetKey: 'skillId' }
+);
+
+userSkillsContext.sync();
+
+module.exports = userSkillsContext;
 

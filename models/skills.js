@@ -2,13 +2,14 @@ var Sequelize = require("sequelize");
 var database = require("./../database");
 
 var skillsContext = database.define('skills', {
-	SkillId: {
+	skillId: {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
 		allwoNull: false
 	},
-	Name: Sequelize.STRING
+	name: Sequelize.STRING
 });
 
+skillsContext.sync();
 module.exports = skillsContext;
