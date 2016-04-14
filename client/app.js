@@ -1,11 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
+var user_factory = require("./user.factory");
 
 var searchInput_directive = require("./search/searchInput.directive");
 
 var gmap_directive = require("./gmap/gmap.directive");
 var gmap_controller = require("./gmap/gmap.controller");
+
+var signin_directive = require("./signin/signin.directive");
 
 var signup_directive = require("./signup/signupForm.directive");
 var signup_service = require("./signup/signup.service");
@@ -21,7 +24,11 @@ window.init = function() {
 	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
 
 	app
-		.service('messenger_service', ['$rootScope', messenger_service])
+		.factory('user_factory', ['$resource', '$rootScope', user_factory])
+	;
+
+	app
+		.service('messenger_service', ['$rootScope', 'user_factory', messenger_service])
 		.service('signup_service', ['$resource', '$rootScope', signup_service])
 	;
 
@@ -30,6 +37,7 @@ window.init = function() {
 		.directive('ghSidebar', [sidebar_directive])
 		.directive('ghGmap', [gmap_directive])
 		.directive('ghSearch', [searchInput_directive])
+		.directive('ghSigninModal', [signin_directive])
 		.directive('ghSignupForm', [signup_directive])
 		.directive('ghPostJobForm', [postjob_directive])
 	;
@@ -47,7 +55,7 @@ window.init = function() {
 	}).resize();
 
 };
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signup/signup.service":14,"./signup/signupForm.directive":15}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signin/signin.directive":14,"./signup/signup.service":16,"./signup/signupForm.directive":17,"./user.factory":18}],2:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	if (messenger) {
 		$scope.jobs = messenger.getJobs();
@@ -224,9 +232,14 @@ module.exports = function() {
 },{"./gmap.controller":2}],4:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
 	$scope.sidebarModel = messenger.getSidebar();
+
+	$scope.signinModalControl = {}; // to be assigned by the signinModal directive
+	$scope.$on('navbar.buttonSignin.clicked', function() {
+		$scope.signinModalControl.show();
+	});
 }
 },{}],5:[function(require,module,exports){
-module.exports = function($rootScope) {
+module.exports = function($rootScope, user_factory) {
 	var models = {
 		sidebar: {
 			show: false
@@ -242,7 +255,7 @@ module.exports = function($rootScope) {
 
 		, jobs: []
 
-		, user: null
+		, user: {}
 	}
 
 	var service = {
@@ -259,9 +272,24 @@ module.exports = function($rootScope) {
 			return models.user;
 		}
 
+		, signin: function(signinForm) {
+			var user = user_factory.signin({}, signinForm);
+			user.$promise.then(
+				function(response) {
+					angular.copy(user, models.user);
+				}
+				,
+				function(response) {
+					$rootScope.$broadcast('error', response);
+				}
+			);
+
+			return user.$promise;
+		}
+
 		, setUser: function(user) {
 			var self = this;
-			models.user = angular.extend({}, user);
+			angular.copy(user, models.user);
 		}
 
 		, setNewJobAtAddress: function(objAddress) {
@@ -308,9 +336,7 @@ module.exports = function($scope, messenger) {
 		$scope.$broadcast("status.waiting");
 	});
 
-	$scope.$on('models.user.updated', function(evt, user) {
-		$scope.user = messenger.getUser();
-	});
+	$scope.user = messenger.getUser();
 
 	// helpers
 	$scope.vEllipsisToggle = function() {
@@ -320,6 +346,10 @@ module.exports = function($scope, messenger) {
 
 	$scope.triggerSignup = function() {
 		$scope.signup.show = true;
+	}
+
+	$scope.triggerSignin = function() {
+		$scope.$emit('navbar.buttonSignin.clicked');
 	}
 
 	$scope.showPostJob = function() {
@@ -521,6 +551,49 @@ module.exports =function() {
 	}
 }
 },{}],13:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+	$scope.control = {};
+	$scope.form = { email: null, password: null };
+
+	$scope.status = "standby";
+
+	$scope.submit = function() {
+		$scope.status = "waiting";
+		messenger
+			.signin($scope.form)
+			.then(function(response) {
+				$scope.status = "success";
+				$scope.form.email = null;
+				$scope.form.password = null;
+				setTimeout(function() {
+					$scope.control.hide();
+				},2000);
+			});
+		;
+	}
+}
+},{}],14:[function(require,module,exports){
+module.exports = function() {
+	var controller = require('./signin.controller');
+
+	return {
+		templateUrl: 'signin/signin.modal.html'
+		, scope: {
+			control: "="
+		}
+
+		, link: function($scope, $element, $attrs) {
+			var modal = $element.find('.modal');
+			
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() { modal.modal('hide'); }
+			
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./signin.controller":13}],15:[function(require,module,exports){
 module.exports = function($scope, signup_service, messenger) {
 	$scope.messenger = messenger;
 	$scope.model = messenger.getSignup();
@@ -556,10 +629,8 @@ module.exports = function($scope, signup_service, messenger) {
 		signup_service.signup(
 			$scope.model
 			, function(response) {
-				if (response.UserId > 0) {
+				if (response.userId > 0) {
 					messenger.setUser(response);
-					$scope.$emit('models.user.updated', response);
-					$scope.$broadcast('models.user.updated', response);
 					$scope.status = 'success';
 				} else {
 					if (angular.isArray(response.error)) {
@@ -581,7 +652,7 @@ module.exports = function($scope, signup_service, messenger) {
 		$scope.formError = '';
 	}, true);
 }
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/signup/'
@@ -592,7 +663,7 @@ module.exports = function($resource, $rootScope) {
 
 	return client;
 }
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -629,4 +700,20 @@ module.exports = function() {
 		, controller: ['$scope', 'signup_service', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":13}]},{},[1]);
+},{"./signup.controller":15}],18:[function(require,module,exports){
+module.exports = function($resource, $rootScope) {
+	// define the class
+	var resUser = $resource(
+		'/api/user/:request'
+		, 
+		{
+			request: "@signinORsignout"
+		}
+		, 
+		{
+			signin: { method: 'POST', params: { request: 'signin' } }
+		});
+
+	return resUser;
+}
+},{}]},{},[1]);

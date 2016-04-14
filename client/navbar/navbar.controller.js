@@ -10,9 +10,7 @@ module.exports = function($scope, messenger) {
 		$scope.$broadcast("status.waiting");
 	});
 
-	$scope.$on('models.user.updated', function(evt, user) {
-		$scope.user = messenger.getUser();
-	});
+	$scope.user = messenger.getUser();
 
 	// helpers
 	$scope.vEllipsisToggle = function() {
@@ -22,6 +20,10 @@ module.exports = function($scope, messenger) {
 
 	$scope.triggerSignup = function() {
 		$scope.signup.show = true;
+	}
+
+	$scope.triggerSignin = function() {
+		$scope.$emit('navbar.buttonSignin.clicked');
 	}
 
 	$scope.showPostJob = function() {

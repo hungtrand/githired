@@ -1,10 +1,13 @@
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
+var user_factory = require("./user.factory");
 
 var searchInput_directive = require("./search/searchInput.directive");
 
 var gmap_directive = require("./gmap/gmap.directive");
 var gmap_controller = require("./gmap/gmap.controller");
+
+var signin_directive = require("./signin/signin.directive");
 
 var signup_directive = require("./signup/signupForm.directive");
 var signup_service = require("./signup/signup.service");
@@ -20,7 +23,11 @@ window.init = function() {
 	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
 
 	app
-		.service('messenger_service', ['$rootScope', messenger_service])
+		.factory('user_factory', ['$resource', '$rootScope', user_factory])
+	;
+
+	app
+		.service('messenger_service', ['$rootScope', 'user_factory', messenger_service])
 		.service('signup_service', ['$resource', '$rootScope', signup_service])
 	;
 
@@ -29,6 +36,7 @@ window.init = function() {
 		.directive('ghSidebar', [sidebar_directive])
 		.directive('ghGmap', [gmap_directive])
 		.directive('ghSearch', [searchInput_directive])
+		.directive('ghSigninModal', [signin_directive])
 		.directive('ghSignupForm', [signup_directive])
 		.directive('ghPostJobForm', [postjob_directive])
 	;

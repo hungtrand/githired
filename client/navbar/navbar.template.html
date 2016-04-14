@@ -16,11 +16,11 @@
 	
 	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 		<ul class="nav navbar-nav navbar-right">
-			<li class="dropdown" ng-if="!user">
+			<li class="dropdown" ng-if="!user.userId">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account <span class="caret"></span></a>
 				<ul class="dropdown-menu">
 					<li>
-						<a href="#">
+						<a href="" ng-click="triggerSignin()">
 							<i class="fa fa-sign-in"></i> Sign In
 						</a>
 					</li>
@@ -34,8 +34,8 @@
 				</ul>
 			</li>
 
-			<li class="dropdown" ng-if="user">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.FirstName || user.Company }} <span class="caret"></span></a>
+			<li class="dropdown" ng-if="user.userId">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.firstName || user.company }} <span class="caret"></span></a>
 				<ul class="dropdown-menu">
 					<li>
 						<a href="#">

@@ -33,10 +33,8 @@ module.exports = function($scope, signup_service, messenger) {
 		signup_service.signup(
 			$scope.model
 			, function(response) {
-				if (response.UserId > 0) {
+				if (response.userId > 0) {
 					messenger.setUser(response);
-					$scope.$emit('models.user.updated', response);
-					$scope.$broadcast('models.user.updated', response);
 					$scope.status = 'success';
 				} else {
 					if (angular.isArray(response.error)) {

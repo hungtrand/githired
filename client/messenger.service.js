@@ -1,4 +1,4 @@
-module.exports = function($rootScope) {
+module.exports = function($rootScope, user_factory) {
 	var models = {
 		sidebar: {
 			show: false
@@ -14,7 +14,7 @@ module.exports = function($rootScope) {
 
 		, jobs: []
 
-		, user: null
+		, user: {}
 	}
 
 	var service = {
@@ -31,9 +31,24 @@ module.exports = function($rootScope) {
 			return models.user;
 		}
 
+		, signin: function(signinForm) {
+			var user = user_factory.signin({}, signinForm);
+			user.$promise.then(
+				function(response) {
+					angular.copy(user, models.user);
+				}
+				,
+				function(response) {
+					$rootScope.$broadcast('error', response);
+				}
+			);
+
+			return user.$promise;
+		}
+
 		, setUser: function(user) {
 			var self = this;
-			models.user = angular.extend({}, user);
+			angular.copy(user, models.user);
 		}
 
 		, setNewJobAtAddress: function(objAddress) {
