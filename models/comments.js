@@ -1,24 +1,16 @@
-var Sequelize = require("sequelize");
-var database = require("./../database");
-var usersContext = require("./users");
+module.exports = function(database, Sequelize) {
 
-var commentsContext = database.define('comments', {
-	commentId: {
-		type: Sequelize.INTEGER
-		, primaryKey: true
-	}
-	, comment: Sequelize.STRING
-	, timestamp: {
-		type: Sequelize.DATE
-		, Timestamp: true
-	}
-});
+	var commentsContext = database.define('comments', {
+		commentId: {
+			type: Sequelize.INTEGER,
+			primaryKey: true
+		},
+		comment: Sequelize.STRING,
+		timestamp: {
+			type: Sequelize.DATE,
+			Timestamp: true
+		}
+	});
 
-commentsContext.belongsTo(
-	usersContext, 
-	{ foreignKey: 'fk_userId', targetKey: 'userId' }
-);
-
-commentsContext.sync();
-
-module.exports = commentsContext;
+	return commentsContext;
+}

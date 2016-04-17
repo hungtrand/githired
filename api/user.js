@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var usersContext = require('./../models/users');
+var usersContext = require('./../models').users;
 
 /* POST signin. Expecting params: @email, @password */
 router.post("/signin", function(req, res, next) {

@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var usersContext = require('./../models/users');
+var usersContext = require('./../models').users;
 
 /* POST new signup. */
 router.post("/", function(req, res, next) {
