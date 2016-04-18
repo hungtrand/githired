@@ -15,7 +15,12 @@ router.post("/signin", function(req, res, next) {
 			attributes: ['userId', 'email', 'firstName', 'lastName', 'company', 'isEmployer', 'isEmployee']
 		})
 		.then(function(user) {
-			res.send(JSON.stringify(user));
+			if (user) {
+				res.send(JSON.stringify(user));
+			} else {
+				res.sendStatus(401);
+			}
+			
 		})
 		.catch(function(err) {
 			res.send(JSON.stringify(err));

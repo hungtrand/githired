@@ -29,7 +29,9 @@ module.exports = function($rootScope, user_factory) {
 				var user = user_factory.signin({}, signinForm);
 				user.$promise.then(
 					function(response) {
-						service.setUser(user);
+						if (response.userId) {
+							service.setUser(user);
+						}
 					}
 					,
 					function(response) {
