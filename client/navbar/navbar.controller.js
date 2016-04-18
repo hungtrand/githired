@@ -1,33 +1,31 @@
 module.exports = function($scope, messenger) {
-	// models
-	$scope.user = messenger.getUser();
-	$scope.sidebar = messenger.getSidebar();
-	$scope.signup = messenger.getSignup();
-	$scope.postjob = messenger.getPostJob();
+	$scope.user = messenger.user;
 
-	// events handlers
-	$scope.$on('searchBar.input.submit', function(evt, keywords) {
-		$scope.$broadcast("status.waiting");
-	});
-
-	$scope.user = messenger.getUser();
-
-	// helpers
 	$scope.vEllipsisToggle = function() {
-		$scope.sidebar.show = !$scope.sidebar.show;
-		$scope.vEllipsis = $scope.sidebar.show;
+		messenger.sidebar.control.show();
 	}
 
-	$scope.triggerSignup = function() {
-		$scope.signup.show = true;
+	$scope.onSignupClicked = function() {
+		messenger.signup.control.show();
 	}
 
-	$scope.triggerSignin = function() {
-		$scope.$emit('navbar.buttonSignin.clicked');
+	$scope.onSigninClicked = function() {
+		messenger.signin.control.show();
 	}
 
-	$scope.showPostJob = function() {
-		$scope.postjob.show = true;
+	$scope.onSignoutClicked = function() {
+		// TODO
+	}
+
+	$scope.onSidebarToggleClicked = function() {
+		// TODO
+		$scope.vEllipsis = !$scope.vEllipsis;
+		if ($scope.vEllipsis) {
+			messenger.sidebar.control.show();
+		} else {
+			messenger.sidebar.control.hide();
+		}
+		
 	}
 	
 }

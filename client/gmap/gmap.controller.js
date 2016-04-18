@@ -1,15 +1,8 @@
 module.exports = function($scope, messenger) {
-	if (messenger) {
-		$scope.jobs = messenger.getJobs();
-	}
+	$scope.control = {};
+	messenger.gmap.control = $scope.control;
 	
 	$scope.requestPostJob = function(objAddress) {
-		messenger.setNewJobAtAddress(objAddress);
+		messenger.jobPostingForm.show(objAddress);
 	}
-
-	$scope.$on('models.jobs', function(evt, eventType) {
-		if (eventType == 'updated') {
-			$scope.jobs = messenger.getJobs();
-		}
-	});
 }

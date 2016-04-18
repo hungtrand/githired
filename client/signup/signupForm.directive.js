@@ -4,33 +4,16 @@ module.exports = function() {
 	return {
 		templateUrl: 'signup/signup.form.html'
 		, scope: {
-			model: '='
+
 		}
 
 		, link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
-			$scope.$watch('model', function(newModel) {
-				if (newModel.show) {
-					modal.modal('show');
-				} else {
-					modal.modal('hide');
-				}
-			}, true);
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() {modal.modal('hide'); }
 
-			$scope.$watch('status', function(newStatus) {
-				if ($scope.status == 'success') {
-					setTimeout(function() {
-						modal.modal('hide');
-					}, 1000);
-				}
-			});
-
-			modal.on('hidden.bs.modal', function() {
-				$scope.model.show = false;
-				setTimeout(function() { $scope.$apply(); }, 100);
-			});
 		}
 
-		, controller: ['$scope', 'signup_service', 'messenger_service', controller]
+		, controller: ['$scope', 'messenger_service', controller]
 	}
 }

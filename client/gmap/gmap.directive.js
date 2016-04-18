@@ -88,20 +88,16 @@ module.exports = function() {
 	/****** directive properties ********/
 	return {
 		controller: ['$scope', 'messenger_service', controller],
+		scope: {
+			
+		},
 		link: function($scope, $element, $attrs) {
 			map = new google.maps.Map($element[0], mapOptions);
 			geocoder = new google.maps.Geocoder();
 
-			$scope.$watch('jobs', function(newData, oldData) {
-				if (!oldData) oldData = [];
-				if (!newData) newData = [];
-				if (newData.length < oldData.length) {
-					clearMarkers(markers);
-				}
-
-				for (var i = oldData.length, l = newData.length; i < l; i++) {
-					var job = newData[i];
-				    var contentString = job.jobAddress.formattedAddress;
+			$scope.control = {
+				addJob: function(job) {
+					var contentString = job.jobAddress.formattedAddress;
 					        contentString += '<br /><br />' + job.jobDescription;
 				    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
 				    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
@@ -122,12 +118,11 @@ module.exports = function() {
 					var marker = markerFactory(job.jobTitle, pos, contentString);
 
 					markers.push(marker);
+					setTimeout(function() {
+						$scope.$apply();
+					}, 200);
 				}
-
-				setTimeout(function() {
-					$scope.$apply(), 200
-				});
-			}, true);
+			}
 
 			google.maps.event.addListener(map, 'click', function(e) {
 				geocoder.geocode({

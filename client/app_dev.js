@@ -10,7 +10,6 @@ var gmap_controller = require("./gmap/gmap.controller");
 var signin_directive = require("./signin/signin.directive");
 
 var signup_directive = require("./signup/signupForm.directive");
-var signup_service = require("./signup/signup.service");
 
 var postjob_directive = require("./postjob/postjobForm.directive");
 var postjob_service = require("./postjob/postjob.service");
@@ -28,7 +27,6 @@ window.init = function() {
 
 	app
 		.service('messenger_service', ['$rootScope', 'user_factory', messenger_service])
-		.service('signup_service', ['$resource', '$rootScope', signup_service])
 	;
 
 	app

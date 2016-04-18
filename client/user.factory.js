@@ -4,11 +4,16 @@ module.exports = function($resource, $rootScope) {
 		'/api/user/:request'
 		, 
 		{
-			request: "@signinORsignout"
+			request: "@signinORsignoutORsignup"
 		}
 		, 
 		{
+			signup: { method: 'POST', params: { request: 'signup' } }
+			,
 			signin: { method: 'POST', params: { request: 'signin' } }
+			,
+			signout: { method: 'POST', params: { request: 'signout' } }
+			
 		});
 
 	return resUser;

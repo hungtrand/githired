@@ -1,5 +1,6 @@
 module.exports = function($scope, messenger) {
 	$scope.control = {};
+	messenger.signin.control = $scope.control;
 	$scope.form = { email: null, password: null };
 
 	$scope.status = "standby";
@@ -7,7 +8,7 @@ module.exports = function($scope, messenger) {
 	$scope.submit = function() {
 		$scope.status = "waiting";
 		messenger
-			.signin($scope.form)
+			.signin.submit($scope.form)
 			.then(function(response) {
 				$scope.status = "success";
 				$scope.form.email = null;

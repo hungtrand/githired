@@ -1,9 +1,10 @@
-module.exports = function($scope, signup_service, messenger) {
-	$scope.messenger = messenger;
-	$scope.model = messenger.getSignup();
+module.exports = function($scope, messenger) {
+	$scope.control = {};
+	messenger.signup.control = $scope.control;
 	$scope.formError = '';
 	$scope.error = '';
 	$scope.status = 'standby';
+	$scope.model = {};
 
 	var validate = function() {
 		if ($scope.model.password !== $scope.model.confPassword) {
@@ -23,36 +24,30 @@ module.exports = function($scope, signup_service, messenger) {
 		$scope.error = '';
 		$scope.formError = '';
 		$scope.status = 'waiting';
-		
+
 		if (!validate()) return false;
-		
-		$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
+
+		$scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
 		$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
 		$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
 
-		signup_service.signup(
-			$scope.model
-			, function(response) {
-				if (response.userId > 0) {
-					messenger.setUser(response);
-					$scope.status = 'success';
-				} else {
-					if (angular.isArray(response.error)) {
-						$scope.error = response.error.join('\n');
+		messenger.signup
+			.submit($scope.model)
+			.then(
+				function(response) {
+					if (response.userId > 0) {
+						$scope.status = 'success';
+						setTimeout(function() {
+							$scope.control.hide();
+						}, 1500);
 					} else {
 						$scope.error = response;
+						$scope.status = 'standby';
 					}
+				},
+				function(error) {
+					$scope.error = error;
 					$scope.status = 'standby';
-				}
-			}
-			, function(error) {
-				$scope.error = error;
-				$scope.status = 'standby';
-			}
-		);
+				});
 	}
-
-	$scope.$watch('model', function() {
-		$scope.formError = '';
-	}, true);
 }

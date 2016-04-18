@@ -4,7 +4,7 @@ module.exports = function() {
 	return {
 		templateUrl: 'signin/signin.modal.html'
 		, scope: {
-			control: "="
+			
 		}
 
 		, link: function($scope, $element, $attrs) {

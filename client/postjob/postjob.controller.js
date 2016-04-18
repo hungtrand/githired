@@ -1,16 +1,11 @@
 module.exports = function($scope, messenger) {
-	$scope.model = messenger.getPostJob();
-	$scope.show = false;
-
-	$scope.$on('models.postJob.newJob', function(evt, eventType) {
-		if (eventType == 'updated') {
-			$scope.show();
-		}
-	});
+	$scope.control = {};
+	messenger.jobPostingForm.control = $scope.control;
+	$scope.model = {};
 
 	$scope.submitPostJob = function() {
-		console.log('submitted');
-		messenger.addJob($scope.model.newJob);
-		$scope.hide();
+		messenger
+			.addJob($scope.model)
+			.then(function() { $scope.control.hide() });
 	}
 }

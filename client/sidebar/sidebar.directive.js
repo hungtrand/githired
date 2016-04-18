@@ -1,20 +1,23 @@
 module.exports =function() {
-	var controller = function($scope) {
+	var controller = function($scope, messenger) {
+		$scope.control = {};
+		messenger.sidebar.control = $scope.control;
 	}
 	return {
 		templateUrl: 'sidebar/sidebar.template.html'
 		, scope: {
-			model: "="
+
 		}
 
 		, link: function($scope, $element, $attrs) {
-			$scope.$watch('model', function(properties) {
-				$element.toggleClass("toggled", properties.show);
-			}, true);
-
-			
+			$scope.control.show = function() {
+				$element.toggleClass("toggled", true);
+			}
+			$scope.control.hide = function() {
+				$element.toggleClass("toggled", false);
+			}
 		}
 
-		, controller: ['$scope', controller]
+		, controller: ['$scope', 'messenger_service', controller]
 	}
 }

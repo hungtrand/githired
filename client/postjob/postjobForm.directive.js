@@ -2,29 +2,33 @@ module.exports = function() {
 	var controller = require('./postjob.controller');
 
 	return {
-		templateUrl: 'postjob/postjob.form.html'
+		templateUrl: 'postjob/postjob.form.html',
+		control: "="
 
-		, link: function($scope, $element, $attrs) {
+		,
+		link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
-			
-			$scope.show = function() {
+
+			$scope.control.show = function(objAddress) {
+				$scope.model = {
+					jobTitle: '',
+					jobDescription: '',
+					jobAddress: objAddress,
+					jobWageType: null,
+					jobMinWage: '',
+					jobMaxWage: '',
+					jobSetWage: ''
+				}
+
 				modal.modal('show');
-			};
-
-			$scope.hide = function() {
+			}
+			$scope.control.hide = function() {
 				modal.modal('hide');
-			};
-
-			modal.on('shown.bs.modal', function() {
-				setTimeout(function() { $scope.$apply() }, 500);
-			});
-
-			modal.on('hidden.bs.modal', function() {
-				$scope.model.newJob = null;
-				setTimeout(function() { $scope.$apply(); }, 100);
-			});
+				$scope.model = null;
+			}
 		}
 
-		, controller: ['$scope', 'messenger_service', controller]
+		,
+		controller: ['$scope', 'messenger_service', controller]
 	}
 }

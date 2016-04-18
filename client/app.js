@@ -11,7 +11,6 @@ var gmap_controller = require("./gmap/gmap.controller");
 var signin_directive = require("./signin/signin.directive");
 
 var signup_directive = require("./signup/signupForm.directive");
-var signup_service = require("./signup/signup.service");
 
 var postjob_directive = require("./postjob/postjobForm.directive");
 var postjob_service = require("./postjob/postjob.service");
@@ -29,7 +28,6 @@ window.init = function() {
 
 	app
 		.service('messenger_service', ['$rootScope', 'user_factory', messenger_service])
-		.service('signup_service', ['$resource', '$rootScope', signup_service])
 	;
 
 	app
@@ -55,21 +53,14 @@ window.init = function() {
 	}).resize();
 
 };
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signin/signin.directive":14,"./signup/signup.service":16,"./signup/signupForm.directive":17,"./user.factory":18}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signin/signin.directive":14,"./signup/signupForm.directive":16,"./user.factory":17}],2:[function(require,module,exports){
 module.exports = function($scope, messenger) {
-	if (messenger) {
-		$scope.jobs = messenger.getJobs();
-	}
+	$scope.control = {};
+	messenger.gmap.control = $scope.control;
 	
 	$scope.requestPostJob = function(objAddress) {
-		messenger.setNewJobAtAddress(objAddress);
+		messenger.jobPostingForm.show(objAddress);
 	}
-
-	$scope.$on('models.jobs', function(evt, eventType) {
-		if (eventType == 'updated') {
-			$scope.jobs = messenger.getJobs();
-		}
-	});
 }
 },{}],3:[function(require,module,exports){
 module.exports = function() {
@@ -162,20 +153,16 @@ module.exports = function() {
 	/****** directive properties ********/
 	return {
 		controller: ['$scope', 'messenger_service', controller],
+		scope: {
+			
+		},
 		link: function($scope, $element, $attrs) {
 			map = new google.maps.Map($element[0], mapOptions);
 			geocoder = new google.maps.Geocoder();
 
-			$scope.$watch('jobs', function(newData, oldData) {
-				if (!oldData) oldData = [];
-				if (!newData) newData = [];
-				if (newData.length < oldData.length) {
-					clearMarkers(markers);
-				}
-
-				for (var i = oldData.length, l = newData.length; i < l; i++) {
-					var job = newData[i];
-				    var contentString = job.jobAddress.formattedAddress;
+			$scope.control = {
+				addJob: function(job) {
+					var contentString = job.jobAddress.formattedAddress;
 					        contentString += '<br /><br />' + job.jobDescription;
 				    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
 				    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
@@ -196,12 +183,11 @@ module.exports = function() {
 					var marker = markerFactory(job.jobTitle, pos, contentString);
 
 					markers.push(marker);
+					setTimeout(function() {
+						$scope.$apply();
+					}, 200);
 				}
-
-				setTimeout(function() {
-					$scope.$apply(), 200
-				});
-			}, true);
+			}
 
 			google.maps.event.addListener(map, 'click', function(e) {
 				geocoder.geocode({
@@ -231,93 +217,67 @@ module.exports = function() {
 
 },{"./gmap.controller":2}],4:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
-	$scope.sidebarModel = messenger.getSidebar();
-
-	$scope.signinModalControl = {}; // to be assigned by the signinModal directive
-	$scope.$on('navbar.buttonSignin.clicked', function() {
-		$scope.signinModalControl.show();
-	});
+	
 }
 },{}],5:[function(require,module,exports){
 module.exports = function($rootScope, user_factory) {
-	var models = {
-		sidebar: {
-			show: false
-		}
+
+	var service = {
+		sidebar: {}
+
+		, navbar: {}
 
 		, signup: {
-			show: false
+			submit: function(signupForm) {
+				user = user_factory.signup(signupForm);
+				user.$promise
+					.then(
+						function(newUser) {
+							if (newUser.userId) {
+								service.setUser(newUser);
+							}
+						}
+						,
+						function(error) {
+							$rootScope.$broadcast('error', error);
+						});
+
+				return user.$promise;
+			}
 		}
 
-		, postJob: {
-			newJob: null
+		, signin: {
+			submit: function(signinForm) {
+				var user = user_factory.signin({}, signinForm);
+				user.$promise.then(
+					function(response) {
+						service.setUser(user);
+					}
+					,
+					function(response) {
+						$rootScope.$broadcast('error', response);
+					}
+				);
+
+				return user.$promise;
+			}
 		}
+
+		, jobPostingForm: {}
 
 		, jobs: []
 
 		, user: {}
-	}
 
-	var service = {
-
-		getSidebar: function() {
-			return models.sidebar;
-		}
-		
-		, getSignup: function() {
-			return models.signup;
-		}
-
-		, getUser: function() {
-			return models.user;
-		}
-
-		, signin: function(signinForm) {
-			var user = user_factory.signin({}, signinForm);
-			user.$promise.then(
-				function(response) {
-					angular.copy(user, models.user);
-				}
-				,
-				function(response) {
-					$rootScope.$broadcast('error', response);
-				}
-			);
-
-			return user.$promise;
-		}
+		, gmap: {}
 
 		, setUser: function(user) {
 			var self = this;
-			angular.copy(user, models.user);
+			angular.copy(user, self.user);
 		}
-
-		, setNewJobAtAddress: function(objAddress) {
+		, addJob: function(jobForm) {
 			var self = this;
-			models.postJob.newJob = {
-				jobTitle: ''
-				, jobDescription: ''
-				, jobAddress: objAddress
-				, jobWageType: null
-				, jobMinWage: ''
-				, jobMaxWage: ''
-				, jobSetWage: ''
-			}
-
-			$rootScope.$broadcast('models.postJob.newJob', 'updated');
-		} 
-
-		, addJob: function(newJob) {
-			models.jobs.push(newJob);
-			$rootScope.$broadcast('models.jobs', 'updated');
-		}
-
-		, getPostJob: function() {
-			return models.postJob;
-		}
-
-		, getJobs: function() {
-			return models.jobs;
+			// TODO job_factory
 		}
 	}
 
@@ -325,35 +285,33 @@ module.exports = function($rootScope, user_factory) {
 }
 },{}],6:[function(require,module,exports){
 module.exports = function($scope, messenger) {
-	// models
-	$scope.user = messenger.getUser();
-	$scope.sidebar = messenger.getSidebar();
-	$scope.signup = messenger.getSignup();
-	$scope.postjob = messenger.getPostJob();
+	$scope.user = messenger.user;
 
-	// events handlers
-	$scope.$on('searchBar.input.submit', function(evt, keywords) {
-		$scope.$broadcast("status.waiting");
-	});
-
-	$scope.user = messenger.getUser();
-
-	// helpers
 	$scope.vEllipsisToggle = function() {
-		$scope.sidebar.show = !$scope.sidebar.show;
-		$scope.vEllipsis = $scope.sidebar.show;
+		messenger.sidebar.control.show();
 	}
 
-	$scope.triggerSignup = function() {
-		$scope.signup.show = true;
+	$scope.onSignupClicked = function() {
+		messenger.signup.control.show();
 	}
 
-	$scope.triggerSignin = function() {
-		$scope.$emit('navbar.buttonSignin.clicked');
+	$scope.onSigninClicked = function() {
+		messenger.signin.control.show();
 	}
 
-	$scope.showPostJob = function() {
-		$scope.postjob.show = true;
+	$scope.onSignoutClicked = function() {
+		// TODO
+	}
+
+	$scope.onSidebarToggleClicked = function() {
+		// TODO
+		$scope.vEllipsis = !$scope.vEllipsis;
+		if ($scope.vEllipsis) {
+			messenger.sidebar.control.show();
+		} else {
+			messenger.sidebar.control.hide();
+		}
+		
 	}
 	
 }
@@ -371,19 +329,14 @@ module.exports = function() {
 }
 },{"./navbar.controller":6}],8:[function(require,module,exports){
 module.exports = function($scope, messenger) {
-	$scope.model = messenger.getPostJob();
-	$scope.show = false;
-
-	$scope.$on('models.postJob.newJob', function(evt, eventType) {
-		if (eventType == 'updated') {
-			$scope.show();
-		}
-	});
+	$scope.control = {};
+	messenger.jobPostingForm.control = $scope.control;
+	$scope.model = {};
 
 	$scope.submitPostJob = function() {
-		console.log('submitted');
-		messenger.addJob($scope.model.newJob);
-		$scope.hide();
+		messenger
+			.addJob($scope.model)
+			.then(function() { $scope.control.hide() });
 	}
 }
 },{}],9:[function(require,module,exports){
@@ -402,30 +355,34 @@ module.exports = function() {
 	var controller = require('./postjob.controller');
 
 	return {
-		templateUrl: 'postjob/postjob.form.html'
+		templateUrl: 'postjob/postjob.form.html',
+		control: "="
 
-		, link: function($scope, $element, $attrs) {
+		,
+		link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
-			
-			$scope.show = function() {
+
+			$scope.control.show = function(objAddress) {
+				$scope.model = {
+					jobTitle: '',
+					jobDescription: '',
+					jobAddress: objAddress,
+					jobWageType: null,
+					jobMinWage: '',
+					jobMaxWage: '',
+					jobSetWage: ''
+				}
+
 				modal.modal('show');
-			};
-
-			$scope.hide = function() {
+			}
+			$scope.control.hide = function() {
 				modal.modal('hide');
-			};
-
-			modal.on('shown.bs.modal', function() {
-				setTimeout(function() { $scope.$apply() }, 500);
-			});
-
-			modal.on('hidden.bs.modal', function() {
-				$scope.model.newJob = null;
-				setTimeout(function() { $scope.$apply(); }, 100);
-			});
+				$scope.model = null;
+			}
 		}
 
-		, controller: ['$scope', 'messenger_service', controller]
+		,
+		controller: ['$scope', 'messenger_service', controller]
 	}
 }
 },{"./postjob.controller":8}],11:[function(require,module,exports){
@@ -531,28 +488,32 @@ module.exports = function() {
 }
 },{}],12:[function(require,module,exports){
 module.exports =function() {
-	var controller = function($scope) {
+	var controller = function($scope, messenger) {
+		$scope.control = {};
+		messenger.sidebar.control = $scope.control;
 	}
 	return {
 		templateUrl: 'sidebar/sidebar.template.html'
 		, scope: {
-			model: "="
+
 		}
 
 		, link: function($scope, $element, $attrs) {
-			$scope.$watch('model', function(properties) {
-				$element.toggleClass("toggled", properties.show);
-			}, true);
-
-			
+			$scope.control.show = function() {
+				$element.toggleClass("toggled", true);
+			}
+			$scope.control.hide = function() {
+				$element.toggleClass("toggled", false);
+			}
 		}
 
-		, controller: ['$scope', controller]
+		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
 },{}],13:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
+	messenger.signin.control = $scope.control;
 	$scope.form = { email: null, password: null };
 
 	$scope.status = "standby";
@@ -560,7 +521,7 @@ module.exports = function($scope, messenger) {
 	$scope.submit = function() {
 		$scope.status = "waiting";
 		messenger
-			.signin($scope.form)
+			.signin.submit($scope.form)
 			.then(function(response) {
 				$scope.status = "success";
 				$scope.form.email = null;
@@ -579,7 +540,7 @@ module.exports = function() {
 	return {
 		templateUrl: 'signin/signin.modal.html'
 		, scope: {
-			control: "="
+			
 		}
 
 		, link: function($scope, $element, $attrs) {
@@ -594,12 +555,13 @@ module.exports = function() {
 	}
 }
 },{"./signin.controller":13}],15:[function(require,module,exports){
-module.exports = function($scope, signup_service, messenger) {
-	$scope.messenger = messenger;
-	$scope.model = messenger.getSignup();
+module.exports = function($scope, messenger) {
+	$scope.control = {};
+	messenger.signup.control = $scope.control;
 	$scope.formError = '';
 	$scope.error = '';
 	$scope.status = 'standby';
+	$scope.model = {};
 
 	var validate = function() {
 		if ($scope.model.password !== $scope.model.confPassword) {
@@ -619,99 +581,70 @@ module.exports = function($scope, signup_service, messenger) {
 		$scope.error = '';
 		$scope.formError = '';
 		$scope.status = 'waiting';
-		
+
 		if (!validate()) return false;
-		
-		$scope.model.company =  $scope.model.isEmployer ? $scope.model.company : '';
+
+		$scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
 		$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
 		$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
 
-		signup_service.signup(
-			$scope.model
-			, function(response) {
-				if (response.userId > 0) {
-					messenger.setUser(response);
-					$scope.status = 'success';
-				} else {
-					if (angular.isArray(response.error)) {
-						$scope.error = response.error.join('\n');
+		messenger.signup
+			.submit($scope.model)
+			.then(
+				function(response) {
+					if (response.userId > 0) {
+						$scope.status = 'success';
+						setTimeout(function() {
+							$scope.control.hide();
+						}, 1500);
 					} else {
 						$scope.error = response;
+						$scope.status = 'standby';
 					}
+				},
+				function(error) {
+					$scope.error = error;
 					$scope.status = 'standby';
-				}
-			}
-			, function(error) {
-				$scope.error = error;
-				$scope.status = 'standby';
-			}
-		);
+				});
 	}
-
-	$scope.$watch('model', function() {
-		$scope.formError = '';
-	}, true);
 }
 },{}],16:[function(require,module,exports){
-module.exports = function($resource, $rootScope) {
-	var client = $resource(
-		'/api/signup/'
-		, {}
-		, {
-			signup: { method: 'POST' }
-		});
-
-	return client;
-}
-},{}],17:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
 	return {
 		templateUrl: 'signup/signup.form.html'
 		, scope: {
-			model: '='
+
 		}
 
 		, link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
-			$scope.$watch('model', function(newModel) {
-				if (newModel.show) {
-					modal.modal('show');
-				} else {
-					modal.modal('hide');
-				}
-			}, true);
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() {modal.modal('hide'); }
 
-			$scope.$watch('status', function(newStatus) {
-				if ($scope.status == 'success') {
-					setTimeout(function() {
-						modal.modal('hide');
-					}, 1000);
-				}
-			});
-
-			modal.on('hidden.bs.modal', function() {
-				$scope.model.show = false;
-				setTimeout(function() { $scope.$apply(); }, 100);
-			});
 		}
 
-		, controller: ['$scope', 'signup_service', 'messenger_service', controller]
+		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":15}],18:[function(require,module,exports){
+},{"./signup.controller":15}],17:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	// define the class
 	var resUser = $resource(
 		'/api/user/:request'
 		, 
 		{
-			request: "@signinORsignout"
+			request: "@signinORsignoutORsignup"
 		}
 		, 
 		{
+			signup: { method: 'POST', params: { request: 'signup' } }
+			,
 			signin: { method: 'POST', params: { request: 'signin' } }
+			,
+			signout: { method: 'POST', params: { request: 'signout' } }
+			
 		});
 
 	return resUser;
