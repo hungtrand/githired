@@ -146,6 +146,34 @@ module.exports = function() {
 						}
 					});
 			});
+
+			$scope.$watch("jobs", 
+				function(newJobsArray, oldJobsArray) {
+
+					// TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+
+					function retrieveLatLngOfJobAndSetOnMap(job) {
+						geocoder.geocode({
+							'address': job.location + ""
+						},
+						function(results, status) {
+							if (status == google.maps.GeocoderStatus.OK) {
+								var marker = markerFactory(
+												job.jobTitle,
+												results[0].geometry.location,
+												job.jobDescription
+											);
+							} else {
+								alert("Geocode was not successful for the following reason: " + status);
+							}
+						});
+					}
+
+					for (var i = 0; i < newJobsArray.length; i++) {
+						retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
+					}
+				},
+				true);
 		}
 	}
 }

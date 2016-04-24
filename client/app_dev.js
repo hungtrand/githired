@@ -1,6 +1,7 @@
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
 var user_factory = require("./user.factory");
+var joblist_factory = require("./jobs/joblist.factory");
 
 var searchInput_directive = require("./search/searchInput.directive");
 
@@ -23,10 +24,11 @@ window.init = function() {
 
 	app
 		.factory('user_factory', ['$resource', '$rootScope', user_factory])
+		.factory('joblist_factory', ['$resource', joblist_factory])
 	;
 
 	app
-		.service('messenger_service', ['$rootScope', 'user_factory', messenger_service])
+		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', messenger_service])
 	;
 
 	app

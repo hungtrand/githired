@@ -1,4 +1,4 @@
-module.exports = function($rootScope, user_factory) {
+module.exports = function($rootScope, user_factory, joblist_factory) {
 
 	var service = {
 		sidebar: {}
@@ -47,6 +47,8 @@ module.exports = function($rootScope, user_factory) {
 
 		, jobs: []
 
+		, joblist: []
+
 		, user: {}
 
 		, gmap: {}
@@ -59,7 +61,26 @@ module.exports = function($rootScope, user_factory) {
 			var self = this;
 			// TODO job_factory
 		}
+		, fetchJobs: function() {
+			var self = this;
+			joblist_factory.query({}, function(response) {
+				// success
+				console.log("i'm in success");
+				console.log("Response:" + response);
+
+				// self.joblist.splice(0, self.joblist.length);
+				angular.copy(response, self.joblist); // use angular copy to save reference
+			}, function(failure) {
+				// failure
+				console.log("Failure:" + failure);
+			});
+
+			//console.log(self.joblist);
+		}
 	}
+	$(document).on('dblclick', function() {
+		service.fetchJobs();
+	});
 
 	return service;
 }

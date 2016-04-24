@@ -2,6 +2,7 @@
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
 var user_factory = require("./user.factory");
+var joblist_factory = require("./jobs/joblist.factory");
 
 var searchInput_directive = require("./search/searchInput.directive");
 
@@ -24,10 +25,11 @@ window.init = function() {
 
 	app
 		.factory('user_factory', ['$resource', '$rootScope', user_factory])
+		.factory('joblist_factory', ['$resource', joblist_factory])
 	;
 
 	app
-		.service('messenger_service', ['$rootScope', 'user_factory', messenger_service])
+		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', messenger_service])
 	;
 
 	app
@@ -53,13 +55,14 @@ window.init = function() {
 	}).resize();
 
 };
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./main.controller":4,"./messenger.service":5,"./navbar/navbar.directive":7,"./postjob/postjob.service":9,"./postjob/postjobForm.directive":10,"./search/searchInput.directive":11,"./sidebar/sidebar.directive":12,"./signin/signin.directive":14,"./signup/signupForm.directive":16,"./user.factory":17}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/postjob.service":10,"./postjob/postjobForm.directive":11,"./search/searchInput.directive":12,"./sidebar/sidebar.directive":13,"./signin/signin.directive":15,"./signup/signupForm.directive":17,"./user.factory":18}],2:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
+	$scope.jobs = messenger.joblist;
 	messenger.gmap.control = $scope.control;
 	
 	$scope.requestPostJob = function(objAddress) {
-		messenger.jobPostingForm.show(objAddress);
+		messenger.jobPostingForm.control.show(objAddress);
 	}
 }
 },{}],3:[function(require,module,exports){
@@ -211,16 +214,51 @@ module.exports = function() {
 						}
 					});
 			});
+
+			$scope.$watch("jobs", 
+				function(newJobsArray, oldJobsArray) {
+
+					// TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+
+					function retrieveLatLngOfJobAndSetOnMap(job) {
+						geocoder.geocode({
+							'address': job.location + ""
+						},
+						function(results, status) {
+							if (status == google.maps.GeocoderStatus.OK) {
+								var marker = markerFactory(
+												job.jobTitle,
+												results[0].geometry.location,
+												job.jobDescription
+											);
+							} else {
+								alert("Geocode was not successful for the following reason: " + status);
+							}
+						});
+					}
+
+					for (var i = 0; i < newJobsArray.length; i++) {
+						retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
+					}
+				},
+				true);
 		}
 	}
 }
 
 },{"./gmap.controller":2}],4:[function(require,module,exports){
-module.exports = function ($scope, messenger) {
-	
+module.exports = function($resource) {
+	// var url = "/jobs/job.json";
+	var url = "api/user/alljobs";
+
+	return $resource(url);
 }
 },{}],5:[function(require,module,exports){
-module.exports = function($rootScope, user_factory) {
+module.exports = function ($scope, messenger) {
+	console.log(messenger.joblist);
+}
+},{}],6:[function(require,module,exports){
+module.exports = function($rootScope, user_factory, joblist_factory) {
 
 	var service = {
 		sidebar: {}
@@ -269,6 +307,8 @@ module.exports = function($rootScope, user_factory) {
 
 		, jobs: []
 
+		, joblist: []
+
 		, user: {}
 
 		, gmap: {}
@@ -281,11 +321,30 @@ module.exports = function($rootScope, user_factory) {
 			var self = this;
 			// TODO job_factory
 		}
+		, fetchJobs: function() {
+			var self = this;
+			joblist_factory.query({}, function(response) {
+				// success
+				console.log("i'm in success");
+				console.log("Response:" + response);
+
+				// self.joblist.splice(0, self.joblist.length);
+				angular.copy(response, self.joblist); // use angular copy to save reference
+			}, function(failure) {
+				// failure
+				console.log("Failure:" + failure);
+			});
+
+			//console.log(self.joblist);
+		}
 	}
+	$(document).on('dblclick', function() {
+		service.fetchJobs();
+	});
 
 	return service;
 }
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.user = messenger.user;
 $(document).on('dblclick', function() { console.log($scope.user) });
@@ -317,7 +376,7 @@ $(document).on('dblclick', function() { console.log($scope.user) });
 	}
 	
 }
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function() {
 	var controller = require("./navbar.controller");
 
@@ -329,7 +388,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./navbar.controller":6}],8:[function(require,module,exports){
+},{"./navbar.controller":7}],9:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	messenger.jobPostingForm.control = $scope.control;
@@ -341,7 +400,7 @@ module.exports = function($scope, messenger) {
 			.then(function() { $scope.control.hide() });
 	}
 }
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/postjob/'
@@ -352,7 +411,7 @@ module.exports = function($resource, $rootScope) {
 	
 	return client;
 }
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./postjob.controller');
 
@@ -387,7 +446,7 @@ module.exports = function() {
 		controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./postjob.controller":8}],11:[function(require,module,exports){
+},{"./postjob.controller":9}],12:[function(require,module,exports){
 module.exports = function() {
 
 	var suggestions = new Bloodhound({
@@ -488,7 +547,7 @@ module.exports = function() {
 		}]
 	}
 }
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope, messenger) {
 		$scope.control = {};
@@ -512,7 +571,7 @@ module.exports =function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	messenger.signin.control = $scope.control;
@@ -544,7 +603,7 @@ module.exports = function($scope, messenger) {
 			);
 	}
 }
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signin.controller');
 
@@ -565,7 +624,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signin.controller":13}],15:[function(require,module,exports){
+},{"./signin.controller":14}],16:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	messenger.signup.control = $scope.control;
@@ -619,7 +678,7 @@ module.exports = function($scope, messenger) {
 				});
 	}
 }
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -639,7 +698,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":15}],17:[function(require,module,exports){
+},{"./signup.controller":16}],18:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	// define the class
 	var resUser = $resource(
