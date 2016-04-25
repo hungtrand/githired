@@ -5,7 +5,6 @@ var allJobs = require('./../models').jobs;
 router.get("/alljobs", function(req, res, next){
 	res.setHeader('Content-Type', 'application/json');
 	allJobs.findAll({
-		
 		attributes: ['jobId', 'jobTitle', 'jobDescription'
 		, 'minimumWage', 'maximumWage', 'jobType'
 		, 'position', 'startingDate', 'endDate'
