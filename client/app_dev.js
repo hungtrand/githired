@@ -15,12 +15,15 @@ var signup_directive = require("./signup/signupForm.directive");
 var postjob_directive = require("./postjob/postjobForm.directive");
 var postjob_service = require("./postjob/postjob.service");
 
+var mySkills_directive = require("./skills/mySkills.directive");
+
 var messenger_service = require("./messenger.service");
-//hey
+var trendySkills_service = require("./skills/trendySkills.service");
+
 var main_controller = require("./main.controller");
 
 window.init = function() {
-	var app = angular.module('githired', ['ngResource', 'ngAnimate']);
+	var app = angular.module('githired', ['ngResource', 'ngAnimate', 'ui.bootstrap']);
 
 	app
 		.factory('user_factory', ['$resource', '$rootScope', user_factory])
@@ -29,6 +32,7 @@ window.init = function() {
 
 	app
 		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', messenger_service])
+                .service('trendySkills_service', ['$resource', trendySkills_service])
 	;
 
 	app
@@ -39,6 +43,7 @@ window.init = function() {
 		.directive('ghSigninModal', [signin_directive])
 		.directive('ghSignupForm', [signup_directive])
 		.directive('ghPostJobForm', [postjob_directive])
+                .directive('ghMySkills', [mySkills_directive])
 	;
 
 	app

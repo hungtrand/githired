@@ -1,179 +1,179 @@
 module.exports = function() {
-	var controller = require('./gmap.controller');
-	/***** Private properties ******/
-	var mapOptions = {
-		center: new google.maps.LatLng(37.335268, -121.881361),
-		zoom: 13,
-	};
+    var controller = require('./gmap.controller');
+    /***** Private properties ******/
+    var mapOptions = {
+        center: new google.maps.LatLng(37.335268, -121.881361),
+        zoom: 13,
+    };
 
-	var map, geocoder;
-	var markers = [];
+    var map, geocoder;
+    var markers = [];
 
-	function clearMarkers(markerList) {
-		angular.forEach(markerList, function(marker, index) {
-			marker.setMap(null);
-		});
-	}
+    function clearMarkers(markerList) {
+        angular.forEach(markerList, function(marker, index) {
+            marker.setMap(null);
+        });
+    }
 
-	function markerFactory(title, pos, info) {
-		var newMarker = new google.maps.Marker({
-			map: map,
-			draggable: false,
-		    icon: 'images/logo32.png',
-			title: title,
+    function markerFactory(title, pos, info) {
+        var newMarker = new google.maps.Marker({
+            map: map,
+            draggable: false,
+            icon: 'images/logo32.png',
+            title: title,
 
-			animation: google.maps.Animation.DROP,
-			position: pos
-		});
+            animation: google.maps.Animation.DROP,
+            position: pos
+        });
 
-		var infowindow = new google.maps.InfoWindow({
-			content: info
-		});
+        var infowindow = new google.maps.InfoWindow({
+            content: info
+        });
 
-		newMarker.addListener('click', function() {
-			infowindow.open(map, newMarker);
-		});
+        newMarker.addListener('click', function() {
+            infowindow.open(map, newMarker);
+        });
 
-		return newMarker;
-	}
+        return newMarker;
+    }
 
-	var extractAddress = function(arrAddress) {
-		var itemRoute = '';
-		var itemLocality = '';
-		var itemCountry = '';
-		var itemPc = '';
-		var itemSnumber = '';
-		var itemState = '';
-	    
-		// iterate through address_component array
-		angular.forEach(arrAddress, function(address_component, i) {
+    var extractAddress = function(arrAddress) {
+        var itemRoute = '';
+        var itemLocality = '';
+        var itemCountry = '';
+        var itemPc = '';
+        var itemSnumber = '';
+        var itemState = '';
 
-			if (address_component.types[0] == "route") {
-				itemRoute = address_component.long_name;
-			}
+        // iterate through address_component array
+        angular.forEach(arrAddress, function(address_component, i) {
 
-			if (address_component.types[0] == "locality") {
-				itemLocality = address_component.long_name;
-			}
+            if (address_component.types[0] == "route") {
+                itemRoute = address_component.long_name;
+            }
 
-			if (address_component.types[0] == "country") {
-				itemCountry = address_component.long_name;
-			}
+            if (address_component.types[0] == "locality") {
+                itemLocality = address_component.long_name;
+            }
 
-			if (address_component.types[0] == "administrative_area_level_1") {
-				itemState = address_component.long_name;
-			}
+            if (address_component.types[0] == "country") {
+                itemCountry = address_component.long_name;
+            }
 
-			if (address_component.types[0] == "postal_code") {
-				itemPc = address_component.long_name;
-			}
+            if (address_component.types[0] == "administrative_area_level_1") {
+                itemState = address_component.long_name;
+            }
 
-			if (address_component.types[0] == "street_number") {
-				itemSnumber = address_component.long_name;
-			}
-			//return false; // break the loop   
-		});
+            if (address_component.types[0] == "postal_code") {
+                itemPc = address_component.long_name;
+            }
 
-		return {
-			number: itemSnumber,
-			street: itemRoute,
-			city: itemLocality,
-			state: itemState,
-			country: itemCountry,
-			postal: itemPc
-		}
-	}
+            if (address_component.types[0] == "street_number") {
+                itemSnumber = address_component.long_name;
+            }
+            //return false; // break the loop   
+        });
+
+        return {
+            number: itemSnumber,
+                street: itemRoute,
+                city: itemLocality,
+                state: itemState,
+                country: itemCountry,
+                postal: itemPc
+        }
+    }
 
 
-	/****** directive properties ********/
-	return {
-		controller: ['$scope', 'messenger_service', controller],
-		scope: {
-			
-		},
-		link: function($scope, $element, $attrs) {
-			map = new google.maps.Map($element[0], mapOptions);
-			geocoder = new google.maps.Geocoder();
+    /****** directive properties ********/
+    return {
+        controller: ['$scope', 'messenger_service', controller],
+        scope: {
 
-			$scope.control = {
-				addJob: function(job) {
-					var contentString = job.jobAddress.formattedAddress;
-					        contentString += '<br /><br />' + job.jobDescription;
-				    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
-				    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
+        },
+        link: function($scope, $element, $attrs) {
+            map = new google.maps.Map($element[0], mapOptions);
+            geocoder = new google.maps.Geocoder();
 
-					if (job.coordinates) {
-						var lat = job.coordinates[0];
-						var lng = job.coordinates[1];
-						
-						var pos = {
-							lat: lat,
-							lng: lng
-						}
-					} else if (job.jobAddress) {
-						var pos = job.jobAddress.latLng;
-					}
-					
+            $scope.control = {
+                addJob: function(job) {
+                    var contentString = job.jobAddress.formattedAddress;
+                    contentString += '<br /><br />' + job.jobDescription;
+                    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
+                    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
 
-					var marker = markerFactory(job.jobTitle, pos, contentString);
+                    if (job.coordinates) {
+                        var lat = job.coordinates[0];
+                        var lng = job.coordinates[1];
 
-					markers.push(marker);
-					setTimeout(function() {
-						$scope.$apply();
-					}, 200);
-				}
-			}
+                        var pos = {
+                            lat: lat,
+                            lng: lng
+                        }
+                    } else if (job.jobAddress) {
+                        var pos = job.jobAddress.latLng;
+                    }
 
-			google.maps.event.addListener(map, 'click', function(e) {
-				geocoder.geocode({
-						'latLng': e.latLng
-					},
-					function(results, status) {
-						var address = "";
-						if (status == google.maps.GeocoderStatus.OK) {
-							if (results[0]) {
-								address = {
-									formattedAddress: results[0].formatted_address,
-									latLng: e.latLng
-								}
 
-								angular.extend(address, extractAddress(results[0].address_components));
+                    var marker = markerFactory(job.jobTitle, pos, contentString);
 
-								$scope.requestPostJob(address);
-							}
-						} else {
-							// TODO handle error
-						}
-					});
-			});
+                    markers.push(marker);
+                    setTimeout(function() {
+                        $scope.$apply();
+                    }, 200);
+                }
+            }
 
-			$scope.$watch("jobs", 
-				function(newJobsArray, oldJobsArray) {
+            google.maps.event.addListener(map, 'click', function(e) {
+                geocoder.geocode({
+                    'latLng': e.latLng
+                },
+                function(results, status) {
+                    var address = "";
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        if (results[0]) {
+                            address = {
+                                formattedAddress: results[0].formatted_address,
+                latLng: e.latLng
+                            }
 
-					// TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+                            angular.extend(address, extractAddress(results[0].address_components));
 
-					function retrieveLatLngOfJobAndSetOnMap(job) {
-						geocoder.geocode({
-							'address': job.location + ""
-						},
-						function(results, status) {
-							if (status == google.maps.GeocoderStatus.OK) {
-								var marker = markerFactory(
-												job.jobTitle,
-												results[0].geometry.location,
-												job.jobDescription
-											);
-							} else {
-								alert("Geocode was not successful for the following reason: " + status);
-							}
-						});
-					}
+                            $scope.requestPostJob(address);
+                        }
+                    } else {
+                        // TODO handle error
+                    }
+                });
+            });
 
-					for (var i = 0; i < newJobsArray.length; i++) {
-						retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
-					}
-				},
-				true);
-		}
-	}
+            $scope.$watch("jobs", 
+                    function(newJobsArray, oldJobsArray) {
+
+                        // TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+
+                        function retrieveLatLngOfJobAndSetOnMap(job) {
+                            geocoder.geocode({
+                                'address': job.location + ""
+                            },
+                            function(results, status) {
+                                if (status == google.maps.GeocoderStatus.OK) {
+                                    var marker = markerFactory(
+                                        job.jobTitle,
+                                        results[0].geometry.location,
+                                        job.jobDescription
+                                        );
+                                } else {
+                                    alert("Geocode was not successful for the following reason: " + status);
+                                }
+                            });
+                        }
+
+                        for (var i = 0; i < newJobsArray.length; i++) {
+                            retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
+                        }
+                    },
+                    true);
+        }
+    }
 }

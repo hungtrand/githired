@@ -1,5 +1,5 @@
 module.exports = function($resource) {
-	var url = "api/user/alljobs";
+	var url = "api/jobs";
 
 	return $resource(url);
 }

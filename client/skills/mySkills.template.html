@@ -1,0 +1,54 @@
+<div class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">My Skills</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="">Add New Skill: </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control"
+                                style="height: 36px; margin-top: 1px;"
+                                ng-model="selected" 
+                                typeahead-loading="loadingSuggestions"
+                                typeahead-no-results="noResults"
+                                typeahead-on-select="selectSkill($item, $model, $label, $event)"
+                                uib-typeahead="skill.keyName for skill 
+                                                in getSkillSuggestions($viewValue)" />
+                            <span class="input-group-addon">
+                                <i class="fa fa-search"
+                                    ng-show="!loadingSuggestions"></i>
+                                    
+                                <i class="fa fa-spin fa-spinner"
+                                    ng-show="loadingSuggestions"></i>
+                            </span>
+                        </div>
+                        <em ng-if="noResults">No suggestions</em>
+                    </div>
+                    
+                </form>
+
+                <div class="well well-sm">
+                    <button class="btn btn-info btn-xs" 
+                        style="margin-right: 5px; font-size: 14px;"
+                        ng-repeat="skill in skills">
+                        <strong>{{ skill }}</strong>
+                        &nbsp;&nbsp;
+                        <a class="close" href="" ng-click="removeSkill($index)">&times;</a>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- ./modal-content -->
+    </div>
+    <!-- ./modal-dialog -->
+</div>
+<!-- ./modal -->
