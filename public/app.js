@@ -1,1 +1,877 @@
-!function a(b,c,d){function e(g,h){if(!c[g]){if(!b[g]){var i="function"==typeof require&&require;if(!h&&i)return i(g,!0);if(f)return f(g,!0);var j=new Error("Cannot find module '"+g+"'");throw j.code="MODULE_NOT_FOUND",j}var k=c[g]={exports:{}};b[g][0].call(k.exports,function(a){var c=b[g][1][a];return e(c?c:a)},k,k.exports,a,b,c,d)}return c[g].exports}for(var f="function"==typeof require&&require,g=0;g<d.length;g++)e(d[g]);return e}({1:[function(a,b,c){var d=a("./navbar/navbar.directive"),e=a("./sidebar/sidebar.directive"),f=a("./user.factory"),g=a("./jobs/joblist.factory"),h=a("./search/searchInput.directive"),i=a("./gmap/gmap.directive"),j=(a("./gmap/gmap.controller"),a("./signin/signin.directive")),k=a("./signup/signupForm.directive"),l=a("./postjob/postjobForm.directive"),m=(a("./postjob/postjob.service"),a("./messenger.service")),n=a("./main.controller");window.init=function(){var a=angular.module("githired",["ngResource","ngAnimate"]);a.factory("user_factory",["$resource","$rootScope",f]).factory("joblist_factory",["$resource",g]),a.service("messenger_service",["$rootScope","user_factory","joblist_factory",m]),a.directive("ghNavbar",[d]).directive("ghSidebar",[e]).directive("ghGmap",[i]).directive("ghSearch",[h]).directive("ghSigninModal",[j]).directive("ghSignupForm",[k]).directive("ghPostJobForm",[l]),a.controller("main_controller",["$scope","messenger_service",n]),angular.bootstrap(document,["githired"]),$(window).resize(function(){var a=$(window).height();$("#gmap").css("height",a)}).resize()}},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/postjob.service":10,"./postjob/postjobForm.directive":11,"./search/searchInput.directive":12,"./sidebar/sidebar.directive":13,"./signin/signin.directive":15,"./signup/signupForm.directive":17,"./user.factory":18}],2:[function(a,b,c){b.exports=function(a,b){a.control={},a.jobs=b.joblist,b.gmap.control=a.control,a.requestPostJob=function(a){b.jobPostingForm.control.show(a)}}},{}],3:[function(a,b,c){b.exports=function(){function b(a,b,d){var e=new google.maps.Marker({map:c,draggable:!1,icon:"images/logo32.png",title:a,animation:google.maps.Animation.DROP,position:b}),f=new google.maps.InfoWindow({content:d});return e.addListener("click",function(){f.open(c,e)}),e}var c,d,e=a("./gmap.controller"),f={center:new google.maps.LatLng(37.335268,-121.881361),zoom:13},g=[],h=function(a){var b="",c="",d="",e="",f="",g="";return angular.forEach(a,function(a,h){"route"==a.types[0]&&(b=a.long_name),"locality"==a.types[0]&&(c=a.long_name),"country"==a.types[0]&&(d=a.long_name),"administrative_area_level_1"==a.types[0]&&(g=a.long_name),"postal_code"==a.types[0]&&(e=a.long_name),"street_number"==a.types[0]&&(f=a.long_name)}),{number:f,street:b,city:c,state:g,country:d,postal:e}};return{controller:["$scope","messenger_service",e],scope:{},link:function(a,e,i){c=new google.maps.Map(e[0],f),d=new google.maps.Geocoder,a.control={addJob:function(c){var d=c.jobAddress.formattedAddress;d+="<br /><br />"+c.jobDescription;var e='<h3 class="text-danger">'+c.jobTitle+"</h3>";if(d=e+'<pre class="text-primary">'+d+"</pre>",c.coordinates)var f=c.coordinates[0],h=c.coordinates[1],i={lat:f,lng:h};else if(c.jobAddress)var i=c.jobAddress.latLng;var j=b(c.jobTitle,i,d);g.push(j),setTimeout(function(){a.$apply()},200)}},google.maps.event.addListener(c,"click",function(b){d.geocode({latLng:b.latLng},function(c,d){var e="";d==google.maps.GeocoderStatus.OK&&c[0]&&(e={formattedAddress:c[0].formatted_address,latLng:b.latLng},angular.extend(e,h(c[0].address_components)),a.requestPostJob(e))})}),a.$watch("jobs",function(a,c){function e(a){d.geocode({address:a.location+""},function(c,d){if(d==google.maps.GeocoderStatus.OK){b(a.jobTitle,c[0].geometry.location,a.jobDescription)}else alert("Geocode was not successful for the following reason: "+d)})}for(var f=0;f<a.length;f++)e(a[f])},!0)}}}},{"./gmap.controller":2}],4:[function(a,b,c){b.exports=function(a){var b="api/user/alljobs";return a(b)}},{}],5:[function(a,b,c){b.exports=function(a,b){console.log(b.joblist)}},{}],6:[function(a,b,c){b.exports=function(a,b,c){var d={sidebar:{},navbar:{},signup:{submit:function(c){return user=b.signup(c),user.$promise.then(function(a){a.userId&&d.setUser(a)},function(b){a.$broadcast("error",b)}),user.$promise}},signin:{submit:function(c){var e=b.signin({},c);return e.$promise.then(function(a){a.userId&&d.setUser(e)},function(b){a.$broadcast("error",b)}),e.$promise}},jobPostingForm:{},jobs:[],joblist:[],user:{},gmap:{},setUser:function(a){var b=this;angular.copy(a,b.user)},addJob:function(a){},fetchJobs:function(){var a=this;c.query({},function(b){console.log("i'm in success"),console.log("Response:"+b),angular.copy(b,a.joblist)},function(a){console.log("Failure:"+a)})}};return $(document).on("dblclick",function(){d.fetchJobs()}),d}},{}],7:[function(a,b,c){b.exports=function(a,b){a.user=b.user,$(document).on("dblclick",function(){console.log(a.user)}),a.vEllipsisToggle=function(){b.sidebar.control.show()},a.onSignupClicked=function(){b.signup.control.show()},a.onSigninClicked=function(){b.signin.control.show()},a.onSignoutClicked=function(){},a.onSidebarToggleClicked=function(){a.vEllipsis=!a.vEllipsis,a.vEllipsis?b.sidebar.control.show():b.sidebar.control.hide()}}},{}],8:[function(a,b,c){b.exports=function(){var b=a("./navbar.controller");return{templateUrl:"navbar/navbar.template.html",link:function(a,b,c){},controller:["$scope","messenger_service",b]}}},{"./navbar.controller":7}],9:[function(a,b,c){b.exports=function(a,b){a.control={},b.jobPostingForm.control=a.control,a.model={},a.submitPostJob=function(){b.addJob(a.model).then(function(){a.control.hide()})}}},{}],10:[function(a,b,c){b.exports=function(a,b){var c=a("/api/postjob/",{},{postjob:{method:"POST"}});return c}},{}],11:[function(a,b,c){b.exports=function(){var b=a("./postjob.controller");return{templateUrl:"postjob/postjob.form.html",control:"=",link:function(a,b,c){var d=b.find(".modal");a.control.show=function(b){a.model={jobTitle:"",jobDescription:"",jobAddress:b,jobWageType:null,jobMinWage:"",jobMaxWage:"",jobSetWage:""},d.modal("show")},a.control.hide=function(){d.modal("hide"),a.model=null}},controller:["$scope","messenger_service",b]}}},{"./postjob.controller":9}],12:[function(a,b,c){b.exports=function(){function a(a,c){""===a?c(b.get("developer","engineer","designer","tester")):b.search(a,c)}var b=new Bloodhound({datumTokenizer:Bloodhound.tokenizers.whitespace,queryTokenizer:Bloodhound.tokenizers.whitespace,prefetch:"search/suggestions.json"});return{templateUrl:"search/searchBar.template.html",link:function(b,c,d){c.find("form").on("submit",function(a){console.log(b.searchInput),b.sendQuery(b.searchInput)}),c.find(".inputSearch").typeahead({hint:!0,highlight:!0,minLength:0},{name:"states",source:a,templates:{empty:['<div class="text-muted">',"No Suggestion","</div>"].join("\n"),suggestion:function(a){var b='<div class="list-group-item">{{data}}</div>';return b.replace(/{{data}}/g,a)}}}),c.find(".inputSearch").on("focus",function(){$(this).select()}).bind("typeahead:select",function(a,c){b.sendQuery(c)}),c.find("#searchLog .dropdown-menu").on("click",function(a){a.stopPropagation()})},controller:["$scope",function(a){a.waiting=!1,a.searchLog={},a.clear=function(){a.searchLog={},a.$emit("searchInput.cleared"),a.searchInput="",setTimeout(function(){a.$apply()},10)},a.$on("searchInput.status.waiting",function(){a.waiting=!0,setTimeout(function(){a.$apply()},10)}),a.$on("searchInput.status.ready",function(){a.waiting=!1,setTimeout(function(){a.$apply()},10)}),a.sendQuery=function(b){b&&(a.searchInput=b),a.searchLog.hasOwnProperty(b)||"undefined"==typeof b||(a.searchLog[b]=!0);var c=Object.keys(a.searchLog);c.length>0?a.$emit("searchInput.submitted",c):a.$emit("searchInput.log.clear")}}]}}},{}],13:[function(a,b,c){b.exports=function(){var a=function(a,b){a.control={},b.sidebar.control=a.control};return{templateUrl:"sidebar/sidebar.template.html",scope:{},link:function(a,b,c){a.control.show=function(){b.toggleClass("toggled",!0)},a.control.hide=function(){b.toggleClass("toggled",!1)}},controller:["$scope","messenger_service",a]}}},{}],14:[function(a,b,c){b.exports=function(a,b){a.control={},b.signin.control=a.control,a.form={email:null,password:null},a.status="standby",a.submit=function(){a.status="waiting",a.error="",b.signin.submit(a.form).then(function(b){a.status="success",a.form.email=null,a.form.password=null,setTimeout(function(){a.control.hide()},2e3)},function(b){a.error=b.data,a.status="standby"})}}},{}],15:[function(a,b,c){b.exports=function(){var b=a("./signin.controller");return{templateUrl:"signin/signin.modal.html",scope:{},link:function(a,b,c){var d=b.find(".modal");a.control.show=function(){d.modal("show")},a.control.hide=function(){d.modal("hide")}},controller:["$scope","messenger_service",b]}}},{"./signin.controller":14}],16:[function(a,b,c){b.exports=function(a,b){a.control={},b.signup.control=a.control,a.formError="",a.error="",a.status="standby",a.model={};var c=function(){return a.model.password!==a.model.confPassword?(a.formError="password",!1):a.model.isEmployer||a.model.isEmployee?!0:(a.formError="employment",!1)};a.submit=function(){return a.error="",a.formError="",a.status="waiting",c()?(a.model.company=a.model.isEmployer?a.model.company:"",a.model.firstName=a.model.isEmployee?a.model.firstName:"",a.model.lastName=a.model.isEmployee?a.model.lastName:"",void b.signup.submit(a.model).then(function(b){b.userId>0?(a.status="success",setTimeout(function(){a.control.hide()},1500)):(a.error=b,a.status="standby")},function(b){a.error=b,a.status="standby"})):!1}}},{}],17:[function(a,b,c){b.exports=function(){var b=a("./signup.controller");return{templateUrl:"signup/signup.form.html",scope:{},link:function(a,b,c){var d=b.find(".modal");a.control.show=function(){d.modal("show")},a.control.hide=function(){d.modal("hide")}},controller:["$scope","messenger_service",b]}}},{"./signup.controller":16}],18:[function(a,b,c){b.exports=function(a,b){var c=a("/api/user/:request",{request:"@signinORsignoutORsignup"},{signup:{method:"POST",params:{request:"signup"}},signin:{method:"POST",params:{request:"signin"}},signout:{method:"POST",params:{request:"signout"}}});return c}},{}]},{},[1]);
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var navbar_directive = require("./navbar/navbar.directive");
+var sidebar_directive = require("./sidebar/sidebar.directive");
+var searchInput_directive = require("./search/searchInput.directive");
+var gmap_directive = require("./gmap/gmap.directive");
+var signin_directive = require("./signin/signin.directive");
+var signup_directive = require("./signup/signupForm.directive");
+var postjob_directive = require("./postjob/postjobForm.directive");
+var mySkills_directive = require("./skills/mySkills.directive");
+
+var user_factory = require("./user.factory");
+var joblist_factory = require("./jobs/joblist.factory");
+var mySkills_factory = require("./skills/mySkills.factory");
+
+var gmap_controller = require("./gmap/gmap.controller");
+
+var postjob_service = require("./postjob/postjob.service");
+var messenger_service = require("./messenger.service");
+var trendySkills_service = require("./skills/trendySkills.service");
+
+
+var main_controller = require("./main.controller");
+
+window.init = function() {
+	var app = angular.module('githired', ['ngResource', 'ngAnimate', 'ui.bootstrap']);
+
+	app
+		.factory('user_factory', ['$resource', '$rootScope', 
+                                            'mySkills_factory', user_factory])
+		.factory('joblist_factory', ['$resource', joblist_factory])
+                .factory('mySkills_factory', ['$resource', mySkills_factory])
+	;
+
+	app
+		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', messenger_service])
+                .service('trendySkills_service', ['$resource', trendySkills_service])
+	;
+
+	app
+		.directive('ghNavbar', [navbar_directive])
+		.directive('ghSidebar', [sidebar_directive])
+		.directive('ghGmap', [gmap_directive])
+		.directive('ghSearch', [searchInput_directive])
+		.directive('ghSigninModal', [signin_directive])
+		.directive('ghSignupForm', [signup_directive])
+		.directive('ghPostJobForm', [postjob_directive])
+                .directive('ghMySkills', [mySkills_directive])
+	;
+
+	app
+		.controller('main_controller', ['$scope', 'messenger_service', main_controller])
+	;
+
+	angular.bootstrap(document, ['githired']);
+
+	$(window).resize(function() {
+		var h = $(window).height();
+
+		$('#gmap').css('height', h);
+	}).resize();
+
+};
+
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/postjob.service":10,"./postjob/postjobForm.directive":11,"./search/searchInput.directive":12,"./sidebar/sidebar.directive":13,"./signin/signin.directive":15,"./signup/signupForm.directive":17,"./skills/mySkills.directive":18,"./skills/mySkills.factory":19,"./skills/trendySkills.service":20,"./user.factory":21}],2:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+	$scope.control = {};
+	$scope.jobs = messenger.joblist;
+	messenger.gmap.control = $scope.control;
+	
+	$scope.requestPostJob = function(objAddress) {
+		messenger.jobPostingForm.control.show(objAddress);
+	}
+}
+},{}],3:[function(require,module,exports){
+module.exports = function() {
+    var controller = require('./gmap.controller');
+    /***** Private properties ******/
+    var mapOptions = {
+        center: new google.maps.LatLng(37.335268, -121.881361),
+        zoom: 13,
+    };
+
+    var map, geocoder;
+    var markers = [];
+
+    function clearMarkers(markerList) {
+        angular.forEach(markerList, function(marker, index) {
+            marker.setMap(null);
+        });
+    }
+
+    function markerFactory(title, pos, info) {
+        var newMarker = new google.maps.Marker({
+            map: map,
+            draggable: false,
+            icon: 'images/logo32.png',
+            title: title,
+
+            animation: google.maps.Animation.DROP,
+            position: pos
+        });
+
+        var infowindow = new google.maps.InfoWindow({
+            content: info
+        });
+
+        newMarker.addListener('click', function() {
+            infowindow.open(map, newMarker);
+        });
+
+        return newMarker;
+    }
+
+    var extractAddress = function(arrAddress) {
+        var itemRoute = '';
+        var itemLocality = '';
+        var itemCountry = '';
+        var itemPc = '';
+        var itemSnumber = '';
+        var itemState = '';
+
+        // iterate through address_component array
+        angular.forEach(arrAddress, function(address_component, i) {
+
+            if (address_component.types[0] == "route") {
+                itemRoute = address_component.long_name;
+            }
+
+            if (address_component.types[0] == "locality") {
+                itemLocality = address_component.long_name;
+            }
+
+            if (address_component.types[0] == "country") {
+                itemCountry = address_component.long_name;
+            }
+
+            if (address_component.types[0] == "administrative_area_level_1") {
+                itemState = address_component.long_name;
+            }
+
+            if (address_component.types[0] == "postal_code") {
+                itemPc = address_component.long_name;
+            }
+
+            if (address_component.types[0] == "street_number") {
+                itemSnumber = address_component.long_name;
+            }
+            //return false; // break the loop   
+        });
+
+        return {
+            number: itemSnumber,
+                street: itemRoute,
+                city: itemLocality,
+                state: itemState,
+                country: itemCountry,
+                postal: itemPc
+        }
+    }
+
+
+    /****** directive properties ********/
+    return {
+        controller: ['$scope', 'messenger_service', controller],
+        scope: {
+
+        },
+        link: function($scope, $element, $attrs) {
+            map = new google.maps.Map($element[0], mapOptions);
+            geocoder = new google.maps.Geocoder();
+
+            $scope.control = {
+                addJob: function(job) {
+                    var contentString = job.jobAddress.formattedAddress;
+                    contentString += '<br /><br />' + job.jobDescription;
+                    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
+                    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
+
+                    if (job.coordinates) {
+                        var lat = job.coordinates[0];
+                        var lng = job.coordinates[1];
+
+                        var pos = {
+                            lat: lat,
+                            lng: lng
+                        }
+                    } else if (job.jobAddress) {
+                        var pos = job.jobAddress.latLng;
+                    }
+
+
+                    var marker = markerFactory(job.jobTitle, pos, contentString);
+
+                    markers.push(marker);
+                    setTimeout(function() {
+                        $scope.$apply();
+                    }, 200);
+                }
+            }
+
+            google.maps.event.addListener(map, 'click', function(e) {
+                geocoder.geocode({
+                    'latLng': e.latLng
+                },
+                function(results, status) {
+                    var address = "";
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        if (results[0]) {
+                            address = {
+                                formattedAddress: results[0].formatted_address,
+                latLng: e.latLng
+                            }
+
+                            angular.extend(address, extractAddress(results[0].address_components));
+
+                            $scope.requestPostJob(address);
+                        }
+                    } else {
+                        // TODO handle error
+                    }
+                });
+            });
+
+            $scope.$watch("jobs", 
+                    function(newJobsArray, oldJobsArray) {
+
+                        // TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+
+                        function retrieveLatLngOfJobAndSetOnMap(job) {
+                            geocoder.geocode({
+                                'address': job.location + ""
+                            },
+                            function(results, status) {
+                                if (status == google.maps.GeocoderStatus.OK) {
+                                    var marker = markerFactory(
+                                        job.jobTitle,
+                                        results[0].geometry.location,
+                                        job.jobDescription
+                                        );
+                                } else {
+                                    alert("Geocode was not successful for the following reason: " + status);
+                                }
+                            });
+                        }
+
+                        for (var i = 0; i < newJobsArray.length; i++) {
+                            retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
+                        }
+                    },
+                    true);
+        }
+    }
+}
+
+},{"./gmap.controller":2}],4:[function(require,module,exports){
+module.exports = function($resource) {
+	var url = "api/jobs";
+
+	return $resource(url);
+}
+
+},{}],5:[function(require,module,exports){
+module.exports = function ($scope, messenger) {
+    console.log(messenger.joblist);
+    if (sessionStorage.getItem("__githired.user.credentials__")) {
+        var strCredentials = sessionStorage.getItem("__githired.user.credentials__");
+        var email = strCredentials.split(":")[0];
+        var pass = strCredentials.split(":")[1];
+        messenger
+            .signin({ email: email, password: pass})
+            .then(
+                function(response) {
+                    messenger.user.fetchSkills();
+                },
+                function(failure) {
+                    console.log("Failed to load user. Error: " + failure);
+                }
+            );
+    }
+}
+
+},{}],6:[function(require,module,exports){
+module.exports = function($rootScope, user_factory, joblist_factory) {
+
+    var service = {
+        sidebar: {}, 
+        navbar: {}, 
+        signup: function(signupForm) {
+            var self = this;
+            self.user = user_factory.signup(signupForm);
+            self.user.$promise
+                .then(
+                        function(newUser) {
+                            self.setSession(signupForm);
+                        }
+                        ,
+                        function(error) {
+                            $rootScope.$broadcast('error', error);
+                        });
+
+            return self.user.$promise;
+        },
+        signin: function(signinForm) {
+            var self = this;
+            self.user = user_factory.signin({}, signinForm);
+            self.user.$promise.then(
+                    function(response) {
+                        if (response.userId) {
+                            self.setSession(signinForm);
+                        }
+                    },
+                    function(response) {
+                        $rootScope.$broadcast('error', response);
+                    }
+                    );
+            return self.user.$promise;
+        },
+        signout: function() {
+            sessionStorage.removeItem("__githired.user.credentials__");
+            window.location.reload();
+        },
+        jobPostingForm: {}, 
+        jobs: [], 
+        joblist: [],
+        user: {}, 
+        gmap: {},
+        mySkillsModal: {},
+        setSession: function(credentials) {
+            var self = this;
+
+            strCredentials = credentials.email + ":" + credentials.password;
+            sessionStorage.setItem("__githired.user.credentials__", strCredentials);
+        }, 
+        addJob: function(jobForm) {
+            var self = this;
+            // TODO job_factory
+        }, 
+        fetchJobs: function() {
+            var self = this;
+            joblist_factory.query({}, function(response) {
+                // success
+                console.log("i'm in success");
+                console.log("Response:" + response);
+
+                // self.joblist.splice(0, self.joblist.length);
+                angular.copy(response, self.joblist); // use angular copy to save reference
+            }, function(failure) {
+                // failure
+                console.log("Failure:" + failure);
+            });
+        }
+    }
+    $(document).on('dblclick', function() {
+        service.fetchJobs();
+    });
+
+    return service;
+}
+
+},{}],7:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+    $scope.user = messenger.user;
+
+    $(document).on('dblclick', function() { console.log($scope.user) });
+    $scope.vEllipsisToggle = function() {
+        messenger.sidebar.control.show();
+    }
+
+    $scope.onSignupClicked = function() {
+        messenger.signup.control.show();
+    }
+
+    $scope.onSigninClicked = function() {
+        messenger.signin.control.show();
+    }
+
+    $scope.onSignoutClicked = function() {
+        messenger.signout();
+    }
+
+    $scope.openMySkillsModal = function() {
+        messenger.mySkillsModal.control.show();
+    }
+
+    $scope.onSidebarToggleClicked = function() {
+        // TODO
+        $scope.vEllipsis = !$scope.vEllipsis;
+        if ($scope.vEllipsis) {
+            messenger.sidebar.control.show();
+        } else {
+            messenger.sidebar.control.hide();
+        }
+
+    }
+
+}
+
+},{}],8:[function(require,module,exports){
+module.exports = function() {
+	var controller = require("./navbar.controller");
+
+	return {
+		templateUrl: 'navbar/navbar.template.html'
+		, link: function($scope, $element, $http) {
+
+		}
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./navbar.controller":7}],9:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+	$scope.control = {};
+	messenger.jobPostingForm.control = $scope.control;
+	$scope.model = {};
+
+	$scope.submitPostJob = function() {
+		messenger
+			.addJob($scope.model)
+			.then(function() { $scope.control.hide() });
+	}
+}
+},{}],10:[function(require,module,exports){
+module.exports = function($resource, $rootScope) {
+	var client = $resource(
+		'/api/postjob/'
+		, {}
+		, {
+			postjob: { method: 'POST' }
+		});
+	
+	return client;
+}
+},{}],11:[function(require,module,exports){
+module.exports = function() {
+    var controller = require('./postjob.controller');
+
+    return {
+        templateUrl: 'postjob/postjob.form.html',
+            control: "="
+
+                ,
+            link: function($scope, $element, $attrs) {
+                var modal = $element.find('.modal');
+
+                $scope.control.show = function(objAddress) {
+                    $scope.model = {
+                        jobTitle: '',
+                        jobDescription: '',
+                        jobAddress: objAddress,
+                        jobWageType: null,
+                        jobMinWage: '',
+                        jobMaxWage: '',
+                        jobSetWage: ''
+                    }
+
+                    modal.modal('show');
+                }
+                $scope.control.hide = function() {
+                    modal.modal('hide');
+                    $scope.model = null;
+                }
+            }
+
+        ,
+            controller: ['$scope', 'messenger_service', controller]
+    }
+}
+
+},{"./postjob.controller":9}],12:[function(require,module,exports){
+module.exports = function() {
+
+	var suggestions = new Bloodhound({
+		datumTokenizer: Bloodhound.tokenizers.whitespace,
+		queryTokenizer: Bloodhound.tokenizers.whitespace,
+		prefetch: "search/suggestions.json"
+	});
+
+	function fetchSuggestions(q, sync) {
+		if (q === '') {
+			sync(suggestions.get(
+				'developer', 'engineer', 'designer', 'tester'
+			));
+		} else {
+			suggestions.search(q, sync);
+		}
+	}
+
+	return {
+		templateUrl: 'search/searchBar.template.html',
+		link: function($scope, $element, $attrs) {
+			$element.find('form').on('submit', function(e) {
+				console.log($scope.searchInput);
+				$scope.sendQuery($scope.searchInput);
+			});
+
+			$element.find('.inputSearch').typeahead({
+				hint: true,
+				highlight: true,
+				minLength: 0
+			}, {
+				name: 'states',
+				source: fetchSuggestions,
+				templates: {
+					empty: [
+						'<div class="text-muted">',
+						'No Suggestion',
+						'</div>'
+					].join('\n'),
+					suggestion: function(data) {
+						var templ = '<div class="list-group-item">' + '{{data}}</div>';
+
+						return templ.replace(/{{data}}/g, data);
+					}
+				}
+			});
+
+			$element.find('.inputSearch')
+				.on('focus', function() {
+					$(this).select();
+				})
+				.bind('typeahead:select', function(e, sugg) {
+					$scope.sendQuery(sugg);
+				});
+
+			$element.find('#searchLog .dropdown-menu').on('click', function(e) {
+				e.stopPropagation();
+			});
+		},
+
+		controller: ['$scope', function($scope) {
+			$scope.waiting = false;
+			$scope.searchLog = {};
+			$scope.clear = function() {
+				$scope.searchLog = {};
+				$scope.$emit('searchInput.cleared');
+				$scope.searchInput = '';
+				setTimeout(function() { $scope.$apply(); }, 10);
+			}
+
+			$scope.$on("searchInput.status.waiting", function() {
+				$scope.waiting = true;
+				setTimeout(function() { $scope.$apply(); }, 10);
+			});
+
+			$scope.$on("searchInput.status.ready", function() {
+				$scope.waiting = false;
+
+				setTimeout(function() {
+					$scope.$apply();
+				},10);
+			});
+
+			$scope.sendQuery = function(query) {
+				if (query) $scope.searchInput = query;
+				if (!$scope.searchLog.hasOwnProperty(query) && typeof query !== 'undefined') {
+					$scope.searchLog[query] = true;
+				}
+
+				var keywords = Object.keys($scope.searchLog);
+
+				if (keywords.length > 0) {
+					$scope.$emit('searchInput.submitted', keywords);
+				} else {
+					$scope.$emit('searchInput.log.clear');
+				}
+			}
+		}]
+	}
+}
+},{}],13:[function(require,module,exports){
+module.exports =function() {
+	var controller = function($scope, messenger) {
+		$scope.control = {};
+		messenger.sidebar.control = $scope.control;
+	}
+	return {
+		templateUrl: 'sidebar/sidebar.template.html'
+		, scope: {
+
+		}
+
+		, link: function($scope, $element, $attrs) {
+			$scope.control.show = function() {
+				$element.toggleClass("toggled", true);
+			}
+			$scope.control.hide = function() {
+				$element.toggleClass("toggled", false);
+			}
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{}],14:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+    $scope.control = {};
+    messenger.signin.control = $scope.control;
+    $scope.form = {
+        email: null,
+        password: null
+    };
+
+    $scope.status = "standby";
+
+    $scope.submit = function() {
+        $scope.status = "waiting";
+        $scope.error = "";
+        messenger
+            .signin($scope.form)
+            .then(
+                    function(response) {
+                        $scope.status = "success";
+                        $scope.form.email = null;
+                        $scope.form.password = null;
+                        setTimeout(function() {
+                            $scope.control.hide();
+                        }, 2000);
+                    }
+                    , function(failure) {
+                        $scope.error = failure.data;
+                        $scope.status = "standby";
+                    }
+                 );
+    }
+}
+
+},{}],15:[function(require,module,exports){
+module.exports = function() {
+	var controller = require('./signin.controller');
+
+	return {
+		templateUrl: 'signin/signin.modal.html'
+		, scope: {
+			
+		}
+
+		, link: function($scope, $element, $attrs) {
+			var modal = $element.find('.modal');
+			
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() { modal.modal('hide'); }
+			
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./signin.controller":14}],16:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+    $scope.control = {};
+    messenger.signup.control = $scope.control;
+    $scope.formError = '';
+    $scope.error = '';
+    $scope.status = 'standby';
+    $scope.model = {};
+
+    var validate = function() {
+        if ($scope.model.password !== $scope.model.confPassword) {
+            $scope.formError = "password";
+            return false;
+        }
+
+        if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
+            $scope.formError = 'employment';
+            return false;
+        }
+
+        return true;
+    }
+
+    $scope.submit = function() {
+        $scope.error = '';
+        $scope.formError = '';
+        $scope.status = 'waiting';
+
+        if (!validate()) return false;
+
+        $scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
+        $scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
+        $scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
+
+        messenger.signup($scope.model)
+            .then(
+                    function(response) {
+                        if (response.userId > 0) {
+                            $scope.status = 'success';
+                            setTimeout(function() {
+                                $scope.control.hide();
+                            }, 1500);
+                        } else {
+                            $scope.error = response;
+                            $scope.status = 'standby';
+                        }
+                    },
+                    function(error) {
+                        $scope.error = error;
+                        $scope.status = 'standby';
+                    });
+    }
+}
+
+},{}],17:[function(require,module,exports){
+module.exports = function() {
+	var controller = require('./signup.controller');
+
+	return {
+		templateUrl: 'signup/signup.form.html'
+		, scope: {
+
+		}
+
+		, link: function($scope, $element, $attrs) {
+			var modal = $element.find('.modal');
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() {modal.modal('hide'); }
+
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./signup.controller":16}],18:[function(require,module,exports){
+module.exports = function() {
+    var controller = function($scope, messenger, trendySkills_service) {
+        $scope.control = {};
+        $scope.waiting = false;
+        $scope.user = messenger.user;
+
+        $scope.status = "";
+
+        $scope.skills = $scope.user.skills;
+        messenger.mySkillsModal.control = $scope.control;
+        
+        $scope.selected = null;
+        $scope.selectSkill = function($item, $model, $label, $event) {
+            $scope.selected = "";
+            $scope.user.skills.push($model);
+        }
+
+        $scope.removeSkill = function($index) {
+            $scope.user.skills.splice($index, 1);
+        }
+
+        $scope.getSkillSuggestions = function(query) {
+            var http = trendySkills_service.getSkills({ like: query});
+            
+            return http.$promise.then(
+                function(response) {
+                    if (response.success) {
+                        return response.keywords;
+                    } else {
+                        return [];
+                    }        
+                }, 
+                function(failure) {
+                    console.log(failure);
+                }
+            );
+        }
+
+        $scope.save = function() {
+            $scope.waiting = true;
+            $scope.user
+                .saveSkills()
+                .then(
+                    function(response) {
+                        console.log("Saved skills successfully");
+                        $scope.waiting = false;
+                        $sccope.status = "saved";
+
+                        setTimeout(function() {
+                            $scope.status = "";
+                            $scope.$apply();
+                        }, 3000);
+                    },
+
+                    function(failure) {
+                        console.log(failure);
+                    }
+                );
+        }
+    }
+
+    return {
+        templateUrl: "skills/mySkills.template.html",
+        scope: {
+
+        },
+        link: function($scope, $element, $attrs) {
+            var modal = $element.find('.modal');
+            
+            $scope.control.show = function() {
+                modal.modal('show');
+            }
+            $scope.control.hide = function() {
+                modal.modal('hide');
+            }
+
+        },
+        
+        controller: ['$scope','messenger_service', 'trendySkills_service', controller]
+    }
+}
+
+},{}],19:[function(require,module,exports){
+module.exports = function($resource) {
+    var url = "/api/user/:userId/skills"
+
+    var mySkills = $resource(
+        url, 
+        {
+            userId: '@id'
+        }
+    );
+
+    return mySkills;
+}
+
+},{}],20:[function(require,module,exports){
+module.exports = function($resource) {
+    var url = "http://trendyskills.com/service";
+    var trendySkills = $resource(
+        url, 
+        {
+            callback: "JSON_CALLBACK",
+            q: "keywords",
+            like: "@query",
+            key: "FjlgMNTrEU2eTRgi"
+        }, 
+        {
+            getSkills: {
+                method: "JSONP",
+                isArray: false
+            }
+        }
+    );
+
+    return trendySkills;
+}
+
+},{}],21:[function(require,module,exports){
+module.exports = function($resource, $rootScope, mySkills_factory) {
+    // define the class
+    var resUser = $resource(
+            '/api/user/:userId/:request', 
+            {
+                userId: "@id",
+                request: "@signinORsignoutORsignup"
+            }, 
+            {
+                signup: { method: 'POST', params: { request: 'signup' } },
+                signin: { method: 'POST', params: { request: 'signin' } },
+                signout: { method: 'POST', params: { request: 'signout' } }
+
+            }
+    );
+
+    resUser.prototype.saveSkills = function() {
+        var results = mySkills_factory.save(
+            { 
+                userId: self.userId,
+                skills: self.skills 
+            }
+        );
+
+        return results.$promise;
+    }
+
+    resUser.prototype.fetchSkills = function() {
+        var self = this;
+        self.skills = mySkills_factory.query({ userId: self.userId });
+    };
+
+    return resUser;
+}
+
+},{}]},{},[1]);

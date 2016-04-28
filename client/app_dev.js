@@ -1,24 +1,22 @@
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
-var user_factory = require("./user.factory");
-var joblist_factory = require("./jobs/joblist.factory");
-
 var searchInput_directive = require("./search/searchInput.directive");
-
 var gmap_directive = require("./gmap/gmap.directive");
-var gmap_controller = require("./gmap/gmap.controller");
-
 var signin_directive = require("./signin/signin.directive");
-
 var signup_directive = require("./signup/signupForm.directive");
-
 var postjob_directive = require("./postjob/postjobForm.directive");
-var postjob_service = require("./postjob/postjob.service");
-
 var mySkills_directive = require("./skills/mySkills.directive");
 
+var user_factory = require("./user.factory");
+var joblist_factory = require("./jobs/joblist.factory");
+var mySkills_factory = require("./skills/mySkills.factory");
+
+var gmap_controller = require("./gmap/gmap.controller");
+
+var postjob_service = require("./postjob/postjob.service");
 var messenger_service = require("./messenger.service");
 var trendySkills_service = require("./skills/trendySkills.service");
+
 
 var main_controller = require("./main.controller");
 
@@ -26,8 +24,10 @@ window.init = function() {
 	var app = angular.module('githired', ['ngResource', 'ngAnimate', 'ui.bootstrap']);
 
 	app
-		.factory('user_factory', ['$resource', '$rootScope', user_factory])
+		.factory('user_factory', ['$resource', '$rootScope', 
+                                            'mySkills_factory', user_factory])
 		.factory('joblist_factory', ['$resource', joblist_factory])
+                .factory('mySkills_factory', ['$resource', mySkills_factory])
 	;
 
 	app

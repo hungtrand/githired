@@ -4,6 +4,15 @@ module.exports = function ($scope, messenger) {
         var strCredentials = sessionStorage.getItem("__githired.user.credentials__");
         var email = strCredentials.split(":")[0];
         var pass = strCredentials.split(":")[1];
-        messenger.signin.submit({ email: email, password: pass});
+        messenger
+            .signin({ email: email, password: pass})
+            .then(
+                function(response) {
+                    messenger.user.fetchSkills();
+                },
+                function(failure) {
+                    console.log("Failed to load user. Error: " + failure);
+                }
+            );
     }
 }

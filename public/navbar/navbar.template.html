@@ -1,69 +1,74 @@
 <div class="container-fluid">
-	<div class="navbar-header">
-		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-		<span class="icon-bar"></span>
-		<span class="icon-bar"></span>
-		<span class="icon-bar"></span>
-		</button>
-		<a class="navbar-brand text-warning text-capitalize" href="#">
-			<span><img src="images/temp-logo.png" height="24px;" />	<span class=" hidden-xs">GitHired</span></span>
-		</a>
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand text-warning text-capitalize" href="#">
+            <span><img src="images/temp-logo.png" height="24px;" />	<span class=" hidden-xs">GitHired</span></span>
+        </a>
 
-		<div class="navbar-left hidden-sm hidden-md hidden-lg col-xs-9" 
-			style="margin-top: 7px;" gh-search></div>
-		
-	</div>
-	
-	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-		<ul class="nav navbar-nav navbar-right">
-			<li class="dropdown" ng-if="!user">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account <span class="caret"></span></a>
-				<ul class="dropdown-menu">
-					<li>
-						<a href="#">
-							<i class="fa fa-sign-in"></i> Sign In
-						</a>
-					</li>
-					<li>
-						<a href="javascript:void(0);" title="Post Job" ng-click="showPostJob()">
-							Post A Job
-						</a>
-					</li>
-					<li role="separator" class="divider"></li>
-					<li>
-						<a href="javascript:void(0);" ng-click="triggerSignup()">
-							Sign Up
-						</a>
-					</li>
-				</ul>
-			</li>
+        <div class="navbar-left hidden-sm hidden-md hidden-lg col-xs-9" 
+            style="margin-top: 7px;" gh-search></div>
 
-			<li class="dropdown" ng-if="user">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.FirstName }} <span class="caret"></span></a>
-				<ul class="dropdown-menu">
-					<li>
-						<a href="#">
-							<i class="fa fa-sign-out"></i> Sign Out
-						</a>
-					</li>
-				</ul>
-			</li>
+    </div>
 
-			<li>
-				<a href="#menu-toggle" id="menu-toggle"
-					ng-click="vEllipsisToggle()"
-					style="font-size: 18px;">
-					<span>
-						<i class="fa fa-list-alt text-danger" ng-if="!vEllipsis"></i>
-						<i class="fa fa-ellipsis-v text-success" ng-if="vEllipsis"></i>
-					</span>
-				</a>
-			</li>
-		</ul>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown" ng-if="!user.userId">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li>
+                <a href="" ng-click="onSigninClicked()">
+                    <i class="fa fa-sign-in"></i> Sign In
+                </a>
+                </li>
 
-		<div class="navbar-right hidden-xs col-sm-6 col-md-8 col-lg-9" 
-			style="margin-top: 7px;" gh-search></div>
-		
-	</div>
-	<!--/.nav-collapse -->
+                <li role="separator" class="divider"></li>
+                <li>
+                <a href="javascript:void(0);" ng-click="onSignupClicked()">
+                    Sign Up
+                </a>
+                </li>
+            </ul>
+            </li>
+
+            <li class="dropdown" ng-if="user.userId">
+            <a href="#" class="dropdown-toggle" 
+                data-toggle="dropdown" role="button" 
+                aria-haspopup="true" aria-expanded="false">
+                {{ user.firstName || user.company }} <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="" ng-click="openMySkillsModal()">
+                        <i class="fa fa-briefcase"></i> My Skills
+                    </a>
+                </li>
+                <li>
+                <a href="" ng-click="onSignoutClicked()">
+                    <i class="fa fa-sign-out"></i> Sign Out
+                </a>
+                </li>
+            </ul>
+            </li>
+
+            <li>
+            <a href="" id="menu-toggle"
+                ng-click="onSidebarToggleClicked()"
+                style="font-size: 18px;">
+                <span>
+                    <i class="fa fa-list-alt text-danger" ng-if="!vEllipsis"></i>
+                    <i class="fa fa-ellipsis-v text-success" ng-if="vEllipsis"></i>
+                </span>
+            </a>
+            </li>
+        </ul>
+
+        <div class="navbar-right hidden-xs col-sm-6 col-md-8 col-lg-9" 
+            style="margin-top: 7px;" gh-search></div>
+
+    </div>
+    <!--/.nav-collapse -->
 </div>

@@ -1,25 +1,23 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var navbar_directive = require("./navbar/navbar.directive");
 var sidebar_directive = require("./sidebar/sidebar.directive");
-var user_factory = require("./user.factory");
-var joblist_factory = require("./jobs/joblist.factory");
-
 var searchInput_directive = require("./search/searchInput.directive");
-
 var gmap_directive = require("./gmap/gmap.directive");
-var gmap_controller = require("./gmap/gmap.controller");
-
 var signin_directive = require("./signin/signin.directive");
-
 var signup_directive = require("./signup/signupForm.directive");
-
 var postjob_directive = require("./postjob/postjobForm.directive");
-var postjob_service = require("./postjob/postjob.service");
-
 var mySkills_directive = require("./skills/mySkills.directive");
 
+var user_factory = require("./user.factory");
+var joblist_factory = require("./jobs/joblist.factory");
+var mySkills_factory = require("./skills/mySkills.factory");
+
+var gmap_controller = require("./gmap/gmap.controller");
+
+var postjob_service = require("./postjob/postjob.service");
 var messenger_service = require("./messenger.service");
 var trendySkills_service = require("./skills/trendySkills.service");
+
 
 var main_controller = require("./main.controller");
 
@@ -27,8 +25,10 @@ window.init = function() {
 	var app = angular.module('githired', ['ngResource', 'ngAnimate', 'ui.bootstrap']);
 
 	app
-		.factory('user_factory', ['$resource', '$rootScope', user_factory])
+		.factory('user_factory', ['$resource', '$rootScope', 
+                                            'mySkills_factory', user_factory])
 		.factory('joblist_factory', ['$resource', joblist_factory])
+                .factory('mySkills_factory', ['$resource', mySkills_factory])
 	;
 
 	app
@@ -61,7 +61,7 @@ window.init = function() {
 
 };
 
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/postjob.service":10,"./postjob/postjobForm.directive":11,"./search/searchInput.directive":12,"./sidebar/sidebar.directive":13,"./signin/signin.directive":15,"./signup/signupForm.directive":17,"./skills/mySkills.directive":18,"./skills/trendySkills.service":19,"./user.factory":20}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/postjob.service":10,"./postjob/postjobForm.directive":11,"./search/searchInput.directive":12,"./sidebar/sidebar.directive":13,"./signin/signin.directive":15,"./signup/signupForm.directive":17,"./skills/mySkills.directive":18,"./skills/mySkills.factory":19,"./skills/trendySkills.service":20,"./user.factory":21}],2:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	$scope.jobs = messenger.joblist;
@@ -266,7 +266,16 @@ module.exports = function ($scope, messenger) {
         var strCredentials = sessionStorage.getItem("__githired.user.credentials__");
         var email = strCredentials.split(":")[0];
         var pass = strCredentials.split(":")[1];
-        messenger.signin.submit({ email: email, password: pass});
+        messenger
+            .signin({ email: email, password: pass})
+            .then(
+                function(response) {
+                    messenger.user.fetchSkills();
+                },
+                function(failure) {
+                    console.log("Failed to load user. Error: " + failure);
+                }
+            );
     }
 }
 
@@ -276,40 +285,35 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
     var service = {
         sidebar: {}, 
         navbar: {}, 
-        signup: {
-            submit: function(signupForm) {
-                user = user_factory.signup(signupForm);
-                user.$promise
-                    .then(
-                            function(newUser) {
-                                if (newUser.userId) {
-                                    service.setUser(newUser);
-                                }
-                            }
-                            ,
-                            function(error) {
-                                $rootScope.$broadcast('error', error);
-                            });
-
-                return user.$promise;
-            }
-        },
-        signin: {
-            submit: function(signinForm) {
-                var user = user_factory.signin({}, signinForm);
-                user.$promise.then(
-                        function(response) {
-                            if (response.userId) {
-                                service.setUser(user, signinForm);
-                            }
-                        },
-                        function(response) {
-                            $rootScope.$broadcast('error', response);
+        signup: function(signupForm) {
+            var self = this;
+            self.user = user_factory.signup(signupForm);
+            self.user.$promise
+                .then(
+                        function(newUser) {
+                            self.setSession(signupForm);
                         }
-                        );
+                        ,
+                        function(error) {
+                            $rootScope.$broadcast('error', error);
+                        });
 
-                return user.$promise;
-            }
+            return self.user.$promise;
+        },
+        signin: function(signinForm) {
+            var self = this;
+            self.user = user_factory.signin({}, signinForm);
+            self.user.$promise.then(
+                    function(response) {
+                        if (response.userId) {
+                            self.setSession(signinForm);
+                        }
+                    },
+                    function(response) {
+                        $rootScope.$broadcast('error', response);
+                    }
+                    );
+            return self.user.$promise;
         },
         signout: function() {
             sessionStorage.removeItem("__githired.user.credentials__");
@@ -320,15 +324,10 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
         joblist: [],
         user: {}, 
         gmap: {},
-        mySkills: {
-            skills: [],
-            save: function() {
-            
-            }
-        },
-        setUser: function(user, credentials) {
+        mySkillsModal: {},
+        setSession: function(credentials) {
             var self = this;
-            angular.copy(user, self.user);
+
             strCredentials = credentials.email + ":" + credentials.password;
             sessionStorage.setItem("__githired.user.credentials__", strCredentials);
         }, 
@@ -361,6 +360,7 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
 },{}],7:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
+
     $(document).on('dblclick', function() { console.log($scope.user) });
     $scope.vEllipsisToggle = function() {
         messenger.sidebar.control.show();
@@ -379,7 +379,7 @@ module.exports = function($scope, messenger) {
     }
 
     $scope.openMySkillsModal = function() {
-        messenger.mySkills.control.show();
+        messenger.mySkillsModal.control.show();
     }
 
     $scope.onSidebarToggleClicked = function() {
@@ -606,7 +606,7 @@ module.exports = function($scope, messenger) {
         $scope.status = "waiting";
         $scope.error = "";
         messenger
-            .signin.submit($scope.form)
+            .signin($scope.form)
             .then(
                     function(response) {
                         $scope.status = "success";
@@ -647,58 +647,58 @@ module.exports = function() {
 }
 },{"./signin.controller":14}],16:[function(require,module,exports){
 module.exports = function($scope, messenger) {
-	$scope.control = {};
-	messenger.signup.control = $scope.control;
-	$scope.formError = '';
-	$scope.error = '';
-	$scope.status = 'standby';
-	$scope.model = {};
+    $scope.control = {};
+    messenger.signup.control = $scope.control;
+    $scope.formError = '';
+    $scope.error = '';
+    $scope.status = 'standby';
+    $scope.model = {};
 
-	var validate = function() {
-		if ($scope.model.password !== $scope.model.confPassword) {
-			$scope.formError = "password";
-			return false;
-		}
+    var validate = function() {
+        if ($scope.model.password !== $scope.model.confPassword) {
+            $scope.formError = "password";
+            return false;
+        }
 
-		if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
-			$scope.formError = 'employment';
-			return false;
-		}
+        if (!$scope.model.isEmployer && !$scope.model.isEmployee) {
+            $scope.formError = 'employment';
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	$scope.submit = function() {
-		$scope.error = '';
-		$scope.formError = '';
-		$scope.status = 'waiting';
+    $scope.submit = function() {
+        $scope.error = '';
+        $scope.formError = '';
+        $scope.status = 'waiting';
 
-		if (!validate()) return false;
+        if (!validate()) return false;
 
-		$scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
-		$scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
-		$scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
+        $scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
+        $scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
+        $scope.model.lastName = $scope.model.isEmployee ? $scope.model.lastName : '';
 
-		messenger.signup
-			.submit($scope.model)
-			.then(
-				function(response) {
-					if (response.userId > 0) {
-						$scope.status = 'success';
-						setTimeout(function() {
-							$scope.control.hide();
-						}, 1500);
-					} else {
-						$scope.error = response;
-						$scope.status = 'standby';
-					}
-				},
-				function(error) {
-					$scope.error = error;
-					$scope.status = 'standby';
-				});
-	}
+        messenger.signup($scope.model)
+            .then(
+                    function(response) {
+                        if (response.userId > 0) {
+                            $scope.status = 'success';
+                            setTimeout(function() {
+                                $scope.control.hide();
+                            }, 1500);
+                        } else {
+                            $scope.error = response;
+                            $scope.status = 'standby';
+                        }
+                    },
+                    function(error) {
+                        $scope.error = error;
+                        $scope.status = 'standby';
+                    });
+    }
 }
+
 },{}],17:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
@@ -723,17 +723,22 @@ module.exports = function() {
 module.exports = function() {
     var controller = function($scope, messenger, trendySkills_service) {
         $scope.control = {};
-        $scope.skills = messenger.mySkills.skills;
-        messenger.mySkills.control = $scope.control;
+        $scope.waiting = false;
+        $scope.user = messenger.user;
+
+        $scope.status = "";
+
+        $scope.skills = $scope.user.skills;
+        messenger.mySkillsModal.control = $scope.control;
         
         $scope.selected = null;
         $scope.selectSkill = function($item, $model, $label, $event) {
             $scope.selected = "";
-            $scope.skills.push($model);
+            $scope.user.skills.push($model);
         }
 
         $scope.removeSkill = function($index) {
-            $scope.skills.splice($index, 1);
+            $scope.user.skills.splice($index, 1);
         }
 
         $scope.getSkillSuggestions = function(query) {
@@ -751,6 +756,28 @@ module.exports = function() {
                     console.log(failure);
                 }
             );
+        }
+
+        $scope.save = function() {
+            $scope.waiting = true;
+            $scope.user
+                .saveSkills()
+                .then(
+                    function(response) {
+                        console.log("Saved skills successfully");
+                        $scope.waiting = false;
+                        $sccope.status = "saved";
+
+                        setTimeout(function() {
+                            $scope.status = "";
+                            $scope.$apply();
+                        }, 3000);
+                    },
+
+                    function(failure) {
+                        console.log(failure);
+                    }
+                );
         }
     }
 
@@ -777,6 +804,20 @@ module.exports = function() {
 
 },{}],19:[function(require,module,exports){
 module.exports = function($resource) {
+    var url = "/api/user/:userId/skills"
+
+    var mySkills = $resource(
+        url, 
+        {
+            userId: '@id'
+        }
+    );
+
+    return mySkills;
+}
+
+},{}],20:[function(require,module,exports){
+module.exports = function($resource) {
     var url = "http://trendyskills.com/service";
     var trendySkills = $resource(
         url, 
@@ -797,25 +838,40 @@ module.exports = function($resource) {
     return trendySkills;
 }
 
-},{}],20:[function(require,module,exports){
-module.exports = function($resource, $rootScope) {
-	// define the class
-	var resUser = $resource(
-		'/api/user/:request'
-		, 
-		{
-			request: "@signinORsignoutORsignup"
-		}
-		, 
-		{
-			signup: { method: 'POST', params: { request: 'signup' } }
-			,
-			signin: { method: 'POST', params: { request: 'signin' } }
-			,
-			signout: { method: 'POST', params: { request: 'signout' } }
-			
-		});
+},{}],21:[function(require,module,exports){
+module.exports = function($resource, $rootScope, mySkills_factory) {
+    // define the class
+    var resUser = $resource(
+            '/api/user/:userId/:request', 
+            {
+                userId: "@id",
+                request: "@signinORsignoutORsignup"
+            }, 
+            {
+                signup: { method: 'POST', params: { request: 'signup' } },
+                signin: { method: 'POST', params: { request: 'signin' } },
+                signout: { method: 'POST', params: { request: 'signout' } }
 
-	return resUser;
+            }
+    );
+
+    resUser.prototype.saveSkills = function() {
+        var results = mySkills_factory.save(
+            { 
+                userId: self.userId,
+                skills: self.skills 
+            }
+        );
+
+        return results.$promise;
+    }
+
+    resUser.prototype.fetchSkills = function() {
+        var self = this;
+        self.skills = mySkills_factory.query({ userId: self.userId });
+    };
+
+    return resUser;
 }
+
 },{}]},{},[1]);

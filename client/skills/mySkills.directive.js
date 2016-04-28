@@ -1,17 +1,22 @@
 module.exports = function() {
     var controller = function($scope, messenger, trendySkills_service) {
         $scope.control = {};
-        $scope.skills = messenger.mySkills.skills;
-        messenger.mySkills.control = $scope.control;
+        $scope.waiting = false;
+        $scope.user = messenger.user;
+
+        $scope.status = "";
+
+        $scope.skills = $scope.user.skills;
+        messenger.mySkillsModal.control = $scope.control;
         
         $scope.selected = null;
         $scope.selectSkill = function($item, $model, $label, $event) {
             $scope.selected = "";
-            $scope.skills.push($model);
+            $scope.user.skills.push($model);
         }
 
         $scope.removeSkill = function($index) {
-            $scope.skills.splice($index, 1);
+            $scope.user.skills.splice($index, 1);
         }
 
         $scope.getSkillSuggestions = function(query) {
@@ -29,6 +34,28 @@ module.exports = function() {
                     console.log(failure);
                 }
             );
+        }
+
+        $scope.save = function() {
+            $scope.waiting = true;
+            $scope.user
+                .saveSkills()
+                .then(
+                    function(response) {
+                        console.log("Saved skills successfully");
+                        $scope.waiting = false;
+                        $sccope.status = "saved";
+
+                        setTimeout(function() {
+                            $scope.status = "";
+                            $scope.$apply();
+                        }, 3000);
+                    },
+
+                    function(failure) {
+                        console.log(failure);
+                    }
+                );
         }
     }
 

@@ -3,40 +3,35 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
     var service = {
         sidebar: {}, 
         navbar: {}, 
-        signup: {
-            submit: function(signupForm) {
-                user = user_factory.signup(signupForm);
-                user.$promise
-                    .then(
-                            function(newUser) {
-                                if (newUser.userId) {
-                                    service.setUser(newUser);
-                                }
-                            }
-                            ,
-                            function(error) {
-                                $rootScope.$broadcast('error', error);
-                            });
-
-                return user.$promise;
-            }
-        },
-        signin: {
-            submit: function(signinForm) {
-                var user = user_factory.signin({}, signinForm);
-                user.$promise.then(
-                        function(response) {
-                            if (response.userId) {
-                                service.setUser(user, signinForm);
-                            }
-                        },
-                        function(response) {
-                            $rootScope.$broadcast('error', response);
+        signup: function(signupForm) {
+            var self = this;
+            self.user = user_factory.signup(signupForm);
+            self.user.$promise
+                .then(
+                        function(newUser) {
+                            self.setSession(signupForm);
                         }
-                        );
+                        ,
+                        function(error) {
+                            $rootScope.$broadcast('error', error);
+                        });
 
-                return user.$promise;
-            }
+            return self.user.$promise;
+        },
+        signin: function(signinForm) {
+            var self = this;
+            self.user = user_factory.signin({}, signinForm);
+            self.user.$promise.then(
+                    function(response) {
+                        if (response.userId) {
+                            self.setSession(signinForm);
+                        }
+                    },
+                    function(response) {
+                        $rootScope.$broadcast('error', response);
+                    }
+                    );
+            return self.user.$promise;
         },
         signout: function() {
             sessionStorage.removeItem("__githired.user.credentials__");
@@ -47,15 +42,10 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
         joblist: [],
         user: {}, 
         gmap: {},
-        mySkills: {
-            skills: [],
-            save: function() {
-            
-            }
-        },
-        setUser: function(user, credentials) {
+        mySkillsModal: {},
+        setSession: function(credentials) {
             var self = this;
-            angular.copy(user, self.user);
+
             strCredentials = credentials.email + ":" + credentials.password;
             sessionStorage.setItem("__githired.user.credentials__", strCredentials);
         }, 

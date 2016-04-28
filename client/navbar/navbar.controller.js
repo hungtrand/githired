@@ -1,5 +1,6 @@
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
+
     $(document).on('dblclick', function() { console.log($scope.user) });
     $scope.vEllipsisToggle = function() {
         messenger.sidebar.control.show();
@@ -18,7 +19,7 @@ module.exports = function($scope, messenger) {
     }
 
     $scope.openMySkillsModal = function() {
-        messenger.mySkills.control.show();
+        messenger.mySkillsModal.control.show();
     }
 
     $scope.onSidebarToggleClicked = function() {

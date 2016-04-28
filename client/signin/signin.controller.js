@@ -12,7 +12,7 @@ module.exports = function($scope, messenger) {
         $scope.status = "waiting";
         $scope.error = "";
         messenger
-            .signin.submit($scope.form)
+            .signin($scope.form)
             .then(
                     function(response) {
                         $scope.status = "success";
