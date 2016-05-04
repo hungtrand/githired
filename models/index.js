@@ -35,6 +35,7 @@ models.forEach(function(model) {
         }
     );
 
+
     m.jobAcceptances.belongsTo(
         m.jobs, {
             foreignKey: 'jobId',
@@ -74,6 +75,13 @@ models.forEach(function(model) {
             through: 'userSkills'
         }
     );
+
+    m.skills.belongsToMany(
+        m.userSkills, {
+            foreignKey: 'userSkillId'
+            targetKey: 'userSkillId'
+        });
+
 
     database.sync();
 

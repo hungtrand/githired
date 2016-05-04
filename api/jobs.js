@@ -29,7 +29,8 @@ router.get("", function(req, res, next){
     jobsContext.findAll({
 
         attributes: ['jobId', 'jobTitle', 'jobDescription'
-        , 'minimumWage', 'maximumWage', 'jobType'
+        , 'minimumWage', 'maximumWage', 'setWage' 
+        , 'jobType'
         , 'position', 'startingDate', 'endDate'
         , 'location', 'userId']
     })
