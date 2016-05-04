@@ -76,11 +76,11 @@ models.forEach(function(model) {
         }
     );
 
-    m.skills.belongsToMany(
-        m.userSkills, {
-            foreignKey: 'userSkillId'
-            targetKey: 'userSkillId'
-        });
+    // m.skills.belongsTo(
+    //     m.userSkills, {
+    //         foreignKey: 'userSkillId',
+    //         targetKey: 'userSkillId'
+    //     });
 
 
     database.sync();
