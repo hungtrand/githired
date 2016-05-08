@@ -306,6 +306,7 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
             self.user.$promise.then(
                     function(response) {
                         if (response.userId) {
+                            $rootScope.$broadcast("user.signin.success");
                             self.setSession(signinForm);
                         }
                     },
@@ -322,7 +323,7 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
         jobPostingForm: {}, 
         jobs: [], 
         joblist: [],
-        user: {}, 
+        user: null, 
         gmap: {},
         mySkillsModal: {},
         setSession: function(credentials) {
@@ -360,6 +361,10 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
 },{}],7:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
+
+    $scope.$on("user.signin.success", function(evt, data) {
+        $scope.user = messenger.user;
+    });
 
     $(document).on('dblclick', function() { console.log($scope.user) });
     $scope.vEllipsisToggle = function() {
@@ -614,6 +619,7 @@ module.exports = function($scope, messenger) {
                         $scope.form.password = null;
                         setTimeout(function() {
                             $scope.control.hide();
+                            $scope.status = "standby";
                         }, 2000);
                     }
                     , function(failure) {
@@ -734,7 +740,10 @@ module.exports = function() {
         $scope.selected = null;
         $scope.selectSkill = function($item, $model, $label, $event) {
             $scope.selected = "";
-            $scope.user.skills.push($model);
+            $scope.user.skills.push({
+                name: $model,
+                years: 0
+            });
         }
 
         $scope.removeSkill = function($index) {
@@ -856,11 +865,10 @@ module.exports = function($resource, $rootScope, mySkills_factory) {
     );
 
     resUser.prototype.saveSkills = function() {
+        var self = this;
         var results = mySkills_factory.save(
-            { 
-                userId: self.userId,
-                skills: self.skills 
-            }
+            { userId: self.userId },
+            self.skills
         );
 
         return results.$promise;

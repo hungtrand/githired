@@ -31,6 +31,7 @@ if (app.get('env') === 'development') {
 
 // Dynamically handle api calls
 require('./api/user')(app);
+require('./api/user-skills')(app);
 require('./api/jobs')(app);
 
 // catch 404 and forward to error handler

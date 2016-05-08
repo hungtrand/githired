@@ -12,7 +12,10 @@ module.exports = function() {
         $scope.selected = null;
         $scope.selectSkill = function($item, $model, $label, $event) {
             $scope.selected = "";
-            $scope.user.skills.push($model);
+            $scope.user.skills.push({
+                name: $model,
+                years: 0
+            });
         }
 
         $scope.removeSkill = function($index) {

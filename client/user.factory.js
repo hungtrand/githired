@@ -15,11 +15,10 @@ module.exports = function($resource, $rootScope, mySkills_factory) {
     );
 
     resUser.prototype.saveSkills = function() {
+        var self = this;
         var results = mySkills_factory.save(
-            { 
-                userId: self.userId,
-                skills: self.skills 
-            }
+            { userId: self.userId },
+            self.skills
         );
 
         return results.$promise;

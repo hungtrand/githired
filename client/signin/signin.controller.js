@@ -20,6 +20,7 @@ module.exports = function($scope, messenger) {
                         $scope.form.password = null;
                         setTimeout(function() {
                             $scope.control.hide();
+                            $scope.status = "standby";
                         }, 2000);
                     }
                     , function(failure) {

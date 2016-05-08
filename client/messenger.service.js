@@ -24,6 +24,7 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
             self.user.$promise.then(
                     function(response) {
                         if (response.userId) {
+                            $rootScope.$broadcast("user.signin.success");
                             self.setSession(signinForm);
                         }
                     },
@@ -40,7 +41,7 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
         jobPostingForm: {}, 
         jobs: [], 
         joblist: [],
-        user: {}, 
+        user: null, 
         gmap: {},
         mySkillsModal: {},
         setSession: function(credentials) {

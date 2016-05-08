@@ -1,6 +1,10 @@
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
 
+    $scope.$on("user.signin.success", function(evt, data) {
+        $scope.user = messenger.user;
+    });
+
     $(document).on('dblclick', function() { console.log($scope.user) });
     $scope.vEllipsisToggle = function() {
         messenger.sidebar.control.show();
