@@ -1,0 +1,48 @@
+<div class="media">
+    <div class="media-left">
+        <a href="#">
+            <img class="media-object" src="images/logo32.png" alt="Company Logo">
+        </a>
+    </div>
+    <div class="media-body">
+        <h4 class="media-heading text-primary">
+            {{ job.jobTitle }}
+            <label class="label label-warning pull-right" ng-if="job.startDate">start on: {{ job.startDate }}</label>
+        </h4>
+        
+        <p class="like-pre text-primary">
+                {{ job. jobDescription }}
+        </p>
+
+        <label ng-if="job.location">
+            {{ job.location }}
+        </label>
+        
+        <div class="toolbar row">
+            <div class="col col-xs-6">
+                <label>Wage / Salary:</label>
+                <label class="label label-info" ng-if="job.setWage">${{ job.setWage }}</label>
+
+                <div ng-if="job.minimumWage || job.maximumWage">
+                    <label class="job.minimumWage label label-info"
+                        ng-if="job.minimumWage">
+                        min: ${{ job.minimumWage }}
+                    </label>
+                    <span ng-if="job.minimumWage && job.maximumWage"> - </span>
+                    <label class="job.maximumWage label label-info">
+                        max: ${{ job.maximumWage }}
+                    </label>
+                </div>
+
+            </div>
+            <div class="col col-xs-6 text-right">
+                <button ng-if="job.userId != user.userId" 
+                    ng-click="job.apply(user)"
+                    class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
+                <button ng-if="job.userId == user.userId"
+                    ng-click="user.startEdit()"
+                    class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>
+            </div>
+        </div>
+    </div>
+</div>

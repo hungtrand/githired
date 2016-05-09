@@ -87,6 +87,8 @@ router.get("/:userId/skills", function(req, res, next){
 		
 });
 
+		
+		
 	
 
 module.exports = function(app) {

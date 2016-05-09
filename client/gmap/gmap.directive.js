@@ -1,4 +1,4 @@
-module.exports = function() {
+module.exports = function($compile, messenger) {
     var controller = require('./gmap.controller');
     /***** Private properties ******/
     var mapOptions = {
@@ -15,22 +15,27 @@ module.exports = function() {
         });
     }
 
-    function markerFactory(title, pos, info) {
+    function markerFactory(job, pos, scope) {
+        var icon = 'images/logo32.png';
+        if (job.userId == messenger.user.userId) {
+            icon = 'images/logo32-green.png';
+        }
         var newMarker = new google.maps.Marker({
             map: map,
             draggable: false,
-            icon: 'images/logo32.png',
-            title: title,
+            icon: icon,
 
             animation: google.maps.Animation.DROP,
             position: pos
-        });
-
-        var infowindow = new google.maps.InfoWindow({
-            content: info
-        });
+        }); 
 
         newMarker.addListener('click', function() {
+            var content = $compile("<gh-job-window job-id='" + job.jobId + "'></gh-job-window>")(scope);
+
+            var infowindow = new google.maps.InfoWindow({
+                content: content[0] 
+            });   
+                
             infowindow.open(map, newMarker);
         });
 
@@ -97,10 +102,6 @@ module.exports = function() {
 
             $scope.control = {
                 addJob: function(job) {
-                    var contentString = job.jobAddress.formattedAddress;
-                    contentString += '<br /><br />' + job.jobDescription;
-                    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
-                    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
 
                     if (job.coordinates) {
                         var lat = job.coordinates[0];
@@ -115,7 +116,7 @@ module.exports = function() {
                     }
 
 
-                    var marker = markerFactory(job.jobTitle, pos, contentString);
+                    var marker = markerFactory(job, pos, $scope);
 
                     markers.push(marker);
                     setTimeout(function() {
@@ -133,8 +134,7 @@ module.exports = function() {
                     if (status == google.maps.GeocoderStatus.OK) {
                         if (results[0]) {
                             address = {
-                                formattedAddress: results[0].formatted_address,
-                latLng: e.latLng
+                                formattedAddress: results[0].formatted_address, latLng: e.latLng
                             }
 
                             angular.extend(address, extractAddress(results[0].address_components));
@@ -158,13 +158,15 @@ module.exports = function() {
                             },
                             function(results, status) {
                                 if (status == google.maps.GeocoderStatus.OK) {
+                                    console.log(results);
+                                    job.jobAddress = results[0].geometry.location;
                                     var marker = markerFactory(
-                                        job.jobTitle,
+                                        job,
                                         results[0].geometry.location,
-                                        job.jobDescription
+                                        $scope
                                         );
                                 } else {
-                                    alert("Geocode was not successful for the following reason: " + status);
+                                    console.log("Geocode was not successful for the following reason: " + status);
                                 }
                             });
                         }
