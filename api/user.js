@@ -54,7 +54,7 @@ router.post("/signin", function(req, res, next) {
 	;
 });
 
-
+/*
 router.get("/:userId/skills", function(req, res, next){
 	res.setHeader('Content-Type', 'application/json');
 	var id = req.param('userId');
@@ -85,7 +85,7 @@ router.get("/:userId/skills", function(req, res, next){
 
 		
 });
-
+*/
 		
 		
 	
