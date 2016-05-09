@@ -36,9 +36,10 @@
                 <div class="well well-sm">
                     <button class="btn btn-info btn-xs" 
                         style="margin-right: 5px; font-size: 14px;"
-                        ng-repeat="skill in user.skills">
+                        ng-repeat="skill in user.skills"
+                        ng-if="!skill.delete">
                         <input type="text" class="input-sm" title="Years of Experience"
-                        ng-model="skill.years" size="1" data-toggle="tooltip"
+                        ng-model="skill.userSkills.yearsOfExperience" size="1" data-toggle="tooltip"
                         data-placement="top" style="border: 0; padding: 2px 5px;" />
                         &nbsp;
                         <strong>{{ skill.name }}</strong>

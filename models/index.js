@@ -70,13 +70,11 @@ models.forEach(function(model) {
         }
     );
 
-    m.skills.belongsToMany(
-        m.users, {
+    m.users.belongsToMany(
+        m.skills, {
             through: 'userSkills'
         }
     );
-
-   
     
     database.sync();
 

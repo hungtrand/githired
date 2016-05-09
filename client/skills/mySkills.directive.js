@@ -14,12 +14,19 @@ module.exports = function() {
             $scope.selected = "";
             $scope.user.skills.push({
                 name: $model,
-                years: 0
+                userSkills: {
+                    userId: $scope.user.userId,
+                    yearsOfExperience: 0
+                }
             });
         }
 
         $scope.removeSkill = function($index) {
-            $scope.user.skills.splice($index, 1);
+            if (!$scope.user.skills[$index].skillId) {
+                $scope.user.skills.splice($index, 1);
+            } else {
+                $scope.user.skills[$index].delete = true;
+            }
         }
 
         $scope.getSkillSuggestions = function(query) {
@@ -47,7 +54,7 @@ module.exports = function() {
                     function(response) {
                         console.log("Saved skills successfully");
                         $scope.waiting = false;
-                        $sccope.status = "saved";
+                        $scope.status = "saved";
 
                         setTimeout(function() {
                             $scope.status = "";
