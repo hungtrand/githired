@@ -10,6 +10,7 @@ var mySkills_directive = require("./skills/mySkills.directive");
 var user_factory = require("./user.factory");
 var joblist_factory = require("./jobs/joblist.factory");
 var mySkills_factory = require("./skills/mySkills.factory");
+var job_factory = require("./postjob/job.factory");
 
 var gmap_controller = require("./gmap/gmap.controller");
 
@@ -27,12 +28,14 @@ window.init = function() {
 		.factory('user_factory', ['$resource', '$rootScope', 
                                             'mySkills_factory', user_factory])
 		.factory('joblist_factory', ['$resource', joblist_factory])
-                .factory('mySkills_factory', ['$resource', mySkills_factory])
+        .factory('mySkills_factory', ['$resource', mySkills_factory])
+        .factory('job_factory', ['$resource', '$rootScope', job_factory])
 	;
 
 	app
-		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', messenger_service])
-                .service('trendySkills_service', ['$resource', trendySkills_service])
+		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', 
+										'job_factory', messenger_service])
+        .service('trendySkills_service', ['$resource', trendySkills_service])
 	;
 
 	app
@@ -43,7 +46,7 @@ window.init = function() {
 		.directive('ghSigninModal', [signin_directive])
 		.directive('ghSignupForm', [signup_directive])
 		.directive('ghPostJobForm', [postjob_directive])
-                .directive('ghMySkills', [mySkills_directive])
+        .directive('ghMySkills', [mySkills_directive])
 	;
 
 	app

@@ -1,4 +1,4 @@
-module.exports = function($rootScope, user_factory, joblist_factory) {
+module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
         sidebar: {}, 
@@ -53,6 +53,18 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
         addJob: function(jobForm) {
             var self = this;
             // TODO job_factory
+            self.job = job_factory.createJob({userId: this.user.userId}, jobForm);
+            self.job.$promise
+                .then(
+                        function(newJob) {
+                            // self.setSession(signupForm);
+                        }
+                        ,
+                        function(error) {
+                            $rootScope.$broadcast('error', error);
+                        });
+
+            return self.job.$promise;
         }, 
         fetchJobs: function() {
             var self = this;
@@ -69,9 +81,9 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
             });
         }
     }
-    $(document).on('dblclick', function() {
-        service.fetchJobs();
-    });
+
+    // Display job markers on load
+    service.fetchJobs();
 
     return service;
 }

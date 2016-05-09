@@ -11,6 +11,7 @@ var mySkills_directive = require("./skills/mySkills.directive");
 var user_factory = require("./user.factory");
 var joblist_factory = require("./jobs/joblist.factory");
 var mySkills_factory = require("./skills/mySkills.factory");
+var job_factory = require("./postjob/job.factory");
 
 var gmap_controller = require("./gmap/gmap.controller");
 
@@ -28,12 +29,14 @@ window.init = function() {
 		.factory('user_factory', ['$resource', '$rootScope', 
                                             'mySkills_factory', user_factory])
 		.factory('joblist_factory', ['$resource', joblist_factory])
-                .factory('mySkills_factory', ['$resource', mySkills_factory])
+        .factory('mySkills_factory', ['$resource', mySkills_factory])
+        .factory('job_factory', ['$resource', '$rootScope', job_factory])
 	;
 
 	app
-		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', messenger_service])
-                .service('trendySkills_service', ['$resource', trendySkills_service])
+		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', 
+										'job_factory', messenger_service])
+        .service('trendySkills_service', ['$resource', trendySkills_service])
 	;
 
 	app
@@ -44,7 +47,7 @@ window.init = function() {
 		.directive('ghSigninModal', [signin_directive])
 		.directive('ghSignupForm', [signup_directive])
 		.directive('ghPostJobForm', [postjob_directive])
-                .directive('ghMySkills', [mySkills_directive])
+        .directive('ghMySkills', [mySkills_directive])
 	;
 
 	app
@@ -61,7 +64,7 @@ window.init = function() {
 
 };
 
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/postjob.service":10,"./postjob/postjobForm.directive":11,"./search/searchInput.directive":12,"./sidebar/sidebar.directive":13,"./signin/signin.directive":15,"./signup/signupForm.directive":17,"./skills/mySkills.directive":18,"./skills/mySkills.factory":19,"./skills/trendySkills.service":20,"./user.factory":21}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/job.factory":9,"./postjob/postjob.service":11,"./postjob/postjobForm.directive":12,"./search/searchInput.directive":13,"./sidebar/sidebar.directive":14,"./signin/signin.directive":16,"./signup/signupForm.directive":18,"./skills/mySkills.directive":19,"./skills/mySkills.factory":20,"./skills/trendySkills.service":21,"./user.factory":22}],2:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	$scope.jobs = messenger.joblist;
@@ -280,7 +283,7 @@ module.exports = function ($scope, messenger) {
 }
 
 },{}],6:[function(require,module,exports){
-module.exports = function($rootScope, user_factory, joblist_factory) {
+module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
         sidebar: {}, 
@@ -335,6 +338,18 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
         addJob: function(jobForm) {
             var self = this;
             // TODO job_factory
+            self.job = job_factory.createJob({userId: this.user.userId}, jobForm);
+            self.job.$promise
+                .then(
+                        function(newJob) {
+                            // self.setSession(signupForm);
+                        }
+                        ,
+                        function(error) {
+                            $rootScope.$broadcast('error', error);
+                        });
+
+            return self.job.$promise;
         }, 
         fetchJobs: function() {
             var self = this;
@@ -351,9 +366,9 @@ module.exports = function($rootScope, user_factory, joblist_factory) {
             });
         }
     }
-    $(document).on('dblclick', function() {
-        service.fetchJobs();
-    });
+
+    // Display job markers on load
+    service.fetchJobs();
 
     return service;
 }
@@ -413,6 +428,21 @@ module.exports = function() {
 	}
 }
 },{"./navbar.controller":7}],9:[function(require,module,exports){
+module.exports = function($resource, $rootScope) {
+	// define the class
+	var resJob = $resource(
+		'/api/jobs/:request',
+		{
+			request: "@createJob"
+		},
+		{
+			createJob: { method: 'POST', params: { request: 'createJob' } }
+		}
+	);	
+
+	return resJob;
+}
+},{}],10:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	messenger.jobPostingForm.control = $scope.control;
@@ -424,7 +454,7 @@ module.exports = function($scope, messenger) {
 			.then(function() { $scope.control.hide() });
 	}
 }
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/postjob/'
@@ -435,7 +465,7 @@ module.exports = function($resource, $rootScope) {
 	
 	return client;
 }
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function() {
     var controller = require('./postjob.controller');
 
@@ -471,7 +501,7 @@ module.exports = function() {
     }
 }
 
-},{"./postjob.controller":9}],12:[function(require,module,exports){
+},{"./postjob.controller":10}],13:[function(require,module,exports){
 module.exports = function() {
 
 	var suggestions = new Bloodhound({
@@ -572,7 +602,7 @@ module.exports = function() {
 		}]
 	}
 }
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope, messenger) {
 		$scope.control = {};
@@ -596,7 +626,7 @@ module.exports =function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signin.control = $scope.control;
@@ -630,7 +660,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signin.controller');
 
@@ -651,7 +681,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signin.controller":14}],16:[function(require,module,exports){
+},{"./signin.controller":15}],17:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signup.control = $scope.control;
@@ -705,7 +735,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -725,7 +755,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":16}],18:[function(require,module,exports){
+},{"./signup.controller":17}],19:[function(require,module,exports){
 module.exports = function() {
     var controller = function($scope, messenger, trendySkills_service) {
         $scope.control = {};
@@ -811,7 +841,7 @@ module.exports = function() {
     }
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "/api/user/:userId/skills"
 
@@ -825,7 +855,7 @@ module.exports = function($resource) {
     return mySkills;
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "http://trendyskills.com/service";
     var trendySkills = $resource(
@@ -847,7 +877,7 @@ module.exports = function($resource) {
     return trendySkills;
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports = function($resource, $rootScope, mySkills_factory) {
     // define the class
     var resUser = $resource(

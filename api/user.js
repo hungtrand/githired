@@ -55,8 +55,53 @@ router.post("/signin", function(req, res, next) {
 });
 
 
-router.post("/:skill", function(req, res, next){
-	var temp = new Array();
+router.get("/:userId/skills", function(req, res, next){
+	res.setHeader('Content-Type', 'application/json');
+	var id = req.param('userId');
+	var arr = new Array();
+
+
+	skills.findAll({
+		
+		attributes:['name'],
+		include: [{model: usersContext, throught: [{model: userSkills, where:{
+			userId: id
+		}}]}]
+
+	}).then(function(skills){
+		res.send(JSON.stringify(skills));
+	});
+
+	// arr = skills.findAll({
+	// 	attributes: 
+	// 		['name'],
+	// 	include: [{model: userSkills, through:{attributes: ['userSkillId']
+	// 	,where: {userUserId: id}}}]
+
+			
+	// }).then(function(skill){
+	// 	res.send(JSON.stringify(skill));
+	// });
+
+	
+	
+
+	
+
+	console.log("...............");
+	// console.log(arr);
+
+	
+
+
+
+	// console.log(skillId);
+		
+});
+
+	// res.send("Result");
+
+
 	// var a = ['Software Engineering', 'Computer', 'Bio'];
 	//for(var i=0; i<a.length; i++){
 	// res.setHeader('Content-Type', 'application/json');
@@ -69,43 +114,42 @@ router.post("/:skill", function(req, res, next){
 	// 	var checker = tempSplite[i];
 	// 	console.log(checker);
 	// }
-
-	var a = req.body["name"];
+	
 	// temp.push(a);
 	// console.log(a);
 	// console.log(a.length);
 	// console.log("---------");
 	// console.log(temp);
 	// console.log("99999999");
-	var j;
-	for(var i=0; i<a.length; i++){
-		console.log(a[i]);
-		 j = skills.findOne({
-			where:{
-				name: a[i]
-			},
-			attributes: ['name']
-		});
+	// var j;
+	// for(var i=0; i<a.length; i++){
+	// 	console.log(a[i]);
+	// 	 j = skills.findOne({
+	// 		where:{
+	// 			name: a[i]
+	// 		},
+	// 		attributes: ['name']
+	// 	});
 
-		j.then(function(skills){
-			if(!skills){
-			var skill = skills.build({
-			namename: a[i]
-			});
-			skill.save()
-			.then(function(results) {
-    		res.send(JSON.stringify(results.dataValues));
-			})
-			.catch(function(err) {
-				res.send(JSON.stringify(err));
-			});
-			next();
-		}else{
-			console.log("99999999999999");
-			console.log(JSON.stringify(j));
-			console.log("------------------");
-		}});
-	}
+	// 	j.then(function(skills){
+	// 		if(!skills){
+	// 		var skill = skills.build({
+	// 		namename: a[i]
+	// 		});
+	// 		skill.save()
+	// 		.then(function(results) {
+ //    		res.send(JSON.stringify(results.dataValues));
+	// 		})
+	// 		.catch(function(err) {
+	// 			res.send(JSON.stringify(err));
+	// 		});
+	// 		next();
+	// 	}else{
+	// 		console.log("99999999999999");
+	// 		console.log(JSON.stringify(j));
+	// 		console.log("------------------");
+	// 	}});
+	// }
 
 		
 
@@ -155,9 +199,6 @@ router.post("/:skill", function(req, res, next){
 		
 		
 	//}
-});
-
-
 
 // router.get("/:skills", function(req, res, next){
 // 	res.setHeader('Content-Type', 'application/json');

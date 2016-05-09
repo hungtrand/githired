@@ -76,13 +76,8 @@ models.forEach(function(model) {
         }
     );
 
-    // m.skills.belongsTo(
-    //     m.userSkills, {
-    //         foreignKey: 'userSkillId',
-    //         targetKey: 'userSkillId'
-    //     });
-
-
+   
+    
     database.sync();
 
 })(module.exports);
