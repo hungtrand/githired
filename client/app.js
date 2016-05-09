@@ -7,6 +7,7 @@ var signin_directive = require("./signin/signin.directive");
 var signup_directive = require("./signup/signupForm.directive");
 var postjob_directive = require("./postjob/postjobForm.directive");
 var mySkills_directive = require("./skills/mySkills.directive");
+var jobWindow_directive = require("./jobs/jobWindow.directive");
 
 var user_factory = require("./user.factory");
 var joblist_factory = require("./jobs/joblist.factory");
@@ -23,48 +24,49 @@ var trendySkills_service = require("./skills/trendySkills.service");
 var main_controller = require("./main.controller");
 
 window.init = function() {
-	var app = angular.module('githired', ['ngResource', 'ngAnimate', 'ui.bootstrap']);
+    var app = angular.module('githired', ['ngResource', 'ngAnimate', 'ui.bootstrap']);
 
-	app
-		.factory('user_factory', ['$resource', '$rootScope', 
-                                            'mySkills_factory', user_factory])
-		.factory('joblist_factory', ['$resource', joblist_factory])
+    app
+        .factory('user_factory', ['$resource', '$rootScope', 
+                'mySkills_factory', user_factory])
+        .factory('joblist_factory', ['$resource', joblist_factory])
         .factory('mySkills_factory', ['$resource', mySkills_factory])
         .factory('job_factory', ['$resource', '$rootScope', job_factory])
-	;
+        ;
 
-	app
-		.service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', 
-										'job_factory', messenger_service])
+    app
+        .service('messenger_service', ['$rootScope', 'user_factory', 'joblist_factory', 
+                'job_factory', messenger_service])
         .service('trendySkills_service', ['$resource', trendySkills_service])
-	;
+        ;
 
-	app
-		.directive('ghNavbar', [navbar_directive])
-		.directive('ghSidebar', [sidebar_directive])
-		.directive('ghGmap', [gmap_directive])
-		.directive('ghSearch', [searchInput_directive])
-		.directive('ghSigninModal', [signin_directive])
-		.directive('ghSignupForm', [signup_directive])
-		.directive('ghPostJobForm', [postjob_directive])
+    app
+        .directive('ghNavbar', [navbar_directive])
+        .directive('ghSidebar', [sidebar_directive])
+        .directive('ghGmap', ["$compile", "messenger_service", gmap_directive])
+        .directive('ghSearch', [searchInput_directive])
+        .directive('ghSigninModal', [signin_directive])
+        .directive('ghSignupForm', [signup_directive])
+        .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-	;
+        .directive('ghJobWindow', [jobWindow_directive])
+        ;
 
-	app
-		.controller('main_controller', ['$scope', 'messenger_service', main_controller])
-	;
+    app
+        .controller('main_controller', ['$scope', 'messenger_service', main_controller])
+        ;
 
-	angular.bootstrap(document, ['githired']);
+    angular.bootstrap(document, ['githired']);
 
-	$(window).resize(function() {
-		var h = $(window).height();
+    $(window).resize(function() {
+        var h = $(window).height();
 
-		$('#gmap').css('height', h);
-	}).resize();
+        $('#gmap').css('height', h);
+    }).resize();
 
 };
 
-},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/joblist.factory":4,"./main.controller":5,"./messenger.service":6,"./navbar/navbar.directive":8,"./postjob/job.factory":9,"./postjob/postjob.service":11,"./postjob/postjobForm.directive":12,"./search/searchInput.directive":13,"./sidebar/sidebar.directive":14,"./signin/signin.directive":16,"./signup/signupForm.directive":18,"./skills/mySkills.directive":19,"./skills/mySkills.factory":20,"./skills/trendySkills.service":21,"./user.factory":22}],2:[function(require,module,exports){
+},{"./gmap/gmap.controller":2,"./gmap/gmap.directive":3,"./jobs/jobWindow.directive":4,"./jobs/joblist.factory":5,"./main.controller":6,"./messenger.service":7,"./navbar/navbar.directive":9,"./postjob/job.factory":10,"./postjob/postjob.service":12,"./postjob/postjobForm.directive":13,"./search/searchInput.directive":14,"./sidebar/sidebar.directive":15,"./signin/signin.directive":17,"./signup/signupForm.directive":19,"./skills/mySkills.directive":20,"./skills/mySkills.factory":21,"./skills/trendySkills.service":22,"./user.factory":23}],2:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	$scope.jobs = messenger.joblist;
@@ -75,7 +77,7 @@ module.exports = function($scope, messenger) {
 	}
 }
 },{}],3:[function(require,module,exports){
-module.exports = function() {
+module.exports = function($compile, messenger) {
     var controller = require('./gmap.controller');
     /***** Private properties ******/
     var mapOptions = {
@@ -92,22 +94,27 @@ module.exports = function() {
         });
     }
 
-    function markerFactory(title, pos, info) {
+    function markerFactory(job, pos, scope) {
+        var icon = 'images/logo32.png';
+        if (job.userId == messenger.user.userId) {
+            icon = 'images/logo32-green.png';
+        }
         var newMarker = new google.maps.Marker({
             map: map,
             draggable: false,
-            icon: 'images/logo32.png',
-            title: title,
+            icon: icon,
 
             animation: google.maps.Animation.DROP,
             position: pos
-        });
-
-        var infowindow = new google.maps.InfoWindow({
-            content: info
-        });
+        }); 
 
         newMarker.addListener('click', function() {
+            var content = $compile("<gh-job-window job-id='" + job.jobId + "'></gh-job-window>")(scope);
+
+            var infowindow = new google.maps.InfoWindow({
+                content: content[0] 
+            });   
+                
             infowindow.open(map, newMarker);
         });
 
@@ -174,10 +181,6 @@ module.exports = function() {
 
             $scope.control = {
                 addJob: function(job) {
-                    var contentString = job.jobAddress.formattedAddress;
-                    contentString += '<br /><br />' + job.jobDescription;
-                    var title  = '<h3 class="text-danger">' + job.jobTitle + '</h3>';
-                    contentString = title + '<pre class="text-primary">' + contentString + '</pre>';
 
                     if (job.coordinates) {
                         var lat = job.coordinates[0];
@@ -192,7 +195,7 @@ module.exports = function() {
                     }
 
 
-                    var marker = markerFactory(job.jobTitle, pos, contentString);
+                    var marker = markerFactory(job, pos, $scope);
 
                     markers.push(marker);
                     setTimeout(function() {
@@ -210,8 +213,7 @@ module.exports = function() {
                     if (status == google.maps.GeocoderStatus.OK) {
                         if (results[0]) {
                             address = {
-                                formattedAddress: results[0].formatted_address,
-                latLng: e.latLng
+                                formattedAddress: results[0].formatted_address, latLng: e.latLng
                             }
 
                             angular.extend(address, extractAddress(results[0].address_components));
@@ -235,13 +237,15 @@ module.exports = function() {
                             },
                             function(results, status) {
                                 if (status == google.maps.GeocoderStatus.OK) {
+                                    console.log(results);
+                                    job.jobAddress = results[0].geometry.location;
                                     var marker = markerFactory(
-                                        job.jobTitle,
+                                        job,
                                         results[0].geometry.location,
-                                        job.jobDescription
+                                        $scope
                                         );
                                 } else {
-                                    alert("Geocode was not successful for the following reason: " + status);
+                                    console.log("Geocode was not successful for the following reason: " + status);
                                 }
                             });
                         }
@@ -256,13 +260,36 @@ module.exports = function() {
 }
 
 },{"./gmap.controller":2}],4:[function(require,module,exports){
+module.exports = function() {
+    var controller = function($scope, messenger) {
+        $scope.jobs = messenger.joblist;
+        $scope.user = messenger.user;
+    }
+
+    return {
+        templateUrl: 'jobs/jobWindow.template.html',
+        scope: {
+            jobId: "="
+        },
+        link: function($scope, $element, $attrs) {
+            angular.forEach($scope.jobs, function(j, i) {
+                if (j.jobId == $scope.jobId) {
+                    $scope.job = j;
+                }
+            });
+        },
+        controller: ['$scope', 'messenger_service', controller]
+    }
+}
+
+},{}],5:[function(require,module,exports){
 module.exports = function($resource) {
 	var url = "api/jobs";
 
 	return $resource(url);
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
     console.log(messenger.joblist);
     if (sessionStorage.getItem("__githired.user.credentials__")) {
@@ -282,7 +309,7 @@ module.exports = function ($scope, messenger) {
     }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
@@ -373,7 +400,7 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
     return service;
 }
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
 
@@ -415,7 +442,7 @@ module.exports = function($scope, messenger) {
 
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function() {
 	var controller = require("./navbar.controller");
 
@@ -427,7 +454,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./navbar.controller":7}],9:[function(require,module,exports){
+},{"./navbar.controller":8}],10:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	// define the class
 	var resJob = $resource(
@@ -442,7 +469,7 @@ module.exports = function($resource, $rootScope) {
 
 	return resJob;
 }
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	messenger.jobPostingForm.control = $scope.control;
@@ -454,7 +481,7 @@ module.exports = function($scope, messenger) {
 			.then(function() { $scope.control.hide() });
 	}
 }
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/postjob/'
@@ -465,7 +492,7 @@ module.exports = function($resource, $rootScope) {
 	
 	return client;
 }
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function() {
     var controller = require('./postjob.controller');
 
@@ -501,7 +528,7 @@ module.exports = function() {
     }
 }
 
-},{"./postjob.controller":10}],13:[function(require,module,exports){
+},{"./postjob.controller":11}],14:[function(require,module,exports){
 module.exports = function() {
 
 	var suggestions = new Bloodhound({
@@ -602,7 +629,7 @@ module.exports = function() {
 		}]
 	}
 }
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope, messenger) {
 		$scope.control = {};
@@ -626,7 +653,7 @@ module.exports =function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signin.control = $scope.control;
@@ -660,7 +687,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signin.controller');
 
@@ -681,7 +708,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signin.controller":15}],17:[function(require,module,exports){
+},{"./signin.controller":16}],18:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signup.control = $scope.control;
@@ -735,7 +762,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -755,7 +782,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":17}],19:[function(require,module,exports){
+},{"./signup.controller":18}],20:[function(require,module,exports){
 module.exports = function() {
     var controller = function($scope, messenger, trendySkills_service) {
         $scope.control = {};
@@ -848,7 +875,7 @@ module.exports = function() {
     }
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "/api/user/:userId/skills"
 
@@ -862,7 +889,7 @@ module.exports = function($resource) {
     return mySkills;
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "http://trendyskills.com/service";
     var trendySkills = $resource(
@@ -884,7 +911,7 @@ module.exports = function($resource) {
     return trendySkills;
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = function($resource, $rootScope, mySkills_factory) {
     // define the class
     var resUser = $resource(

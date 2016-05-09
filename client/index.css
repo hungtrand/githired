@@ -158,3 +158,12 @@ pre {
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+.like-pre {
+    white-space: pre-wrap;
+}
+
+.gm-style .gm-style-iw {
+    color: #333;
+    font-size: 14px;
+}
