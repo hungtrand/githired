@@ -61,25 +61,27 @@ router.get("/:userId/skills", function(req, res, next){
 	var arr = new Array();
 
 
-	usersContext.findAll({
-		where: {
+	skills.findAll({
+		
+		attributes:['name'],
+		include: [{model: usersContext, throught: [{model: userSkills, where:{
 			userId: id
-		},
-		include: [{model: skills,through:{attributes: ['name'],
-		} }]
+		}}]}]
 
+	}).then(function(skills){
+		res.send(JSON.stringify(skills));
 	});
 
-	arr = skills.findAll({
-		attributes: 
-			['name'],
-		include: [{model: userSkills, through:{attributes: ['userSkillId']
-		,where: {userUserId: id}}}]
+	// arr = skills.findAll({
+	// 	attributes: 
+	// 		['name'],
+	// 	include: [{model: userSkills, through:{attributes: ['userSkillId']
+	// 	,where: {userUserId: id}}}]
 
 			
-	}).then(function(skill){
-		res.send(JSON.stringify(skill));
-	});
+	// }).then(function(skill){
+	// 	res.send(JSON.stringify(skill));
+	// });
 
 	
 	

@@ -76,7 +76,7 @@ models.forEach(function(model) {
         }
     );
 
-
+   
     
     database.sync();
 
