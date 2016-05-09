@@ -59,6 +59,17 @@ router.get("/:userId/skills", function(req, res, next){
 	res.setHeader('Content-Type', 'application/json');
 	var id = req.param('userId');
 	var arr = new Array();
+
+
+	usersContext.findAll({
+		where: {
+			userId: id
+		},
+		include: [{model: skills,through:{attributes: ['name'],
+		} }]
+
+	});
+
 	arr = skills.findAll({
 		attributes: 
 			['name'],
