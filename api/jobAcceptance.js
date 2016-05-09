@@ -37,12 +37,16 @@ router.post("/:userId/acceptjob/:jobId", function(req, res, next) {
 
 }});
 
-// router.get("/:userId", {
+router.get("/:userId/acceptedJob/",function(req,res, next) {
+
+	var userId = req.param('userId');
+
+	
 
 
 
 
-// });
+});
 
 
 	
