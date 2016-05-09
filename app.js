@@ -33,6 +33,7 @@ if (app.get('env') === 'development') {
 require('./api/user')(app);
 require('./api/user-skills')(app);
 require('./api/jobs')(app);
+require('./api/jobAcceptance')(app);
 
 
 // catch 404 and forward to error handler

@@ -83,7 +83,6 @@ router.get("/:userId/skills", function(req, res, next){
 	});
 
 
-	
 		
 });
 

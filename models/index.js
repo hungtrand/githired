@@ -75,6 +75,13 @@ models.forEach(function(model) {
             through: 'userSkills'
         }
     );
+
+     m.jobAcceptances.belongsTo(
+        m.users, {
+            foreignKey: 'employeeId',
+            targetKey: 'userId'
+        }
+    );
     
     database.sync();
 
