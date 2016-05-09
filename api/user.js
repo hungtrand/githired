@@ -64,212 +64,30 @@ router.get("/:userId/skills", function(req, res, next){
 	skills.findAll({
 		
 		attributes:['name'],
-		include: [{model: usersContext, throught: [{model: userSkills, where:{
-			userId: id
-		}}]}]
+		include: [{model: usersContext, where: {userId: id}
+		,attributes: ['firstName', 'lastName', 'company', 'email']
+		,throught: [{model: userSkills
+		,attributes: ['description', 'yearsOfExperience']
+		}]}]
 
 	}).then(function(skills){
-		res.send(JSON.stringify(skills));
+		if(skills){
+			res.send(JSON.stringify(skills));
+		}else{
+			res.sendStatus(401);
+		}
+		
+	})
+	.catch(function(err){
+		res.send(JSON.stringify(err));
 	});
 
-	// arr = skills.findAll({
-	// 	attributes: 
-	// 		['name'],
-	// 	include: [{model: userSkills, through:{attributes: ['userSkillId']
-	// 	,where: {userUserId: id}}}]
-
-			
-	// }).then(function(skill){
-	// 	res.send(JSON.stringify(skill));
-	// });
 
 	
-	
-
-	
-
-	console.log("...............");
-	// console.log(arr);
-
-	
-
-
-
-	// console.log(skillId);
 		
 });
 
-	// res.send("Result");
-
-
-	// var a = ['Software Engineering', 'Computer', 'Bio'];
-	//for(var i=0; i<a.length; i++){
-	// res.setHeader('Content-Type', 'application/json');
-	// var id = [];
-	// id = req.param('skill');
-	// var tempSplite = id.split(",\ ");
-	// // id.push(tempSplite[1]);
 	
-	// for(var i=0; i<tempSplite.length; i++){
-	// 	var checker = tempSplite[i];
-	// 	console.log(checker);
-	// }
-	
-	// temp.push(a);
-	// console.log(a);
-	// console.log(a.length);
-	// console.log("---------");
-	// console.log(temp);
-	// console.log("99999999");
-	// var j;
-	// for(var i=0; i<a.length; i++){
-	// 	console.log(a[i]);
-	// 	 j = skills.findOne({
-	// 		where:{
-	// 			name: a[i]
-	// 		},
-	// 		attributes: ['name']
-	// 	});
-
-	// 	j.then(function(skills){
-	// 		if(!skills){
-	// 		var skill = skills.build({
-	// 		namename: a[i]
-	// 		});
-	// 		skill.save()
-	// 		.then(function(results) {
- //    		res.send(JSON.stringify(results.dataValues));
-	// 		})
-	// 		.catch(function(err) {
-	// 			res.send(JSON.stringify(err));
-	// 		});
-	// 		next();
-	// 	}else{
-	// 		console.log("99999999999999");
-	// 		console.log(JSON.stringify(j));
-	// 		console.log("------------------");
-	// 	}});
-	// }
-
-		
-
-
-
-// 	for(var i=0; i<tempSplite.length; i++){
-// 		var chcker = tempSplite[i];
-// 		res.send(chcker);
-// 		var d = skills.findOne({
-// 			where: {
-// 				name: chcker
-// 			},
-// 			attributes: ['name']
-// 		}
-
-
-// 		(function(skills){
-// 			if(skills){
-// 				// id.push(skills[i]);
-// 				res.send(("foundoneYO"));
-// 				// next();
-// 				next();
-	
-// 			}else{
-// 				res.send(("just c found!"));
-// 			}
-// 		}));
-		
-// 		// res.send(JSON.stringify(d));
-// // tempSplite.splice(i,1);
-		
-// 	}
-
-
-	// var newArray = id.split("/,[]/");
-
-	// var userSkill = skills
-	// 	.findOne({
-	// 		where: {
-	// 			name: id
-	// 		},
-	// 		attributes: ['name']
-	// 	});
-	// res.send(JSON.stringify(userSkill));
-	
-		
-		
-		
-	//}
-
-// router.get("/:skills", function(req, res, next){
-// 	res.setHeader('Content-Type', 'application/json');
-// 	// var id = req.param('userId');
-
-// 	var skillName = req.param('skills');
-// 	console.log(skillName);
-// 	skills
-// 		.findOne({
-// 			where:{
-// 				name: skillName
-// 			},
-// 			attributes:['name']
-// 		})
-// 		.then(function(skills){
-// 			res.send(JSON.stringify(skills));
-// 		})
-
-
-
-
-
-// 	// for (var i = 0; i<skillName.length; i++) {
-// 		// checker += skillName;
-// 		// var result = skills.find({
-// 		// 	where:{
-// 		// 		name: skillName
-// 		// 	},
-// 		// 	attributes:['name']
-// 		// });
-// 		// if(checker != null){
-// 		// 	console.log("The data is saving in database.");
-// 		// }else{
-// 		// 	console.log("the data is exists");
-// 		// }
-// 	// }
-	
-
-
-// 	// 
-	
-// 	// console.log(skillName[i]);
-	
-// 	// if(skillName[i] == findSkill){
-// 	// 	console.log("Skill exists.");
-// 	// }else{
-// 	// 	console.log("Saving.");
-// 	// }
-
-// 	// }
-	
-
-	
-// 	// var userNewSkills = userSkills.build({
-
-// 	// });
-
-// 	// var newSkills = skills.build({
-// 	// 	name: req.body["name"]
-// 	// });
-// 	// newSkills.save()
-// 	// .then(function(results){
-// 	// 	res.send(JSON.stringify(results.davaValues));
-// 	// })
-// 	// .catch(function(err){
-// 	// 	res.send(JSON.stringify(err));
-// 	// });
-// });
-
-
-
 
 module.exports = function(app) {
     app.use("/api/user", router);
