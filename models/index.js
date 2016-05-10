@@ -64,9 +64,11 @@ models.forEach(function(model) {
         }
     );
 
-    m.skills.belongsToMany(
-        m.jobs, {
-            through: 'jobSkills'
+    m.jobs.belongsToMany(
+        m.skills, {
+            through: 'jobSkills',
+            foreignKey: 'jobJobId',
+            as: 'skills'
         }
     );
 
