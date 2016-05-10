@@ -4,6 +4,15 @@ var bidsContext = require('./../models').bids;
 var userContext = require('./../models').users;
 var jobContext = require('./../models').jobs;
 
+
+/**
+ *  @api {post} /api/user/:userId/bids biding amount.
+ *  @apiName PostNewBids
+ *  @apiGroup employees
+ *  @apiVesion 1.0.0
+ *  @api
+ *  @apiParam {number} userId employeeId
+ */
 router.post("/:userId/bids", function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
     var created = Date.now();
