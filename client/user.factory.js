@@ -1,4 +1,4 @@
-module.exports = function($resource, $rootScope, mySkills_factory) {
+module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) {
     // define the class
     var resUser = $resource(
             '/api/user/:userId/:request', 
@@ -28,6 +28,19 @@ module.exports = function($resource, $rootScope, mySkills_factory) {
         var self = this;
         self.skills = mySkills_factory.query({ userId: self.userId });
     };
+
+    resUser.prototype.createBid = function(jobId, bidAmount) {
+        var self = this;
+        var userData = {
+            userId: self.userId
+        }
+        var bid = bid_factory.create(userData, { jobId: jobId, bidAmount: bidAmount });
+        if (!angular.isArray(self.bids)) {
+            self.bids = [];
+        }
+        self.bids.push(bid);
+        console.log(bid);
+    }
 
     return resUser;
 }

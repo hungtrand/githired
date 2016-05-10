@@ -1,8 +1,5 @@
 module.exports = function() {
-    var controller = function($scope, messenger) {
-        $scope.jobs = messenger.joblist;
-        $scope.user = messenger.user;
-    }
+    var controller = require('./jobWindow.controller.js');
 
     return {
         templateUrl: 'jobs/jobWindow.template.html',
@@ -15,6 +12,18 @@ module.exports = function() {
                     $scope.job = j;
                 }
             });
+
+            $scope.addBid = function(job) {
+                console.log("you clicked on the bid button");
+                var bidAmount = $element.find(".bidAmount").val() || job.setWage;
+                $scope.user.createBid(job.jobId, bidAmount);
+            }
+
+            $scope.startEdit = function(job, user) {
+                console.log("you clicked on the edit button");
+                console.log(job);
+                console.log(user);
+            }
         },
         controller: ['$scope', 'messenger_service', controller]
     }
