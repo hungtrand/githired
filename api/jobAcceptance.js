@@ -48,7 +48,7 @@ router.get("/:userId/acceptedJob/",function(req,res, next) {
 		},
 		include: [{model: usersContext, 
 
-		}] 
+		}, {model: userjobs}] 
 		,
 		attributes: ['amount', 'finalized', 'createdAt'],
 		

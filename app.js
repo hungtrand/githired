@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
-var port = process.env.PORT || 80,
+var port = process.env.PORT || 8081,
     ip = process.env.IP || '0.0.0.0';
 server.listen(port, ip);
 console.log("HTTP Servicing: " + (ip || '0.0.0.0') + ':' + port);
@@ -34,7 +34,6 @@ require('./api/user')(app);
 require('./api/user-skills')(app);
 require('./api/jobs')(app);
 require('./api/jobAcceptance')(app);
-
 require('./api/bids')(app);
 
 
