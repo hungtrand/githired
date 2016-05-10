@@ -32,15 +32,27 @@
                     <label class="job.maximumWage label label-info">
                         max: ${{ job.maximumWage }}
                     </label>
+
+                    <input class="bidAmount" type="range" min="{{ job.minimumWage }}" max="{{ job.maximumWage }}" step="1" />
                 </div>
 
             </div>
+<!--             
             <div class="col col-xs-6 text-right">
                 <button ng-if="job.userId != user.userId" 
-                    ng-click="job.apply(user)"
+                    ng-click="job.addBid(user)"
                     class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
                 <button ng-if="job.userId == user.userId"
                     ng-click="user.startEdit()"
+                    class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>
+            </div> 
+-->
+            <div class="col col-xs-6 text-right">
+                <button ng-if="job.userId != user.userId" 
+                    ng-click="addBid(job)"
+                    class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
+                <button ng-if="job.userId == user.userId"
+                    ng-click="startEdit(job, user)"
                     class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>
             </div>
         </div>
