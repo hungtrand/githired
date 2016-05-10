@@ -82,6 +82,8 @@ models.forEach(function(model) {
             targetKey: 'userId'
         }
     );
+
+   
     
     database.sync();
 

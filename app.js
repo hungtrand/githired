@@ -34,6 +34,7 @@ require('./api/user')(app);
 require('./api/user-skills')(app);
 require('./api/jobs')(app);
 require('./api/jobAcceptance')(app);
+require('./api/jobbids')(app);
 
 
 // catch 404 and forward to error handler
