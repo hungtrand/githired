@@ -11,7 +11,8 @@ module.exports = function(database, Sequelize) {
 		email: Sequelize.STRING,
 		password: Sequelize.STRING,
 		isEmployer: Sequelize.BOOLEAN,
-		isEmployee: Sequelize.BOOLEAN
+		isEmployee: Sequelize.BOOLEAN,
+                linkedin: Sequelize.STRING
 	});
 
 	return usersContext;

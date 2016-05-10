@@ -470,20 +470,45 @@ module.exports = function($scope, messenger) {
 
     }
 
+    $scope.updateUser = function() {
+        $scope.user.loading = true;
+        $scope.user
+            .$save({ userId: $scope.user.userId })
+            .then(
+                function(response) {
+                    $scope.user.loading = false;
+                    $scope.editLinkedIn = false;
+                    $scope.reloadLinkedInScript();
+                },
+                function(err) {
+                    $scope.user.loading = false;
+                });
+    }
+
 }
 
 },{}],11:[function(require,module,exports){
 module.exports = function() {
-	var controller = require("./navbar.controller");
+    var controller = require("./navbar.controller");
 
-	return {
-		templateUrl: 'navbar/navbar.template.html'
-		, link: function($scope, $element, $http) {
+    return {
+        templateUrl: 'navbar/navbar.template.html'
+            , link: function($scope, $element, $http) {
+                $element.find('.menuLinkedInItem').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                });
 
-		}
-		, controller: ['$scope', 'messenger_service', controller]
-	}
+                $scope.reloadLinkedInScript = function() {
+                    var srcScript = $element.find('.linkedinScript').attr('src');
+                    $element.find('.linkedinWidgetBlock').find(':not(.profileScript)').remove();
+                    $element.find('.linkedinWidgetBlock').append('<script class="linkedinScript" src="' + srcScript + '"></script>');
+                }
+            }
+        , controller: ['$scope', 'messenger_service', controller]
+    }
 }
+
 },{"./navbar.controller":10}],12:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	// define the class

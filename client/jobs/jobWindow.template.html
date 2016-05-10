@@ -23,17 +23,20 @@
                 <label>Wage / Salary:</label>
                 <label class="label label-info" ng-if="job.setWage">${{ job.setWage }}</label>
 
-                <div ng-if="job.minimumWage || job.maximumWage">
-                    <label class="job.minimumWage label label-info"
+                <div ng-if="job.minimumWage || job.maximumWage"
+                    class="text-center">
+                    <label class="job.minimumWage label label-info pull-left"
                         ng-if="job.minimumWage">
                         min: ${{ job.minimumWage }}
                     </label>
                     <span ng-if="job.minimumWage && job.maximumWage"> - </span>
-                    <label class="job.maximumWage label label-info">
+                    
+                    <label class="label label-primary">{{ bidAmount }}</label>
+                    <label class="job.maximumWage label label-info pull-right">
                         max: ${{ job.maximumWage }}
                     </label>
-
-                    <input class="bidAmount" type="range" min="{{ job.minimumWage }}" max="{{ job.maximumWage }}" step="1" />
+                    <input class="bidAmount" type="range" ng-model="bidAmount"
+                        min="{{ job.minimumWage }}" max="{{ job.maximumWage }}" step="1" />
                 </div>
 
             </div>
