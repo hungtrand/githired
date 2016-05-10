@@ -34,13 +34,40 @@
             </ul>
             </li>
 
-            <li class="dropdown" ng-if="user.userId">
+            <li class="dropdown" ng-show="user.userId">
             <a href="#" class="dropdown-toggle" 
                 data-toggle="dropdown" role="button" 
                 aria-haspopup="true" aria-expanded="false">
                 {{ user.firstName || user.company }} <span class="caret"></span>
             </a>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu" style="width: 400px;">
+                <li class="menuLinkedInItem text-center">
+                    <div class="text-right" style="padding-right: 5px;">
+                        <a href="" ng-click="editLinkedIn=true"><i class="fa fa-edit"></i> LinkedIn</a>
+                    </div>
+                    <form class="ng-animate nga-default nga-stagger
+                        nga-slide-up-all" ng-show="editLinkedIn">
+                        <div class="input-group">
+                            <input class="form-control input-sm"
+                            ng-model="user.linkedin" placeholder="Link to LinkedIn Profile" />
+                            <span class="input-group-btn">
+                                <button class="btn btn-sm btn-success"
+                                    ng-click="updateUser()">
+                                    <i class="fa fa-check" ng-show="!user.loading"></i>
+                                    <i class="fa fa-spin fa-spinner"
+                                    ng-show="user.loading"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+                    <div class="linkedinWidgetBlock">
+                        <script class="linkedinScript" src="//platform.linkedin.com/in.js" type="text/javascript"></script>
+                        <script class="profileScript" type="IN/MemberProfile" ng-show="user.linkedin"
+                        data-id="{{ user.linkedin }}" data-related="false"
+                        data-format="inline"></script>
+                    </div>
+                </li>
+
                 <li>
                     <a href="" ng-click="openMySkillsModal()">
                         <i class="fa fa-briefcase"></i> My Skills

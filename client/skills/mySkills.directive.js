@@ -6,7 +6,7 @@ module.exports = function() {
 
         $scope.status = "";
 
-        $scope.skills = $scope.user.skills;
+        if ($scope.user) $scope.skills = $scope.user.skills;
         messenger.mySkillsModal.control = $scope.control;
         
         $scope.selected = null;

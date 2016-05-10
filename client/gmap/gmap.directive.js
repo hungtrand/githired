@@ -17,7 +17,7 @@ module.exports = function($compile, messenger) {
 
     function markerFactory(job, pos, scope) {
         var icon = 'images/logo32.png';
-        if (job.userId == messenger.user.userId) {
+        if (messenger.user && job.userId == messenger.user.userId) {
             icon = 'images/logo32-green.png';
         }
         var newMarker = new google.maps.Marker({

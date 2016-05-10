@@ -21,7 +21,9 @@ module.exports = function($scope, messenger) {
                         setTimeout(function() {
                             $scope.control.hide();
                             $scope.status = "standby";
-                        }, 2000);
+
+                            window.location.reload();
+                        }, 1000);
                     }
                     , function(failure) {
                         $scope.error = failure.data;

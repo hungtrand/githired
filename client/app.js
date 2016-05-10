@@ -112,7 +112,7 @@ module.exports = function($compile, messenger) {
 
     function markerFactory(job, pos, scope) {
         var icon = 'images/logo32.png';
-        if (job.userId == messenger.user.userId) {
+        if (messenger.user && job.userId == messenger.user.userId) {
             icon = 'images/logo32-green.png';
         }
         var newMarker = new google.maps.Marker({
@@ -694,7 +694,9 @@ module.exports = function($scope, messenger) {
                         setTimeout(function() {
                             $scope.control.hide();
                             $scope.status = "standby";
-                        }, 2000);
+
+                            window.location.reload();
+                        }, 1000);
                     }
                     , function(failure) {
                         $scope.error = failure.data;
@@ -808,7 +810,7 @@ module.exports = function() {
 
         $scope.status = "";
 
-        $scope.skills = $scope.user.skills;
+        if ($scope.user) $scope.skills = $scope.user.skills;
         messenger.mySkillsModal.control = $scope.control;
         
         $scope.selected = null;
