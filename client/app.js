@@ -470,17 +470,48 @@ module.exports = function($resource, $rootScope) {
 	return resJob;
 }
 },{}],11:[function(require,module,exports){
-module.exports = function($scope, messenger) {
-	$scope.control = {};
-	messenger.jobPostingForm.control = $scope.control;
-	$scope.model = {};
+module.exports = function($scope, messenger, trendySkills_service) {
+    $scope.control = {};
+    messenger.jobPostingForm.control = $scope.control;
+    $scope.model = {};
 
-	$scope.submitPostJob = function() {
-		messenger
-			.addJob($scope.model)
-			.then(function() { $scope.control.hide() });
-	}
+    $scope.submitPostJob = function() {
+        messenger
+            .addJob($scope.model)
+            .then(function() { $scope.control.hide() });
+    }
+
+    $scope.selected = null;
+    $scope.selectSkill = function($item, $model, $label, $event) {
+        $scope.selected = "";
+        $scope.model.skills.push({
+            name: $model
+        });
+    }
+    
+    $scope.removeSkill = function($index) {
+        $scope.model.skills.splice($index, 1);
+    }
+
+    $scope.getSkillSuggestions = function(query) {
+        var http = trendySkills_service.getSkills({ like: query});
+
+        return http.$promise.then(
+                function(response) {
+                    if (response.success) {
+                        return response.keywords;
+                    } else {
+                        return [];
+                    }        
+                }, 
+                function(failure) {
+                    console.log(failure);
+                }
+                );
+    }
+
 }
+
 },{}],12:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
@@ -498,9 +529,7 @@ module.exports = function() {
 
     return {
         templateUrl: 'postjob/postjob.form.html',
-            control: "="
-
-                ,
+            control: "=",
             link: function($scope, $element, $attrs) {
                 var modal = $element.find('.modal');
 
@@ -512,8 +541,11 @@ module.exports = function() {
                         jobWageType: null,
                         jobMinWage: '',
                         jobMaxWage: '',
-                        jobSetWage: ''
+                        jobSetWage: '',
+                        skills: []
                     }
+
+                    setTimeout(function() { $scope.$apply(); }, 200);
 
                     modal.modal('show');
                 }
@@ -521,114 +553,44 @@ module.exports = function() {
                     modal.modal('hide');
                     $scope.model = null;
                 }
-            }
 
-        ,
-            controller: ['$scope', 'messenger_service', controller]
+                modal.on('hidden.bs.modal', function() {
+                    $scope.model = null;
+                });
+            },
+            controller: ['$scope', 'messenger_service', 'trendySkills_service', controller]
     }
 }
 
 },{"./postjob.controller":11}],14:[function(require,module,exports){
 module.exports = function() {
 
-	var suggestions = new Bloodhound({
-		datumTokenizer: Bloodhound.tokenizers.whitespace,
-		queryTokenizer: Bloodhound.tokenizers.whitespace,
-		prefetch: "search/suggestions.json"
-	});
+    return {
+        templateUrl: 'search/searchBar.template.html',
+        link: function($scope, $element, $attrs) {
+            $element.find('form').on('submit', function(e) {
+                $scope.sendQuery($scope.searchInput);
+            });
 
-	function fetchSuggestions(q, sync) {
-		if (q === '') {
-			sync(suggestions.get(
-				'developer', 'engineer', 'designer', 'tester'
-			));
-		} else {
-			suggestions.search(q, sync);
-		}
-	}
+        },
 
-	return {
-		templateUrl: 'search/searchBar.template.html',
-		link: function($scope, $element, $attrs) {
-			$element.find('form').on('submit', function(e) {
-				console.log($scope.searchInput);
-				$scope.sendQuery($scope.searchInput);
-			});
+        controller: ['$scope', function($scope) {
+            $scope.waiting = false;
+            $scope.searchLog = {};
+            $scope.clear = function() {
+                $scope.searchLog = {};
+                $scope.$emit('searchInput.cleared');
+                $scope.searchInput = '';
+                setTimeout(function() { $scope.$apply(); }, 10);
+            }
 
-			$element.find('.inputSearch').typeahead({
-				hint: true,
-				highlight: true,
-				minLength: 0
-			}, {
-				name: 'states',
-				source: fetchSuggestions,
-				templates: {
-					empty: [
-						'<div class="text-muted">',
-						'No Suggestion',
-						'</div>'
-					].join('\n'),
-					suggestion: function(data) {
-						var templ = '<div class="list-group-item">' + '{{data}}</div>';
+            $scope.sendQuery = function(query) {
 
-						return templ.replace(/{{data}}/g, data);
-					}
-				}
-			});
-
-			$element.find('.inputSearch')
-				.on('focus', function() {
-					$(this).select();
-				})
-				.bind('typeahead:select', function(e, sugg) {
-					$scope.sendQuery(sugg);
-				});
-
-			$element.find('#searchLog .dropdown-menu').on('click', function(e) {
-				e.stopPropagation();
-			});
-		},
-
-		controller: ['$scope', function($scope) {
-			$scope.waiting = false;
-			$scope.searchLog = {};
-			$scope.clear = function() {
-				$scope.searchLog = {};
-				$scope.$emit('searchInput.cleared');
-				$scope.searchInput = '';
-				setTimeout(function() { $scope.$apply(); }, 10);
-			}
-
-			$scope.$on("searchInput.status.waiting", function() {
-				$scope.waiting = true;
-				setTimeout(function() { $scope.$apply(); }, 10);
-			});
-
-			$scope.$on("searchInput.status.ready", function() {
-				$scope.waiting = false;
-
-				setTimeout(function() {
-					$scope.$apply();
-				},10);
-			});
-
-			$scope.sendQuery = function(query) {
-				if (query) $scope.searchInput = query;
-				if (!$scope.searchLog.hasOwnProperty(query) && typeof query !== 'undefined') {
-					$scope.searchLog[query] = true;
-				}
-
-				var keywords = Object.keys($scope.searchLog);
-
-				if (keywords.length > 0) {
-					$scope.$emit('searchInput.submitted', keywords);
-				} else {
-					$scope.$emit('searchInput.log.clear');
-				}
-			}
-		}]
-	}
+            }
+        }]
+    }
 }
+
 },{}],15:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope, messenger) {

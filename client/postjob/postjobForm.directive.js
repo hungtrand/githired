@@ -3,9 +3,7 @@ module.exports = function() {
 
     return {
         templateUrl: 'postjob/postjob.form.html',
-            control: "="
-
-                ,
+            control: "=",
             link: function($scope, $element, $attrs) {
                 var modal = $element.find('.modal');
 
@@ -17,8 +15,11 @@ module.exports = function() {
                         jobWageType: null,
                         jobMinWage: '',
                         jobMaxWage: '',
-                        jobSetWage: ''
+                        jobSetWage: '',
+                        skills: []
                     }
+
+                    setTimeout(function() { $scope.$apply(); }, 200);
 
                     modal.modal('show');
                 }
@@ -26,9 +27,11 @@ module.exports = function() {
                     modal.modal('hide');
                     $scope.model = null;
                 }
-            }
 
-        ,
-            controller: ['$scope', 'messenger_service', controller]
+                modal.on('hidden.bs.modal', function() {
+                    $scope.model = null;
+                });
+            },
+            controller: ['$scope', 'messenger_service', 'trendySkills_service', controller]
     }
 }

@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var jobsContext = require('./../models').jobs;
+var jobSkillsContext = require('./../models').jobSkills;
+var skillsContext = require('./../models').skills;
 
 router.post("/createJob", function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
@@ -10,20 +12,54 @@ router.post("/createJob", function(req, res, next) {
         , jobDescription: req.body["jobDescription"]
         , minimumWage: req.body["jobMinWage"]
         , maximumWage: req.body["jobMaxWage"]
-        , setWage: req.body["jobSetWage"]
+        , setWage: req.body["jobSetWage"] || 0
         , location: req.body.jobAddress["formattedAddress"]
         , userId: req.query["userId"]
     });
 
-    // console.log(job);
+    var skills = req.body['skills'];
+
     job
-        .save()
-        .then(function(results) {
-            res.send(JSON.stringify(results.dataValues));
-        })
-        .catch(function(err) {
-            res.send(JSON.stringify(err));
-        });
+    .save()
+    .then(function(theJob) {
+        for (var i = 0, l = skills.length; i < l; i++) {
+            var skillName = skills[i].name;
+
+            (function(skillName) {
+
+                skillsContext.findOrCreate({ 
+                    where : {
+                        name: skillName
+                    },
+                    defaults: {
+                        name: skillName
+                    }
+                })
+                .spread(function(theSkill, created) {
+                    jobSkillsContext.findOrCreate({
+                        where: {
+                            skillSkillId: theSkill.skillId,
+                        jobJobId: theJob.jobId
+                        },
+                        defaults: {
+                            jobJobId: theJob.jobId,
+                        skillSkillId: theSkill.skillId
+                        }
+                    })
+                    .spread(function(theJobSkill, created) {
+                        console.log("########### created #######");
+                        console.log(theJobSkill);
+                        console.log("############################");
+                    });
+                });
+
+            })(skillName);
+        }
+        res.send(JSON.stringify(theJob));
+    })
+.catch(function(err) {
+    res.send(JSON.stringify(err));
+});
 });
 
 router.get("", function(req, res, next){
@@ -32,19 +68,26 @@ router.get("", function(req, res, next){
 
         attributes: ['jobId', 'jobTitle', 'jobDescription'
         , 'minimumWage', 'maximumWage', 'setWage' 
-        , 'jobType'
-        , 'position', 'startingDate', 'endDate'
-        , 'location', 'userId']
+        , 'jobType', 'position', 'startingDate', 'endDate'
+        , 'location', 'userId'],
+        include: [
+            { 
+                model: skillsContext,
+                attributes: ['name', 'skillId'],
+                as: 'skills',
+                required: false
+            }
+        ]
     })
     .then(function(jobs){
         if (jobs){
             res.send(JSON.stringify(jobs));
         } else {
-            res.sendStatus(401);
+            res.send(401, JSON.stringify(jobs));
         }
     })
     .catch(function(err){
-        res.send(JSON.stringify(err));
+        res.send(500, JSON.stringify(err));
     })
 
 });
