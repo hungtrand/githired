@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
-var port = process.env.PORT || 8081,
+var port = process.env.PORT || 80,
     ip = process.env.IP || '0.0.0.0';
 server.listen(port, ip);
 console.log("HTTP Servicing: " + (ip || '0.0.0.0') + ':' + port);
