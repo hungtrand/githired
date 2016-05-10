@@ -15,6 +15,7 @@ router.post("/signup", function(req, res, next) {
 		, password: req.body["password"]
 		, isEmployer: req.body["isEmployer"]
 		, isEmployee: req.body["isEmployee"]
+                , linkedin: req.body["linkedin"]
 	});
 	
         user
@@ -38,7 +39,8 @@ router.post("/signin", function(req, res, next) {
 				email: req.body["email"],
 				password: req.body["password"]
 			},
-			attributes: ['userId', 'email', 'firstName', 'lastName', 'company', 'isEmployer', 'isEmployee']
+			attributes: ['userId', 'email', 'firstName', 'lastName', 
+                                'company', 'isEmployer', 'isEmployee', 'linkedin']
 		})
 		.then(function(user) {
 			if (user) {
@@ -49,9 +51,25 @@ router.post("/signin", function(req, res, next) {
 			
 		})
 		.catch(function(err) {
-			res.send(JSON.stringify(err));
+			res.send(500, JSON.stringify(err));
 		})
 	;
+});
+
+/* POST update user profile */
+router.post("/:userId", function(req, res, next) {
+    var userId = req.params['userId'];
+    usersContext
+        .findOne({ where: {'userId': userId} })
+        .then(function(user) {
+            user.linkedin = req.body['linkedin'];
+            user.save();
+            res.send(200, user);
+        })
+        .catch(function(err) {
+            res.send(500, JSON.stringify(err));
+        });
+    ;
 });
 
 /*

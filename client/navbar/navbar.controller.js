@@ -37,4 +37,19 @@ module.exports = function($scope, messenger) {
 
     }
 
+    $scope.updateUser = function() {
+        $scope.user.loading = true;
+        $scope.user
+            .$save({ userId: $scope.user.userId })
+            .then(
+                function(response) {
+                    $scope.user.loading = false;
+                    $scope.editLinkedIn = false;
+                    $scope.reloadLinkedInScript();
+                },
+                function(err) {
+                    $scope.user.loading = false;
+                });
+    }
+
 }

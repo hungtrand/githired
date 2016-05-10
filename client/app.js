@@ -112,7 +112,7 @@ module.exports = function($compile, messenger) {
 
     function markerFactory(job, pos, scope) {
         var icon = 'images/logo32.png';
-        if (job.userId == messenger.user.userId) {
+        if (messenger.user && job.userId == messenger.user.userId) {
             icon = 'images/logo32-green.png';
         }
         var newMarker = new google.maps.Marker({
@@ -470,20 +470,45 @@ module.exports = function($scope, messenger) {
 
     }
 
+    $scope.updateUser = function() {
+        $scope.user.loading = true;
+        $scope.user
+            .$save({ userId: $scope.user.userId })
+            .then(
+                function(response) {
+                    $scope.user.loading = false;
+                    $scope.editLinkedIn = false;
+                    $scope.reloadLinkedInScript();
+                },
+                function(err) {
+                    $scope.user.loading = false;
+                });
+    }
+
 }
 
 },{}],11:[function(require,module,exports){
 module.exports = function() {
-	var controller = require("./navbar.controller");
+    var controller = require("./navbar.controller");
 
-	return {
-		templateUrl: 'navbar/navbar.template.html'
-		, link: function($scope, $element, $http) {
+    return {
+        templateUrl: 'navbar/navbar.template.html'
+            , link: function($scope, $element, $http) {
+                $element.find('.menuLinkedInItem').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                });
 
-		}
-		, controller: ['$scope', 'messenger_service', controller]
-	}
+                $scope.reloadLinkedInScript = function() {
+                    var srcScript = $element.find('.linkedinScript').attr('src');
+                    $element.find('.linkedinWidgetBlock').find(':not(.profileScript)').remove();
+                    $element.find('.linkedinWidgetBlock').append('<script class="linkedinScript" src="' + srcScript + '"></script>');
+                }
+            }
+        , controller: ['$scope', 'messenger_service', controller]
+    }
 }
+
 },{"./navbar.controller":10}],12:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	// define the class
@@ -669,7 +694,9 @@ module.exports = function($scope, messenger) {
                         setTimeout(function() {
                             $scope.control.hide();
                             $scope.status = "standby";
-                        }, 2000);
+
+                            window.location.reload();
+                        }, 1000);
                     }
                     , function(failure) {
                         $scope.error = failure.data;
@@ -783,7 +810,7 @@ module.exports = function() {
 
         $scope.status = "";
 
-        $scope.skills = $scope.user.skills;
+        if ($scope.user) $scope.skills = $scope.user.skills;
         messenger.mySkillsModal.control = $scope.control;
         
         $scope.selected = null;
