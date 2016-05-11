@@ -9,7 +9,7 @@ module.exports = function() {
 
         },
 
-        controller: ['$scope', function($scope) {
+        controller: ['$scope', 'trendySkills_service', 'messenger_service', function($scope, trendySkills_service, messenger) {
             $scope.waiting = false;
             $scope.searchLog = {};
             $scope.clear = function() {
@@ -18,9 +18,38 @@ module.exports = function() {
                 $scope.searchInput = '';
                 setTimeout(function() { $scope.$apply(); }, 10);
             }
+            $scope.numberOfFilters = 0;
 
-            $scope.sendQuery = function(query) {
+            $scope.selected = null;
+            $scope.selectSkill = function($item, $model, $label, $event) {
+                $scope.selected = "";
+                $scope.searchLog[$model] = true;
+                $scope.sendQuery();
+            } 
 
+            $scope.$watch('searchLog', function() {
+                $scope.numberOfFilters = Object.keys($scope.searchLog).length;
+            });
+
+            $scope.getSkillSuggestions = function(query) {
+                var http = trendySkills_service.getSkills({ like: query});
+
+                return http.$promise.then(
+                        function(response) {
+                            if (response.success) {
+                                return response.keywords;
+                            } else {
+                                return [];
+                            }        
+                        }, 
+                        function(failure) {
+                            console.log(failure);
+                        }
+                        );
+            }
+
+            $scope.sendQuery = function() {
+                messenger.fetchJobs(Object.keys($scope.searchLog));
             }
         }]
     }

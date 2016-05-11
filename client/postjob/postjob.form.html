@@ -115,7 +115,7 @@
                             ng-model="selected" 
                             typeahead-loading="loadingSuggestions"
                             typeahead-no-results="noResults"
-                            typeahead-on-select="selectSkill($item, $model, $label, $event)"
+                            typeahead-on-select="selectRequiredSkill($item, $model, $label, $event)"
                             uib-typeahead="skill.keyName for skill 
                             in getSkillSuggestions($viewValue)" />
                             <span class="input-group-addon">

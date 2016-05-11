@@ -4,7 +4,9 @@
             <div class="input-group">
                 <span id="searchLog" class="input-group-btn" >
                     <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 15px;">
-                        <i class="fa fa-list"></i> <span class="caret"></span>
+                        <i class="fa fa-filter"></i>
+                        <label class="badge" ng-show="numberOfFilters" style="margin: 0;">{{ numberOfFilters }}</label>
+                        <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
                         <li ng-repeat="(keyword, selected) in searchLog">
@@ -27,15 +29,25 @@
                     </ul>
                 </span>
 
-                <input type="text" class="form-control inputSearch" placeholder="Search for job"
+                <input type="text" class="form-control"
+                style="height: 36px; margin-top: 1px;"
+                placeholder="Filter search by skills"
+                ng-model="selected" 
+                typeahead-loading="loadingSuggestions"
+                typeahead-no-results="noResults"
+                typeahead-on-select="selectSkill($item, $model, $label, $event)"
+                uib-typeahead="skill.keyName for skill 
+                in getSkillSuggestions($viewValue)" />
+
+                <!--<input type="text" class="form-control inputSearch" placeholder="Search for job"
                 style="height: 36px; margin-top:1px;"
                 ng-model="searchInput"
-                ng-disabled="waiting" />
-
+                ng-disabled="waiting" /> --> 
                 <span class="input-group-btn">
                     <button type="submit" class="btn btn-primary btnSearch"
                         ng-disabled="waiting" style="font-size: 15px;">
-                        <i ng-class="{ 'glyphicon glyphicon-search': !waiting, 'fa fa-spin fa-spinner': waiting }"></i>
+                        <i ng-class="{ 'glyphicon glyphicon-search': !waiting,
+                            'fa fa-spin fa-spinner': loadingSugggestions }"></i>
                     </button>
                 </span>
             </div>

@@ -19,24 +19,32 @@
     <section>
 
         <div gh-gmap id="gmap"></div>
+        <div style="position: absolute; top: 60px; left: 10px;">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default btnSettings dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-gear"></i> <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                    <a href="javascript:void(0);">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="showMarkers"
+                                ng-value="showMarkers" ng-model="showMarkers" checked/>
+                                Show markers
+                            </label>
+                        </div>
+                    </a>
+                    </li>
+                </ul>
+            </div>
 
-        <div class="btn-group" style="position: absolute; top: 60px; left: 10px;">
-            <button type="button" class="btn btn-default btnSettings dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-gear"></i> <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-                <li>
-                <a href="javascript:void(0);">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" name="showMarkers"
-                            ng-value="showMarkers" ng-model="showMarkers" checked/>
-                            Show markers
-                        </label>
-                    </div>
-                </a>
-                </li>
-            </ul>
+            <label class="label label-info">
+                &nbsp;
+                <strong>Double-click</strong> on map <strong>post new job</strong>
+                <i class="fa fa-info-circle"></i>
+                &nbsp;
+            </label>
         </div>
 
     </section>
