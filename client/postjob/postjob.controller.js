@@ -13,12 +13,17 @@ module.exports = function($scope, messenger, trendySkills_service) {
                .then(function() { 
                    $scope.control.hide();
                    $scope.loading = false;
+               }, function() {
+                    $scope.loading = false;
                });
         } else {
             messenger
                 .addJob($scope.model)
                 .then(function() { 
                     $scope.control.hide();
+                    $scope.loading = false;
+                },
+                function() {
                     $scope.loading = false;
                 });
         }
