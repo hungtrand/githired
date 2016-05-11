@@ -150,8 +150,9 @@ module.exports = function($compile, messenger) {
 
             $scope.$watch("jobs", 
                     function(newJobsArray, oldJobsArray) {
+                        if (angular.equals(newJobsArray, oldJobsArray)) return false;
                         clearMarkers(markers);
-                        // TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+                        
                         var i = 0;
                         var timeout = 100;
                         function retrieveLatLngOfJobAndSetOnMap(job) {

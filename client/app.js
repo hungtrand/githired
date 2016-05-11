@@ -245,8 +245,9 @@ module.exports = function($compile, messenger) {
 
             $scope.$watch("jobs", 
                     function(newJobsArray, oldJobsArray) {
+                        if (angular.equals(newJobsArray, oldJobsArray)) return false;
                         clearMarkers(markers);
-                        // TODO (4/24/2016): remove all markers from the map to avoid stale markers.
+                        
                         var i = 0;
                         var timeout = 100;
                         function retrieveLatLngOfJobAndSetOnMap(job) {
@@ -648,15 +649,16 @@ module.exports = function() {
 
         },
 
-        controller: ['$scope', 'trendySkills_service', 'messenger_service', function($scope, trendySkills_service, messenger) {
+        controller: ['$scope', 'trendySkills_service', 'messenger_service', 
+                    function($scope, trendySkills_service, messenger) {
             $scope.waiting = false;
             $scope.searchLog = {};
             $scope.clear = function() {
-                $scope.searchLog = {};
-                $scope.$emit('searchInput.cleared');
+                angular.copy({}, $scope.searchLog);
                 $scope.searchInput = '';
-                setTimeout(function() { $scope.$apply(); }, 10);
+                $scope.sendQuery();
             }
+
             $scope.numberOfFilters = 0;
 
             $scope.selected = null;
@@ -668,7 +670,7 @@ module.exports = function() {
 
             $scope.$watch('searchLog', function() {
                 $scope.numberOfFilters = Object.keys($scope.searchLog).length;
-            });
+            }, true);
 
             $scope.getSkillSuggestions = function(query) {
                 var http = trendySkills_service.getSkills({ like: query});
@@ -688,7 +690,12 @@ module.exports = function() {
             }
 
             $scope.sendQuery = function() {
-                messenger.fetchJobs(Object.keys($scope.searchLog));
+                var filters = Object.keys($scope.searchLog);
+                if (filters.length > 0) {
+                    messenger.fetchJobs(filters);
+                } else {
+                    messenger.fetchJobs();
+                }
             }
         }]
     }
