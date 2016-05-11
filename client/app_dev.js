@@ -7,12 +7,14 @@ var signup_directive = require("./signup/signupForm.directive");
 var postjob_directive = require("./postjob/postjobForm.directive");
 var mySkills_directive = require("./skills/mySkills.directive");
 var jobWindow_directive = require("./jobs/jobWindow.directive");
+var bids_directive = require("./bids/bids.directive");
 
 var user_factory = require("./user.factory");
 var joblist_factory = require("./jobs/joblist.factory");
 var mySkills_factory = require("./skills/mySkills.factory");
 var job_factory = require("./postjob/job.factory");
 var bid_factory = require('./bids/bid.factory');
+var bidlist_factory = require('./bids/bidlist.factory');
 
 var gmap_controller = require("./gmap/gmap.controller");
 
@@ -32,6 +34,7 @@ window.init = function() {
         .factory('mySkills_factory', ['$resource', mySkills_factory])
         .factory('job_factory', ['$resource', '$rootScope', job_factory])
         .factory('bid_factory', ['$resource', bid_factory])
+        .factory('bidlist_factory', ['$resource', bidlist_factory])
         ;
 
     app
@@ -50,6 +53,7 @@ window.init = function() {
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
         .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
+        .directive('ghBids', [bids_directive])
         ;
 
     app
