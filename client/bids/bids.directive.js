@@ -17,6 +17,6 @@ module.exports = function() {
 			$scope.control.hide = function() { modal.modal('hide'); }
 		}
 
-		, controller: ['$scope', 'messenger_service', controller]
+		, controller: ['$scope', 'messenger_service', '$sce', controller]
 	}
 }

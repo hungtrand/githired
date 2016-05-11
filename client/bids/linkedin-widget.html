@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<body>
+
+<div ng-view>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="https://code.angularjs.org/1.4.9/angular-route.min.js"></script>
+<script type="text/javascript">
+(function() {
+    var app = angular.module('githiredLinkedin', ['ngRoute']);
+    app.config(['$routeProvider', function($route) {
+        $route.when('/', {
+            templateUrl: './linkedinscript.html',
+            controller: 'main_controller'
+        });
+    }]);
+   
+    app.controller('main_controller', ['$scope', '$route', '$routeParams',
+        function($scope, $route, $routeParams) {
+        setTimeout(function() { 
+            $.getScript('//platform.linkedin.com/in.js'); 
+            console.log($route); 
+        },1000);
+
+        
+
+        $scope.profile = $routeParams['profile'];  
+    }]); 
+    
+    angular.bootstrap(document, ['githiredLinkedin']);
+})();
+</script>
+</html>

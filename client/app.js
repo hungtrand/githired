@@ -109,9 +109,13 @@ module.exports = function($resource) {
 }
 
 },{}],4:[function(require,module,exports){
-module.exports = function($scope, messenger) {
+module.exports = function($scope, messenger, $sce) {
     $scope.control = {};
     messenger.bidsModal.control = $scope.control;
+
+    $scope.getSource = function(linkedin) {
+        return "bids/linkedin-widget.html#/?profile=" + encodeURIComponent(linkedin);
+    }
 }
 
 },{}],5:[function(require,module,exports){
@@ -134,9 +138,10 @@ module.exports = function() {
 			$scope.control.hide = function() { modal.modal('hide'); }
 		}
 
-		, controller: ['$scope', 'messenger_service', controller]
+		, controller: ['$scope', 'messenger_service', '$sce', controller]
 	}
 }
+
 },{"./bids.controller":4}],6:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
