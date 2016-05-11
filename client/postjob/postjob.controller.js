@@ -6,9 +6,23 @@ module.exports = function($scope, messenger, trendySkills_service) {
 
 
     $scope.submitPostJob = function() {
-        messenger
-            .addJob($scope.model)
-            .then(function() { $scope.control.hide() });
+        $scope.loading = true;
+        if ($scope.model.jobId) {
+           messenger
+               .updateJob($scope.model) 
+               .then(function() { 
+                   $scope.control.hide();
+                   $scope.loading = false;
+               });
+        } else {
+            messenger
+                .addJob($scope.model)
+                .then(function() { 
+                    $scope.control.hide();
+                    $scope.loading = false;
+                });
+        }
+       
     }
 
     $scope.selected = null;
@@ -21,7 +35,11 @@ module.exports = function($scope, messenger, trendySkills_service) {
     }
 
     $scope.removeSkill = function($index) {
-        $scope.model.skills.splice($index, 1);
+        if ($scope.model.jobId) {
+            $scope.model.skills[$index].delete = true;
+        } else {
+            $scope.model.skills.splice($index, 1);
+        }
     }
 
     $scope.getSkillSuggestions = function(query) {

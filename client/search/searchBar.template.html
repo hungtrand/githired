@@ -14,7 +14,8 @@
                             <div class="checkbox">
                                 <label>
                                     <input type="checkbox" name="searchLogItem"
-                                    ng-value="keyword" ng-model="selected" checked ng-change="sendQuery()"/>
+                                        ng-model="searchLog[keyword]"
+                                        ng-change="sendQuery()" />
                                     {{ keyword }}
                                 </label>
                             </div>

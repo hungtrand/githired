@@ -29,7 +29,6 @@
                         ng-if="job.minimumWage">
                         min: ${{ job.minimumWage }}
                     </label>
-                    <span ng-if="job.minimumWage && job.maximumWage"> - </span>
                     
                     <label class="label label-primary">{{ bidAmount }}</label>
                     <label class="job.maximumWage label label-info pull-right">
@@ -46,14 +45,14 @@
                     <label class="text-primary">Required Skills:</label> <br />
                     <label class="label label-warning" ng-if="!job.skills.length"><em>None</em></label>
                     <button class="btn btn-xs btn-success" style="margin-right: 5px;"
-                        ng-repeat="skill in job.skills">{{ skill.name }}</button>    
+                        ng-repeat="skill in job.skills" ng-hide="skill.delete">{{ skill.name }}</button>    
                 </div>
                 
                 <button ng-if="job.userId != user.userId" 
                     ng-click="addBid(job)"
                     class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
                 <button ng-if="job.userId == user.userId"
-                    ng-click="startEdit(job, user)"
+                    ng-click="startEdit()"
                     class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>
             </div>
         </div>

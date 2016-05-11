@@ -50,7 +50,11 @@ module.exports = function() {
             }
 
             $scope.sendQuery = function() {
-                var filters = Object.keys($scope.searchLog);
+                var filters = [];
+                angular.forEach($scope.searchLog, function(isChecked, filter) {
+                    if (isChecked) filters.push(filter);
+                });
+
                 if (filters.length > 0) {
                     messenger.fetchJobs(filters);
                 } else {

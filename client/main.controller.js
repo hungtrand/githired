@@ -15,5 +15,9 @@ module.exports = function ($scope, messenger) {
             );
     }
 
+    $scope.$on('gmap.home.set', function() {
+        $scope.editHome = false;
+    });
+
     messenger.fetchJobs();
 }

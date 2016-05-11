@@ -8,12 +8,14 @@ var signup_directive = require("./signup/signupForm.directive");
 var postjob_directive = require("./postjob/postjobForm.directive");
 var mySkills_directive = require("./skills/mySkills.directive");
 var jobWindow_directive = require("./jobs/jobWindow.directive");
+var bids_directive = require("./bids/bids.directive");
 
 var user_factory = require("./user.factory");
 var joblist_factory = require("./jobs/joblist.factory");
 var mySkills_factory = require("./skills/mySkills.factory");
 var job_factory = require("./postjob/job.factory");
 var bid_factory = require('./bids/bid.factory');
+var bidlist_factory = require('./bids/bidlist.factory');
 
 var gmap_controller = require("./gmap/gmap.controller");
 
@@ -33,6 +35,7 @@ window.init = function() {
         .factory('mySkills_factory', ['$resource', mySkills_factory])
         .factory('job_factory', ['$resource', '$rootScope', job_factory])
         .factory('bid_factory', ['$resource', bid_factory])
+        .factory('bidlist_factory', ['$resource', bidlist_factory])
         ;
 
     app
@@ -50,7 +53,8 @@ window.init = function() {
         .directive('ghSignupForm', [signup_directive])
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-        .directive('ghJobWindow', [jobWindow_directive])
+        .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
+        .directive('ghBids', [bids_directive])
         ;
 
     app
@@ -67,7 +71,7 @@ window.init = function() {
 
 };
 
-},{"./bids/bid.factory":2,"./gmap/gmap.controller":3,"./gmap/gmap.directive":4,"./jobs/jobWindow.directive":6,"./jobs/joblist.factory":7,"./main.controller":8,"./messenger.service":9,"./navbar/navbar.directive":11,"./postjob/job.factory":12,"./postjob/postjob.service":14,"./postjob/postjobForm.directive":15,"./search/searchInput.directive":16,"./sidebar/sidebar.directive":17,"./signin/signin.directive":19,"./signup/signupForm.directive":21,"./skills/mySkills.directive":22,"./skills/mySkills.factory":23,"./skills/trendySkills.service":24,"./user.factory":25}],2:[function(require,module,exports){
+},{"./bids/bid.factory":2,"./bids/bidlist.factory":3,"./bids/bids.directive":5,"./gmap/gmap.controller":6,"./gmap/gmap.directive":7,"./jobs/jobWindow.directive":9,"./jobs/joblist.factory":10,"./main.controller":11,"./messenger.service":12,"./navbar/navbar.directive":14,"./postjob/job.factory":15,"./postjob/postjob.service":17,"./postjob/postjobForm.directive":18,"./search/searchInput.directive":19,"./sidebar/sidebar.directive":20,"./signin/signin.directive":22,"./signup/signupForm.directive":24,"./skills/mySkills.directive":25,"./skills/mySkills.factory":26,"./skills/trendySkills.service":27,"./user.factory":28}],2:[function(require,module,exports){
 module.exports = function($resource) {
 	// define the class
 	var resBid = $resource(
@@ -83,6 +87,51 @@ module.exports = function($resource) {
 	return resBid;
 }
 },{}],3:[function(require,module,exports){
+module.exports = function($resource) {
+	var url = "/api/user/:userId/:jobId/:request";
+
+	var resBidList = $resource(
+		url,
+		{
+			userId: "@userId",
+			jobId: "@jobId",
+			request: "@aRequest"
+		},
+		{
+			fetchBids: { method: 'GET', params: { request: 'currentbids' } }
+		}
+	);
+
+	return resBidList;
+}
+
+},{}],4:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+    $scope.control = {};
+    messenger.bidsModal.control = $scope.control;
+}
+
+},{}],5:[function(require,module,exports){
+module.exports = function() {
+	var controller = require('./bids.controller');
+
+	return {
+		templateUrl: 'bids/bids.modal.html'
+		, scope: {
+			
+		}
+
+		, link: function($scope, $element, $attrs) {
+			var modal = $element.find('.modal');
+			
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() { modal.modal('hide'); }
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./bids.controller":4}],6:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	$scope.jobs = messenger.joblist;
@@ -92,7 +141,7 @@ module.exports = function($scope, messenger) {
 		messenger.jobPostingForm.control.show(objAddress);
 	}
 }
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function($compile, messenger) {
     var controller = require('./gmap.controller');
     /***** Private properties ******/
@@ -103,6 +152,7 @@ module.exports = function($compile, messenger) {
 
     var map, geocoder;
     var markers = [];
+    var markerByJobId = {};
 
     function clearMarkers(markerList) {
         angular.forEach(markerList, function(marker, index) {
@@ -134,6 +184,8 @@ module.exports = function($compile, messenger) {
 
             infowindow.open(map, newMarker);
         });
+
+        markerByJobId[job.jobId] = newMarker;
 
         return newMarker;
     }
@@ -185,7 +237,6 @@ module.exports = function($compile, messenger) {
         }
     }
 
-
     /****** directive properties ********/
     return {
         controller: ['$scope', 'messenger_service', controller],
@@ -196,30 +247,43 @@ module.exports = function($compile, messenger) {
             map = new google.maps.Map($element[0], mapOptions);
             geocoder = new google.maps.Geocoder();
 
-            $scope.control = {
-                addJob: function(job) {
-
-                    if (job.coordinates) {
-                        var lat = job.coordinates[0];
-                        var lng = job.coordinates[1];
-
-                        var pos = {
-                            lat: lat,
-                            lng: lng
-                        }
-                    } else if (job.jobAddress) {
-                        var pos = job.jobAddress.latLng;
-                    }
-
-
-                    var marker = markerFactory(job, pos, $scope);
-
-                    markers.push(marker);
-                    setTimeout(function() {
-                        $scope.$apply();
-                    }, 200);
+            var input = document.getElementById('gmapHomeLocation');
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo('bounds', map);
+            autocomplete.addListener('place_changed', function() {
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    window.alert("Autocomplete's returned place contains no geometry");
+                    return;
                 }
-            }
+
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(13);  
+                }
+
+                var marker = new google.maps.Marker({
+                    map: map,
+                    draggable: false,
+                    animation: google.maps.Animation.DROP,
+                }); 
+
+                marker.setIcon(/** @type {google.maps.Icon} */({
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(35, 35)
+                }));
+                marker.setPosition(place.geometry.location);
+                marker.setVisible(true);
+                $scope.$emit('gmap.home.set');
+            });
+
+            $scope.control = {}
 
             google.maps.event.addListener(map, 'dblclick', function(e) {
                 geocoder.geocode({
@@ -243,56 +307,80 @@ module.exports = function($compile, messenger) {
                 });
             });
 
-            $scope.$watch("jobs", 
-                    function(newJobsArray, oldJobsArray) {
-                        if (angular.equals(newJobsArray, oldJobsArray)) return false;
+            $scope.$on("models.jobs.added", function(event, newJob) {
+                retrieveLatLngOfJobAndSetOnMap(newJob);
+            });
+
+            $scope.$on("models.jobs.address.updated", function(event, job) {
+                markerByJobId[job.jobId].setMap(null);
+                delete markerByJobId[job.jobId];
+                retrieveLatLngOfJobAndSetOnMap(job);
+            });
+
+            $scope.$on("models.jobs.updated", 
+                    function(event, data) {
                         clearMarkers(markers);
-                        
+
                         var i = 0;
-                        var timeout = 100;
-                        function retrieveLatLngOfJobAndSetOnMap(job) {
-                            if (i >= newJobsArray.length) return;
+                        var timeout = 200;
 
-                            geocoder.geocode({
-                                'address': job.location + ""
-                            },
-                            function(results, status) {
-                                if (status == google.maps.GeocoderStatus.OK) {
-                                    //console.log(results);
-                                    job.jobAddress = results[0].geometry.location;
-                                    var marker = markerFactory(
-                                        job,
-                                        results[0].geometry.location,
-                                        $scope
-                                        );
+                        var recurse = function(i) {
+                            if (i >= $scope.jobs.length) return false;
 
-                                    markers.push(marker);
-                                } else {
-                                    console.log("Geocode was not successful for the following reason: " + status);
-                                }
-                            });
-                            
                             if (i >= 9) timeout = 1000
-                            else timeout = 100;
+                            else timeout = 250;
                             setTimeout(function() {
-                                retrieveLatLngOfJobAndSetOnMap(newJobsArray[++i]);
+                                retrieveLatLngOfJobAndSetOnMap($scope.jobs[i]);
+                                recurse(++i);
                             }, timeout);
                         }
 
-                        retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
-                    },
-                    true);
+                        recurse(i);
+                    }
+                    );
+
+            function retrieveLatLngOfJobAndSetOnMap(job) {
+                geocoder.geocode({
+                    'address': job.location + ""
+                },
+                function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        var addressComponents = results[0]['address_components'];
+
+                        job.jobAddress = extractAddress(addressComponents);
+                        var marker = markerFactory(
+                            job,
+                            results[0].geometry.location,
+                            $scope
+                            );
+
+                        markers.push(marker);
+                    } else {
+                        console.log("Geocode was not successful for the following reason: " + status);
+                    }
+                });
+            }
+
+
         }
     }
 }
 
-},{"./gmap.controller":3}],5:[function(require,module,exports){
+},{"./gmap.controller":6}],8:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.jobs = messenger.joblist;
     $scope.user = messenger.user;
+
+    $scope.startEdit = function() {
+        messenger.jobPostingForm.control.edit($scope.job);
+    }
+
+    $scope.showBids = function(job, user) {
+        messenger.bidsModal.control.show();
+    }
 }
-},{}],6:[function(require,module,exports){
-module.exports = function() {
+},{}],9:[function(require,module,exports){
+module.exports = function(messenger) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -311,19 +399,13 @@ module.exports = function() {
                 console.log("you clicked on the bid button");
                 var bidAmount = $element.find(".bidAmount").val() || job.setWage;
                 $scope.user.createBid(job.jobId, bidAmount);
-            }
-
-            $scope.startEdit = function(job, user) {
-                console.log("you clicked on the edit button");
-                console.log(job);
-                console.log(user);
-            }
+            } 
         },
         controller: ['$scope', 'messenger_service', controller]
     }
 }
 
-},{"./jobWindow.controller.js":5}],7:[function(require,module,exports){
+},{"./jobWindow.controller.js":8}],10:[function(require,module,exports){
 module.exports = function($resource) {
 	var url = "api/jobs";
 
@@ -332,7 +414,7 @@ module.exports = function($resource) {
         });
 }
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
     if (sessionStorage.getItem("__githired.user.credentials__")) {
         var strCredentials = sessionStorage.getItem("__githired.user.credentials__");
@@ -350,13 +432,18 @@ module.exports = function ($scope, messenger) {
             );
     }
 
+    $scope.$on('gmap.home.set', function() {
+        $scope.editHome = false;
+    });
+
     messenger.fetchJobs();
 }
 
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
+        editHome: false,
         sidebar: {}, 
         navbar: {}, 
         signup: function(signupForm) {
@@ -412,15 +499,40 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             job.$promise
                 .then(
                         function(newJob) {
-                            self.jobs.push(job);
+                            newJob.skills = angular.copy(jobForm.skills);
+                            self.joblist.push(newJob);
+                            $rootScope.$broadcast('models.jobs.added', newJob);
                         }
                         ,
                         function(error) {
                             $rootScope.$broadcast('error', error);
                         });
 
-            return self.job.$promise;
-        }, 
+            return job.$promise;
+        },
+        updateJob: function(jobForm) {
+            var self = this;
+            var job = job_factory.update({ jobId: jobForm.jobId }, jobForm);
+            
+            job.$promise.then(
+                function() {
+                    angular.forEach(self.joblist, function(oldJob, index) {
+                        if ( oldJob.jobId == job.jobId ) {
+                            var oldLocation = oldJob.location;
+                            angular.copy(job, self.joblist[index]);
+                            if (oldLocation != job.location) {
+                                $rootScope.$broadcast('models.jobs.address.updated', self.joblist[index]);
+                            }
+                        }
+                    }); 
+                },
+                function(failure) {
+                    console.log(failure);
+                }
+            )
+            
+            return job.$promise;
+        },
         fetchJobs: function(arrSkills) {
             var self = this;
             var searchParams = { skills: arrSkills || [] };
@@ -428,12 +540,14 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             if (arrSkills) {
                 promise = joblist_factory.search({}, searchParams, function(response) {
                     angular.copy(response, self.joblist);
+                    $rootScope.$broadcast('models.jobs.updated');
                 }, function(failure) {
                     console.log(failure);
                 });
             } else {
                 promise = joblist_factory.query({}, function(response) {
-                    angular.copy(response, self.joblist); // use angular copy to save reference
+                    angular.copy(response, self.joblist); 
+                    $rootScope.$broadcast('models.jobs.updated');
                 }, function(failure) {
                     // failure
                     console.log("Failure:" + failure);
@@ -442,13 +556,14 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             }
 
             return promise.$promise;
-        }
+        },
+        bidsModal: {}
     }
 
     return service;
 }
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
 
@@ -505,7 +620,7 @@ module.exports = function($scope, messenger) {
 
 }
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = function() {
     var controller = require("./navbar.controller");
 
@@ -527,22 +642,25 @@ module.exports = function() {
     }
 }
 
-},{"./navbar.controller":10}],12:[function(require,module,exports){
+},{"./navbar.controller":13}],15:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
-	// define the class
-	var resJob = $resource(
-		'/api/jobs/:request',
-		{
-			request: "@createJob"
-		},
-		{
-			createJob: { method: 'POST', params: { request: 'createJob' } }
-		}
-	);	
+    // define the class
+    var resJob = $resource(
+            '/api/jobs/:jobId/:request',
+            {
+                request: "@createJob",
+                jobId: "@jobId"
+            },
+            {
+                createJob: { method: 'POST', params: { request: 'createJob' } },
+                update: { method: 'PUT' }
+            }
+            );	
 
-	return resJob;
+    return resJob;
 }
-},{}],13:[function(require,module,exports){
+
+},{}],16:[function(require,module,exports){
 module.exports = function($scope, messenger, trendySkills_service) {
     $scope.control = {};
     messenger.jobPostingForm.control = $scope.control;
@@ -551,9 +669,23 @@ module.exports = function($scope, messenger, trendySkills_service) {
 
 
     $scope.submitPostJob = function() {
-        messenger
-            .addJob($scope.model)
-            .then(function() { $scope.control.hide() });
+        $scope.loading = true;
+        if ($scope.model.jobId) {
+           messenger
+               .updateJob($scope.model) 
+               .then(function() { 
+                   $scope.control.hide();
+                   $scope.loading = false;
+               });
+        } else {
+            messenger
+                .addJob($scope.model)
+                .then(function() { 
+                    $scope.control.hide();
+                    $scope.loading = false;
+                });
+        }
+       
     }
 
     $scope.selected = null;
@@ -566,7 +698,11 @@ module.exports = function($scope, messenger, trendySkills_service) {
     }
 
     $scope.removeSkill = function($index) {
-        $scope.model.skills.splice($index, 1);
+        if ($scope.model.jobId) {
+            $scope.model.skills[$index].delete = true;
+        } else {
+            $scope.model.skills.splice($index, 1);
+        }
     }
 
     $scope.getSkillSuggestions = function(query) {
@@ -588,7 +724,7 @@ module.exports = function($scope, messenger, trendySkills_service) {
 
 }
 
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/postjob/'
@@ -599,7 +735,7 @@ module.exports = function($resource, $rootScope) {
 	
 	return client;
 }
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = function() {
     var controller = require('./postjob.controller');
 
@@ -609,13 +745,14 @@ module.exports = function() {
             link: function($scope, $element, $attrs) {
                 var modal = $element.find('.modal');
                 var resetModel = function() {
+                    $scope.model.jobId = null;
                     $scope.model.jobTitle = '';
                     $scope.model.jobDescription = '';
                     $scope.model.jobAddress = null;
                     $scope.model.jobWageType = null;
-                    $scope.model.jobMinWage = '';
-                    $scope.model.jobMaxWage = '';
-                    $scope.model.jobSetWage = '';
+                    $scope.model.minimumWage = '';
+                    $scope.model.maximumWage = '';
+                    $scope.model.setWage = '';
                     $scope.model.skills.splice(0, $scope.model.skills.length);
                 }
                 $scope.control.show = function(objAddress) {
@@ -629,6 +766,12 @@ module.exports = function() {
                     modal.modal('hide');
                 }
 
+                $scope.control.edit = function(existingJob) {
+                    resetModel();
+                    angular.extend($scope.model, existingJob);
+                    modal.modal('show');
+                }
+
                 modal.on('hidden.bs.modal', function() {
                     resetModel();
                 });
@@ -637,7 +780,7 @@ module.exports = function() {
     }
 }
 
-},{"./postjob.controller":13}],16:[function(require,module,exports){
+},{"./postjob.controller":16}],19:[function(require,module,exports){
 module.exports = function() {
 
     return {
@@ -690,7 +833,11 @@ module.exports = function() {
             }
 
             $scope.sendQuery = function() {
-                var filters = Object.keys($scope.searchLog);
+                var filters = [];
+                angular.forEach($scope.searchLog, function(isChecked, filter) {
+                    if (isChecked) filters.push(filter);
+                });
+
                 if (filters.length > 0) {
                     messenger.fetchJobs(filters);
                 } else {
@@ -701,7 +848,7 @@ module.exports = function() {
     }
 }
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope, messenger) {
 		$scope.control = {};
@@ -725,7 +872,7 @@ module.exports =function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signin.control = $scope.control;
@@ -761,7 +908,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signin.controller');
 
@@ -782,7 +929,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signin.controller":18}],20:[function(require,module,exports){
+},{"./signin.controller":21}],23:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signup.control = $scope.control;
@@ -836,7 +983,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -856,7 +1003,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":20}],22:[function(require,module,exports){
+},{"./signup.controller":23}],25:[function(require,module,exports){
 module.exports = function() {
     var controller = function($scope, messenger, trendySkills_service) {
         $scope.control = {};
@@ -949,7 +1096,7 @@ module.exports = function() {
     }
 }
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "/api/user/:userId/skills"
 
@@ -963,7 +1110,7 @@ module.exports = function($resource) {
     return mySkills;
 }
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "http://trendyskills.com/service";
     var trendySkills = $resource(
@@ -985,7 +1132,7 @@ module.exports = function($resource) {
     return trendySkills;
 }
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) {
     // define the class
     var resUser = $resource(
