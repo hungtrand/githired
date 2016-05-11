@@ -7,35 +7,57 @@
             </div>
             <div class="modal-body">
                 <!-- fill in body data -->
-                <div ng-repeat="bid in bids" class="list-group-item">
+                <div ng-repeat="bid in bids" ng-hide="bid.deleted" class="list-group-item ng-aninmate
+                    nga-default nga-stagger nga-slide-left-remove">
                     <div class="row">
-                    <div class="col col-xs-12">
-                        <h4> {{ bid.user.firstName }} {{ bid.user.lastName }}</h4>
+                        <div class="col col-xs-12">
+                            <h4> {{ bid.user.firstName }} {{ bid.user.lastName }}</h4>
 
-                        <iframe class="linkedinWidgetBlock" style="width: 100%;
-                            height: 180px;"
-                            ng-if="bid.user.linkedin"
-                            src="{{ getSource(bid.user.linkedin) }}"></iframe>
-
-                    </div>
-                    <div class="col col-xs-12 text-right">
-                        <div>
-                            <label class="badge">{{ bid.createdAt |date:'MM/dd/yy hh:mm' }}</label>
-                            <label>Bid Price:</label>$ <label class="label
-                                label-success">{{ bid.amount}}</label>
+                            <iframe class="linkedinWidgetBlock" style="width: 100%;
+                                height: 180px;"
+                                ng-if="bid.user.linkedin"
+                                src="{{ getSource(bid.user.linkedin) }}"></iframe>
                             
-                        </div>
-                        <button type="button" class="btn btn-sm"
-                            ng-class="{ 'btn-success': bid.accepted, 'btn-info':!bid.accepted }"
-                            ng-disabled="bid.accepted || bid.declined"
-                            ng-click="acceptBid(bid)">Accept</button>
-                        <button type="button" class="btn btn-sm btn-danger"
-                            ng-class="{ 'btn-danger': bid.declined,'btn-warning': !bid.declined }"
+                            <label>Candidate's skills:</label>
+                            <div class="well well-sm">
+                                
+                                <button class="btn btn-info btn-xs" 
+                                    style="margin-right: 5px; font-size: 14px;"
+                                    ng-repeat="skill in bid.user.skills"
+                                    ng-if="!skill.delete">
+                                    &nbsp;
+                                    <strong>{{ skill.name }}</strong>
+                                    &nbsp;&nbsp;
+                                </button>
+                            </div>
 
-                            ng-disabled="bid.declined || bid.accepted"
-                            ng-click="declineBid(bid)">Decline</button>
+                        </div>
+                        <div class="col col-xs-12 text-right">
+                            <div>
+                                <label class="badge">{{ bid.createdAt |date:'MM/dd/yy hh:mm' }}</label>
+                                <label>Bid Price:</label>$ <label class="label
+                                    label-success">{{ bid.amount}}</label>
+
+                            </div>
+                            <button type="button" class="btn btn-sm"
+                                ng-class="{ 'btn-success': bid.accepted, 'btn-info':!bid.accepted }"
+                                ng-disabled="bid.accepted || bid.declined"
+                                ng-click="acceptBid(bid, $index)">
+                                <span ng-if="!bid.accepted">Accept</span>
+                                <span ng-if="bid.accepted">
+                                    <i class="fa fa-check"></i>Accepted</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                ng-class="{ 'btn-danger': bid.declined,'btn-warning': !bid.declined }"
+
+                                ng-disabled="bid.declined || bid.accepted"
+                                ng-click="declineBid(bid, $index)">
+                                <span ng-if="bid.declined">
+                                    <i class="fa fa-close"></i> Declined</span>
+                                <span ng-if="!bid.declined">Decline</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
                 </div>
             </div>
             <div class="modal-footer">

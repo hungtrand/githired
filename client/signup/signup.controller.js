@@ -25,7 +25,10 @@ module.exports = function($scope, messenger) {
         $scope.formError = '';
         $scope.status = 'waiting';
 
-        if (!validate()) return false;
+        if (!validate())  {
+            return false;
+            $scope.waiting = 'standby';
+        }
 
         $scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
         $scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';

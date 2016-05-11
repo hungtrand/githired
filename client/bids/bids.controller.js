@@ -6,11 +6,19 @@ module.exports = function($scope, messenger, $sce) {
         return "bids/linkedin-widget.html#/?profile=" + encodeURIComponent(linkedin);
     }
 
-    $scope.acceptBid = function(bid) {
+    $scope.acceptBid = function(bid, index) {
         bid.accepted = true;
+        setTimeout(function() {
+            bid.deleted = true;
+            $scope.$apply();
+        },3000);
     }
 
-    $scope.declineBid = function(bid) {
+    $scope.declineBid = function(bid, index) {
         bid.declined = true;
+        setTimeout(function() {
+            bid.deleted = true;
+            $scope.$apply();
+        },3000);
     }
 }
