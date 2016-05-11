@@ -135,7 +135,7 @@ module.exports = function($compile, messenger) {
 
             infowindow.open(map, newMarker);
         });
-        
+
         markerByJobId[job.jobId] = newMarker;
 
         return newMarker;
@@ -188,7 +188,6 @@ module.exports = function($compile, messenger) {
         }
     }
 
-
     /****** directive properties ********/
     return {
         controller: ['$scope', 'messenger_service', controller],
@@ -198,6 +197,42 @@ module.exports = function($compile, messenger) {
         link: function($scope, $element, $attrs) {
             map = new google.maps.Map($element[0], mapOptions);
             geocoder = new google.maps.Geocoder();
+
+            var input = document.getElementById('gmapHomeLocation');
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo('bounds', map);
+            autocomplete.addListener('place_changed', function() {
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    window.alert("Autocomplete's returned place contains no geometry");
+                    return;
+                }
+
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(13);  
+                }
+
+                var marker = new google.maps.Marker({
+                    map: map,
+                    draggable: false,
+                    animation: google.maps.Animation.DROP,
+                }); 
+
+                marker.setIcon(/** @type {google.maps.Icon} */({
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(35, 35)
+                }));
+                marker.setPosition(place.geometry.location);
+                marker.setVisible(true);
+                $scope.$emit('gmap.home.set');
+            });
 
             $scope.control = {}
 
@@ -262,7 +297,7 @@ module.exports = function($compile, messenger) {
                 function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
                         var addressComponents = results[0]['address_components'];
-                        
+
                         job.jobAddress = extractAddress(addressComponents);
                         var marker = markerFactory(
                             job,
@@ -345,6 +380,10 @@ module.exports = function ($scope, messenger) {
             );
     }
 
+    $scope.$on('gmap.home.set', function() {
+        $scope.editHome = false;
+    });
+
     messenger.fetchJobs();
 }
 
@@ -352,6 +391,7 @@ module.exports = function ($scope, messenger) {
 module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
+        editHome: false,
         sidebar: {}, 
         navbar: {}, 
         signup: function(signupForm) {

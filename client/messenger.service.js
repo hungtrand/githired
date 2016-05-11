@@ -1,6 +1,7 @@
 module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
+        editHome: false,
         sidebar: {}, 
         navbar: {}, 
         signup: function(signupForm) {
