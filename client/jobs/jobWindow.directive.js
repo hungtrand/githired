@@ -1,4 +1,4 @@
-module.exports = function(messenger) {
+module.exports = function(messenger, job_factory) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -19,6 +19,6 @@ module.exports = function(messenger) {
                 }
             });
         },
-        controller: ['$scope', 'messenger_service', controller]
+        controller: ['$scope', 'messenger_service', 'job_factory', controller]
     }
 }

@@ -32,7 +32,7 @@ window.init = function() {
         .factory('user_factory', ['$resource', '$rootScope', 'mySkills_factory', 'bid_factory', user_factory])
         .factory('joblist_factory', ['$resource', joblist_factory])
         .factory('mySkills_factory', ['$resource', mySkills_factory])
-        .factory('job_factory', ['$resource', '$rootScope', job_factory])
+        .factory('job_factory', ['$resource', '$rootScope', 'bidlist_factory', job_factory])
         .factory('bid_factory', ['$resource', bid_factory])
         .factory('bidlist_factory', ['$resource', bidlist_factory])
         ;
@@ -52,7 +52,7 @@ window.init = function() {
         .directive('ghSignupForm', [signup_directive])
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-        .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
+        .directive('ghJobWindow', ['messenger_service', 'job_factory', jobWindow_directive])
         .directive('ghBids', [bids_directive])
         ;
 

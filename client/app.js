@@ -33,7 +33,7 @@ window.init = function() {
         .factory('user_factory', ['$resource', '$rootScope', 'mySkills_factory', 'bid_factory', user_factory])
         .factory('joblist_factory', ['$resource', joblist_factory])
         .factory('mySkills_factory', ['$resource', mySkills_factory])
-        .factory('job_factory', ['$resource', '$rootScope', job_factory])
+        .factory('job_factory', ['$resource', '$rootScope', 'bidlist_factory', job_factory])
         .factory('bid_factory', ['$resource', bid_factory])
         .factory('bidlist_factory', ['$resource', bidlist_factory])
         ;
@@ -53,7 +53,7 @@ window.init = function() {
         .directive('ghSignupForm', [signup_directive])
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-        .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
+        .directive('ghJobWindow', ['messenger_service', 'job_factory', jobWindow_directive])
         .directive('ghBids', [bids_directive])
         ;
 
@@ -90,14 +90,15 @@ module.exports = function($resource) {
 
 },{}],3:[function(require,module,exports){
 module.exports = function($resource) {
-	var url = "/api/user/:userId/:jobId/:request";
+	var url = "/api/user/:userId/:requestParam1/:jobId/:requestParam2";
 
 	var resBidList = $resource(
 		url,
 		{
 			userId: "@userId",
 			jobId: "@jobId",
-			request: "@aRequest"
+			requestParam1: "@aRequestParam1",
+			requestParam2: "@aRequestParam2"
 		},
 		{
 			fetchBids: { method: 'GET', params: { request: 'currentbids' } }
@@ -126,7 +127,10 @@ module.exports = function() {
 		, link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
 			
-			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.show = function(job) { 
+				$scope.bids = job.bids;
+				modal.modal('show'); 
+			}
 			$scope.control.hide = function() { modal.modal('hide'); }
 		}
 
@@ -378,7 +382,7 @@ module.exports = function($compile, messenger) {
 }
 
 },{"./gmap.controller":6}],8:[function(require,module,exports){
-module.exports = function($scope, messenger) {
+module.exports = function($scope, messenger, job_factory) {
     $scope.jobs = messenger.joblist;
     $scope.user = messenger.user;
     $scope.bidding = false;
@@ -398,12 +402,20 @@ module.exports = function($scope, messenger) {
     }
 
     $scope.showBids = function(job, user) {
-        messenger.bidsModal.control.show();
+    	// since job may be raw data from database, it might not have functions defined in job.factory.js
+    	// create a new job with values from job
+    	var objjob = new job_factory();
+    	angular.extend(objjob, job);
+
+    	// now fetch the jobs
+    	objjob.fetchBids();
+
+        messenger.bidsModal.control.show(objjob);
     }
 }
 
 },{}],9:[function(require,module,exports){
-module.exports = function(messenger) {
+module.exports = function(messenger, job_factory) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -424,7 +436,7 @@ module.exports = function(messenger) {
                 }
             });
         },
-        controller: ['$scope', 'messenger_service', controller]
+        controller: ['$scope', 'messenger_service', 'job_factory', controller]
     }
 }
 
@@ -668,7 +680,7 @@ module.exports = function() {
 }
 
 },{"./navbar.controller":13}],15:[function(require,module,exports){
-module.exports = function($resource, $rootScope) {
+module.exports = function($resource, $rootScope, bidlist_factory) {
     // define the class
     var resJob = $resource(
             '/api/jobs/:jobId/:request',
@@ -681,6 +693,22 @@ module.exports = function($resource, $rootScope) {
                 update: { method: 'PUT' }
             }
             );	
+
+    resJob.prototype.fetchBids = function() {
+        var self = this;
+        console.log(self.jobId);
+        self.bids = bidlist_factory.query( 
+            { 
+                requestParam1: 'jobs', 
+                requestParam2: 'currentbids',
+                jobId: self.jobId 
+            }, function(response) {
+                console.log("successfully retrieved bids for this job");
+            }, function(failure) {
+                console.log("Failure: " + failure);
+            }
+        );
+    }
 
     return resJob;
 }
