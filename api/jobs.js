@@ -134,9 +134,9 @@ router.post("/createJob", function(req, res, next) {
  *  @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     
-        {
-         Job is successfully updated!
-        }   
+ {
+ Job is successfully updated!
+ }   
  *  @apiErrorExample {json} Error-Response:
  *     HTTP/1.1 401 Not Found
  *     {
@@ -158,17 +158,50 @@ router.put("/:jobId", function(req, res, next) {
     formattedAddress += ', ' + req.body.jobAddress['state'];
     formattedAddress += ', ' + req.body.jobAddress['postal'];
     var jobId = req.params['jobId'];
-    
+
     var skills = req.body['skills'];
+
+    if (skills.length == 0) {
+
+        jobsContext.findOne(
+            { 
+                where: { jobId: jobId },
+            include: [
+        { 
+            model: skillsContext,
+            attributes: ['name', 'skillId'],
+            as: 'skills',
+            required: false
+        }
+        ]
+            }
+            ).then(function(foundJob) {
+                foundJob.jobTitle = req.body['jobTitle'];
+                foundJob.jobDescription = req.body['jobDescription'];
+                foundJob.minimumWage = req.body['minimumWage'];
+                foundJob.maximumWage = req.body['maximumWage'];
+                foundJob.setWage = req.body['setWage'];
+                foundJob.location = formattedAddress;
+
+                foundJob.save().then(function() {
+                    res.send(200, JSON.stringify(foundJob));
+                }).catch(function(err) {
+                    res.send(500, JSON.stringify(err));
+                });
+            }).catch(function(err) {
+                res.send(500, JSON.stringify(err));
+            }); 
+    }
+
     for (var i = 0, l = skills.length; i < l; i++) {
         var skillName = skills[i].name;
         var skillId = skills[i].skillId || 0;
         var toBeDeleted = skills[i].delete || false;
         var lastOne = false;
         if (i == l - 1) lastOne = true;
-        
+
         (function(skillName, skillId, toBeDeleted, lastOne) {
-        
+
             skillsContext.findOrCreate({ 
                 where : {
                     name: skillName
@@ -181,11 +214,11 @@ router.put("/:jobId", function(req, res, next) {
                 jobSkillsContext.findOrCreate({
                     where: {
                         skillSkillId: theSkill.skillId,
-                        jobJobId: jobId
+                    jobJobId: jobId
                     },
                     defaults: {
                         jobJobId: jobId,
-                        skillSkillId: theSkill.skillId
+                    skillSkillId: theSkill.skillId
                     }
                 })
                 .spread(function(theJobSkill, created) {
@@ -199,36 +232,36 @@ router.put("/:jobId", function(req, res, next) {
                         }
 
                     }
-                    
+
                     if (lastOne) {
                         jobsContext.findOne(
-                                { 
-                                    where: { jobId: jobId },
-                                include: [
-                                    { 
-                                        model: skillsContext,
-                                        attributes: ['name', 'skillId'],
-                                        as: 'skills',
-                                        required: false
-                                    }
-                                    ]
-                                }
-                                ).then(function(foundJob) {
-                                    foundJob.jobTitle = req.body['jobTitle'];
-                                    foundJob.jobDescription = req.body['jobDescription'];
-                                    foundJob.minimumWage = req.body['minimumWage'];
-                                    foundJob.maximumWage = req.body['maximumWage'];
-                                    foundJob.setWage = req.body['setWage'];
-                                    foundJob.location = formattedAddress;
+                            { 
+                                where: { jobId: jobId },
+                            include: [
+                        { 
+                            model: skillsContext,
+                            attributes: ['name', 'skillId'],
+                            as: 'skills',
+                            required: false
+                        }
+                        ]
+                            }
+                            ).then(function(foundJob) {
+                                foundJob.jobTitle = req.body['jobTitle'];
+                                foundJob.jobDescription = req.body['jobDescription'];
+                                foundJob.minimumWage = req.body['minimumWage'];
+                                foundJob.maximumWage = req.body['maximumWage'];
+                                foundJob.setWage = req.body['setWage'];
+                                foundJob.location = formattedAddress;
 
-                                    foundJob.save().then(function() {
-                                        res.send(200, JSON.stringify(foundJob));
-                                    }).catch(function(err) {
-                                        res.send(500, JSON.stringify(err));
-                                    });
+                                foundJob.save().then(function() {
+                                    res.send(200, JSON.stringify(foundJob));
                                 }).catch(function(err) {
                                     res.send(500, JSON.stringify(err));
-                                }); 
+                                });
+                            }).catch(function(err) {
+                                res.send(500, JSON.stringify(err));
+                            }); 
                     }
 
                 });
@@ -251,129 +284,129 @@ router.put("/:jobId", function(req, res, next) {
  *  @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     
-       [
-    {
-        "jobId": 1,
-        "jobTitle": "Software Engineering",
-        "jobDescription": "Testing",
-        "minimumWage": 30,
-        "maximumWage": 50,
-        "setWage": 35,
-        "jobType": "Engineering",
-        "position": "full time",
-        "startingDate": null,
-        "endDate": null,
-        "location": "San Jose",
-        "userId": 1,
-        "skills": []
-    },
-    {
-        "jobId": 2,
-        "jobTitle": "Software developer",
-        "jobDescription": "Develop web application",
-        "minimumWage": 30,
-        "maximumWage": 60,
-        "setWage": 40,
-        "jobType": "Web Developer",
-        "position": "full stack",
-        "startingDate": null,
-        "endDate": null,
-        "location": "2583 Brenford Drive, San Jose, California, ",
-        "userId": 2,
-        "skills": [
-            {
-                "name": "AngularJS",
-                "skillId": 22,
-                "jobSkills": {
-                    "importance": null,
-                    "createdAt": "2016-05-11T05:07:45.000Z",
-                    "updatedAt": "2016-05-11T05:07:45.000Z",
-                    "jobJobId": 2,
-                    "skillSkillId": 22
-                }
-            }
-        ]
-    },
-    {
-        "jobId": 3,
-        "jobTitle": "Application Developer",
-        "jobDescription": "Software Developer",
-        "minimumWage": 25,
-        "maximumWage": 35,
-        "setWage": 30,
-        "jobType": "App Developer",
-        "position": "full time",
-        "startingDate": null,
-        "endDate": null,
-        "location": "Fremont",
-        "userId": 2,
-        "skills": []
-    },
-    {
-        "jobId": 4,
-        "jobTitle": "Java Developer",
-        "jobDescription": "Must be able to handle pressure. \nWrite clean code.\nLive close by. Not a remote job.",
-        "minimumWage": 40,
-        "maximumWage": 60,
-        "setWage": 0,
-        "jobType": null,
-        "position": null,
-        "startingDate": null,
-        "endDate": null,
-        "location": "800 West Taylor Street, San Jose, California, 95126",
-        "userId": 2,
-        "skills": [
-            {
-                "name": "Java",
-                "skillId": 4,
-                "jobSkills": {
-                    "importance": null,
-                    "createdAt": "2016-05-11T05:03:13.000Z",
-                    "updatedAt": "2016-05-11T05:03:13.000Z",
-                    "jobJobId": 4,
-                    "skillSkillId": 4
-                }
-            }
-        ]
-    }]
-    
- *  @apiErrorExample {json} Error-Response:
- *     HTTP/1.1 401 Not Found
- *     {
- *       "error": "Unauthorized!"
- *     }
- *  @apiPermission required
- *  
- */
-router.get("", function(req, res, next){
-    res.setHeader('Content-Type', 'application/json');
-    jobsContext.findAll({
-
-        attributes: ['jobId', 'jobTitle', 'jobDescription'
-        , 'minimumWage', 'maximumWage', 'setWage' 
-        , 'jobType', 'position', 'startingDate', 'endDate'
-        , 'location', 'userId'],
-        include: [
-    { 
-        model: skillsContext,
-        attributes: ['name', 'skillId'],
-        as: 'skills',
-        required: false
+ [
+ {
+ "jobId": 1,
+ "jobTitle": "Software Engineering",
+ "jobDescription": "Testing",
+ "minimumWage": 30,
+ "maximumWage": 50,
+ "setWage": 35,
+ "jobType": "Engineering",
+ "position": "full time",
+ "startingDate": null,
+ "endDate": null,
+ "location": "San Jose",
+ "userId": 1,
+ "skills": []
+ },
+ {
+ "jobId": 2,
+ "jobTitle": "Software developer",
+ "jobDescription": "Develop web application",
+ "minimumWage": 30,
+ "maximumWage": 60,
+ "setWage": 40,
+ "jobType": "Web Developer",
+ "position": "full stack",
+ "startingDate": null,
+ "endDate": null,
+ "location": "2583 Brenford Drive, San Jose, California, ",
+ "userId": 2,
+ "skills": [
+ {
+ "name": "AngularJS",
+ "skillId": 22,
+ "jobSkills": {
+ "importance": null,
+ "createdAt": "2016-05-11T05:07:45.000Z",
+ "updatedAt": "2016-05-11T05:07:45.000Z",
+ "jobJobId": 2,
+ "skillSkillId": 22
+ }
+ }
+ ]
+ },
+ {
+ "jobId": 3,
+ "jobTitle": "Application Developer",
+ "jobDescription": "Software Developer",
+ "minimumWage": 25,
+ "maximumWage": 35,
+ "setWage": 30,
+ "jobType": "App Developer",
+ "position": "full time",
+ "startingDate": null,
+ "endDate": null,
+ "location": "Fremont",
+ "userId": 2,
+ "skills": []
+ },
+ {
+"jobId": 4,
+    "jobTitle": "Java Developer",
+    "jobDescription": "Must be able to handle pressure. \nWrite clean code.\nLive close by. Not a remote job.",
+    "minimumWage": 40,
+    "maximumWage": 60,
+    "setWage": 0,
+    "jobType": null,
+    "position": null,
+    "startingDate": null,
+    "endDate": null,
+    "location": "800 West Taylor Street, San Jose, California, 95126",
+    "userId": 2,
+    "skills": [
+{
+    "name": "Java",
+    "skillId": 4,
+    "jobSkills": {
+        "importance": null,
+        "createdAt": "2016-05-11T05:03:13.000Z",
+        "updatedAt": "2016-05-11T05:03:13.000Z",
+        "jobJobId": 4,
+        "skillSkillId": 4
     }
-    ]
-    })
-    .then(function(jobs){
-        if (jobs){
-            res.send(JSON.stringify(jobs));
-        } else {
-            res.send(401, JSON.stringify(jobs));
-        }
-    })
-    .catch(function(err){
-        res.send(500, JSON.stringify(err));
-    })
+}
+]
+}]
 
-});
+*  @apiErrorExample {json} Error-Response:
+*     HTTP/1.1 401 Not Found
+*     {
+    *       "error": "Unauthorized!"
+        *     }
+        *  @apiPermission required
+        *  
+        */
+        router.get("", function(req, res, next){
+            res.setHeader('Content-Type', 'application/json');
+            jobsContext.findAll({
+
+                attributes: ['jobId', 'jobTitle', 'jobDescription'
+                , 'minimumWage', 'maximumWage', 'setWage' 
+                , 'jobType', 'position', 'startingDate', 'endDate'
+                , 'location', 'userId'],
+                include: [
+            { 
+                model: skillsContext,
+                attributes: ['name', 'skillId'],
+                as: 'skills',
+                required: false
+            }
+            ]
+            })
+            .then(function(jobs){
+                if (jobs){
+                    res.send(JSON.stringify(jobs));
+                } else {
+                    res.send(401, JSON.stringify(jobs));
+                }
+            })
+            .catch(function(err){
+                res.send(500, JSON.stringify(err));
+            })
+
+        });
 
 
 router.post("", function(req, res, next){
