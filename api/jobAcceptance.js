@@ -12,7 +12,7 @@ var userjobs = require('./../models').jobs;
  *  @apiGroup Acceptance
  *  @apiVersion 1.0.0
  *  @apiParam {number} amount user amount
- 	@apiParam {number} employeeId employee id
+ *	@apiParam {number} employeeId employee id
  *  @apiDescription Method Description : 
  *  Users use this method to accept jobs.
  *  @apiSampleRequest http://localhost:80/api/user/:userId/jobs/:jobId
@@ -314,6 +314,56 @@ router.put("/:userId/acceptedjobs/:acceptanceId",function(req,res,next){
 	}).catch(function(err){
 		res.send(JSON.stringify(err));
 	});
+});
+
+/**
+ *  @api {put} /api/user/:userId/offferedjobs/:acceptanceId employee update his/her finalized decision.
+ *  @apiName UPDATE EMPLOYEEMENT STAGE
+ *  @apiGroup Acceptance
+ *  @apiVersion 1.0.0
+ *  
+ *  @apiDescription Method Description : 
+ *  Employee uses this method to change his/her currently accepted jobs.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId/offeredjobs/:acceptanceId
+ *  @apiSuccess {String} Finalized The yes or no decision from employee.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+         Decision has been changed!
+        }   
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParam {boolean} finalized user's decision
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "finalized": 0
+ *     }
+ *  
+ */	
+router.put("/:userId/offeredjobs/:acceptanceId", function(req,res,next){
+	res.setHeader('Content-Type', 'application/json');
+	var userId = req.param("userId");
+	var acceptanceId = req.param("acceptanceId");
+	jobAcceptance.update({
+		finalized: req.body["finalized"]
+		,updatedAt: Date.now()}
+		,{where: 
+			{employeeId: userId,
+			acceptanceId: acceptanceId
+			}
+		
+		}).then(function(result){
+			if(result){
+				res.send(JSON.stringify("Decision has been changed!"));}
+			else{res.sendStatus(401);}
+		}).catch(function(err){
+			res.send(JSON.stringify(err));
+		});
 });
 
 module.exports = function(app) {
