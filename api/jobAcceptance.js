@@ -4,6 +4,7 @@ var usersContext = require('./../models').users;
 var jobAcceptance = require('./../models').jobAcceptances;
 var userjobs = require('./../models').jobs;
 
+
 router.post("/:userId/acceptjob/:jobId", function(req, res, next) {
 	res.setHeader('Content-Type', 'application/json');
 	
@@ -97,7 +98,6 @@ router.get("/:userId/joboffers", function(req,res,next){
 	});
 });
 
-	
 
 module.exports = function(app) {
     app.use("/api/user", router);

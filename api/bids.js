@@ -8,10 +8,10 @@ var jobContext = require('./../models').jobs;
 /**
  *  @api {post} /api/user/:userId/bids biding amount.
  *  @apiName PostNewBids
- *  @apiGroup employees
- *  @apiVesion 1.0.0
- *  @api
+ *  @apiGroup Bids
+ *  @apiVersion 1.0.0
  *  @apiParam {number} userId employeeId
+ *  
  */
 router.post("/:userId/bids", function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
@@ -39,12 +39,12 @@ router.post("/:userId/bids", function(req, res, next) {
 
 //employer views currents bids
 /**
- *  @api {get} /api/user/jobs/:jobId/currentbids viewing current bids amount and users for job with jodid.
- *  @apiName GetCurrentBids
- *  @apiGroup currentBids
- *  @apiVesion 1.0.0
- *  @api
- *  @apiParam {number} jobId jobId
+ *  @api {get} /api/user/jobs/:jobId/currentbids current biders and their amount.
+ *  @apiName Get current bids
+ *  @apiGroup Bids
+ *  @apiVersion 1.0.0
+ *  @apiParam {number} jobId currentJobId
+ *  
  */
 router.get("/jobs/:jobId/currentbids", function(req, res, next){
     res.setHeader('Content-Type', 'application/json');
@@ -101,6 +101,7 @@ router.get("/:userId/jobs/:jobId/currentbid/:bidId", function(req, res, next){
 
 //update job bids
 router.put("/:userId/jobs/:jobId/currentbid/:bidId/updatebid", function(req,res,next){
+    res.setHeader('Content-Type', 'application/json');
     var userId = req.param('userId');
     var jobId = req.param('jobId');
     var bidId = req.param('bidId');
