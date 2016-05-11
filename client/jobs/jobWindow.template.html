@@ -40,17 +40,15 @@
                 </div>
 
             </div>
-<!--             
-            <div class="col col-xs-6 text-right">
-                <button ng-if="job.userId != user.userId" 
-                    ng-click="job.addBid(user)"
-                    class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
-                <button ng-if="job.userId == user.userId"
-                    ng-click="user.startEdit()"
-                    class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>
-            </div> 
--->
-            <div class="col col-xs-6 text-right">
+
+           <div class="col col-xs-6 text-right">
+                <div class="well well-sm text-left">
+                    <label class="text-primary">Required Skills:</label> <br />
+                    <label class="label label-warning" ng-if="!job.skills.length"><em>None</em></label>
+                    <button class="btn btn-xs btn-success" style="margin-right: 5px;"
+                        ng-repeat="skill in job.skills">{{ skill.name }}</button>    
+                </div>
+                
                 <button ng-if="job.userId != user.userId" 
                     ng-click="addBid(job)"
                     class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
