@@ -52,6 +52,9 @@
                     ng-click="addBid(job)"
                     class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
                 <button ng-if="job.userId == user.userId"
+                    ng-click="showBids(job, user)"
+                    class="btn btn-sm btn-info"><i class="fa fa-money"></i> Bids</button>
+                <button ng-if="job.userId == user.userId"
                     ng-click="startEdit()"
                     class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>
             </div>

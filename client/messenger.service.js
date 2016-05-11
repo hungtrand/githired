@@ -114,7 +114,8 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             }
 
             return promise.$promise;
-        }
+        },
+        bidsModal: {}
     }
 
     return service;

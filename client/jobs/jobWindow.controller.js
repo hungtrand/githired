@@ -5,4 +5,8 @@ module.exports = function($scope, messenger) {
     $scope.startEdit = function() {
         messenger.jobPostingForm.control.edit($scope.job);
     }
+
+    $scope.showBids = function(job, user) {
+        messenger.bidsModal.control.show();
+    }
 }

@@ -8,12 +8,14 @@ var signup_directive = require("./signup/signupForm.directive");
 var postjob_directive = require("./postjob/postjobForm.directive");
 var mySkills_directive = require("./skills/mySkills.directive");
 var jobWindow_directive = require("./jobs/jobWindow.directive");
+var bids_directive = require("./bids/bids.directive");
 
 var user_factory = require("./user.factory");
 var joblist_factory = require("./jobs/joblist.factory");
 var mySkills_factory = require("./skills/mySkills.factory");
 var job_factory = require("./postjob/job.factory");
 var bid_factory = require('./bids/bid.factory');
+var bidlist_factory = require('./bids/bidlist.factory');
 
 var gmap_controller = require("./gmap/gmap.controller");
 
@@ -33,6 +35,7 @@ window.init = function() {
         .factory('mySkills_factory', ['$resource', mySkills_factory])
         .factory('job_factory', ['$resource', '$rootScope', job_factory])
         .factory('bid_factory', ['$resource', bid_factory])
+        .factory('bidlist_factory', ['$resource', bidlist_factory])
         ;
 
     app
@@ -51,6 +54,7 @@ window.init = function() {
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
         .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
+        .directive('ghBids', [bids_directive])
         ;
 
     app
@@ -67,7 +71,7 @@ window.init = function() {
 
 };
 
-},{"./bids/bid.factory":2,"./gmap/gmap.controller":3,"./gmap/gmap.directive":4,"./jobs/jobWindow.directive":6,"./jobs/joblist.factory":7,"./main.controller":8,"./messenger.service":9,"./navbar/navbar.directive":11,"./postjob/job.factory":12,"./postjob/postjob.service":14,"./postjob/postjobForm.directive":15,"./search/searchInput.directive":16,"./sidebar/sidebar.directive":17,"./signin/signin.directive":19,"./signup/signupForm.directive":21,"./skills/mySkills.directive":22,"./skills/mySkills.factory":23,"./skills/trendySkills.service":24,"./user.factory":25}],2:[function(require,module,exports){
+},{"./bids/bid.factory":2,"./bids/bidlist.factory":3,"./bids/bids.directive":5,"./gmap/gmap.controller":6,"./gmap/gmap.directive":7,"./jobs/jobWindow.directive":9,"./jobs/joblist.factory":10,"./main.controller":11,"./messenger.service":12,"./navbar/navbar.directive":14,"./postjob/job.factory":15,"./postjob/postjob.service":17,"./postjob/postjobForm.directive":18,"./search/searchInput.directive":19,"./sidebar/sidebar.directive":20,"./signin/signin.directive":22,"./signup/signupForm.directive":24,"./skills/mySkills.directive":25,"./skills/mySkills.factory":26,"./skills/trendySkills.service":27,"./user.factory":28}],2:[function(require,module,exports){
 module.exports = function($resource) {
 	// define the class
 	var resBid = $resource(
@@ -83,6 +87,51 @@ module.exports = function($resource) {
 	return resBid;
 }
 },{}],3:[function(require,module,exports){
+module.exports = function($resource) {
+	var url = "/api/user/:userId/:jobId/:request";
+
+	var resBidList = $resource(
+		url,
+		{
+			userId: "@userId",
+			jobId: "@jobId",
+			request: "@aRequest"
+		},
+		{
+			fetchBids: { method: 'GET', params: { request: 'currentbids' } }
+		}
+	);
+
+	return resBidList;
+}
+
+},{}],4:[function(require,module,exports){
+module.exports = function($scope, messenger) {
+    $scope.control = {};
+    messenger.bidsModal.control = $scope.control;
+}
+
+},{}],5:[function(require,module,exports){
+module.exports = function() {
+	var controller = require('./bids.controller');
+
+	return {
+		templateUrl: 'bids/bids.modal.html'
+		, scope: {
+			
+		}
+
+		, link: function($scope, $element, $attrs) {
+			var modal = $element.find('.modal');
+			
+			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.hide = function() { modal.modal('hide'); }
+		}
+
+		, controller: ['$scope', 'messenger_service', controller]
+	}
+}
+},{"./bids.controller":4}],6:[function(require,module,exports){
 module.exports = function($scope, messenger) {
 	$scope.control = {};
 	$scope.jobs = messenger.joblist;
@@ -92,7 +141,7 @@ module.exports = function($scope, messenger) {
 		messenger.jobPostingForm.control.show(objAddress);
 	}
 }
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function($compile, messenger) {
     var controller = require('./gmap.controller');
     /***** Private properties ******/
@@ -317,7 +366,7 @@ module.exports = function($compile, messenger) {
     }
 }
 
-},{"./gmap.controller":3}],5:[function(require,module,exports){
+},{"./gmap.controller":6}],8:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.jobs = messenger.joblist;
     $scope.user = messenger.user;
@@ -325,9 +374,12 @@ module.exports = function($scope, messenger) {
     $scope.startEdit = function() {
         messenger.jobPostingForm.control.edit($scope.job);
     }
-}
 
-},{}],6:[function(require,module,exports){
+    $scope.showBids = function(job, user) {
+        messenger.bidsModal.control.show();
+    }
+}
+},{}],9:[function(require,module,exports){
 module.exports = function(messenger) {
     var controller = require('./jobWindow.controller.js');
 
@@ -353,7 +405,7 @@ module.exports = function(messenger) {
     }
 }
 
-},{"./jobWindow.controller.js":5}],7:[function(require,module,exports){
+},{"./jobWindow.controller.js":8}],10:[function(require,module,exports){
 module.exports = function($resource) {
 	var url = "api/jobs";
 
@@ -362,7 +414,7 @@ module.exports = function($resource) {
         });
 }
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function ($scope, messenger) {
     if (sessionStorage.getItem("__githired.user.credentials__")) {
         var strCredentials = sessionStorage.getItem("__githired.user.credentials__");
@@ -387,7 +439,7 @@ module.exports = function ($scope, messenger) {
     messenger.fetchJobs();
 }
 
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function($rootScope, user_factory, joblist_factory, job_factory) {
 
     var service = {
@@ -504,13 +556,14 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             }
 
             return promise.$promise;
-        }
+        },
+        bidsModal: {}
     }
 
     return service;
 }
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.user = messenger.user;
 
@@ -567,7 +620,7 @@ module.exports = function($scope, messenger) {
 
 }
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = function() {
     var controller = require("./navbar.controller");
 
@@ -589,7 +642,7 @@ module.exports = function() {
     }
 }
 
-},{"./navbar.controller":10}],12:[function(require,module,exports){
+},{"./navbar.controller":13}],15:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
     // define the class
     var resJob = $resource(
@@ -607,7 +660,7 @@ module.exports = function($resource, $rootScope) {
     return resJob;
 }
 
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = function($scope, messenger, trendySkills_service) {
     $scope.control = {};
     messenger.jobPostingForm.control = $scope.control;
@@ -671,7 +724,7 @@ module.exports = function($scope, messenger, trendySkills_service) {
 
 }
 
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
 	var client = $resource(
 		'/api/postjob/'
@@ -682,7 +735,7 @@ module.exports = function($resource, $rootScope) {
 	
 	return client;
 }
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = function() {
     var controller = require('./postjob.controller');
 
@@ -727,7 +780,7 @@ module.exports = function() {
     }
 }
 
-},{"./postjob.controller":13}],16:[function(require,module,exports){
+},{"./postjob.controller":16}],19:[function(require,module,exports){
 module.exports = function() {
 
     return {
@@ -795,7 +848,7 @@ module.exports = function() {
     }
 }
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports =function() {
 	var controller = function($scope, messenger) {
 		$scope.control = {};
@@ -819,7 +872,7 @@ module.exports =function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signin.control = $scope.control;
@@ -855,7 +908,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signin.controller');
 
@@ -876,7 +929,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signin.controller":18}],20:[function(require,module,exports){
+},{"./signin.controller":21}],23:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
     messenger.signup.control = $scope.control;
@@ -930,7 +983,7 @@ module.exports = function($scope, messenger) {
     }
 }
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports = function() {
 	var controller = require('./signup.controller');
 
@@ -950,7 +1003,7 @@ module.exports = function() {
 		, controller: ['$scope', 'messenger_service', controller]
 	}
 }
-},{"./signup.controller":20}],22:[function(require,module,exports){
+},{"./signup.controller":23}],25:[function(require,module,exports){
 module.exports = function() {
     var controller = function($scope, messenger, trendySkills_service) {
         $scope.control = {};
@@ -1043,7 +1096,7 @@ module.exports = function() {
     }
 }
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "/api/user/:userId/skills"
 
@@ -1057,7 +1110,7 @@ module.exports = function($resource) {
     return mySkills;
 }
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports = function($resource) {
     var url = "http://trendyskills.com/service";
     var trendySkills = $resource(
@@ -1079,7 +1132,7 @@ module.exports = function($resource) {
     return trendySkills;
 }
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) {
     // define the class
     var resUser = $resource(
