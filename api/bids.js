@@ -10,15 +10,15 @@ var jobContext = require('./../models').jobs;
  *  @apiName PostNewBids
  *  @apiGroup Bids
  *  @apiVersion 1.0.0
- *  @apiParam {number} userId employeeId
+ *  @apiParam {number} amount user amount
  *  @apiDescription Method Description : 
  *  Users use this method to bid the job.
  *  @apiSampleRequest http://localhost:80/api/user/:userId/bids
- *  @apiSuccess {String} amount The amount of user bid.
+ *  @apiSuccess {String} amount The amount of user's bid.
  *  @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "amount": "200",
+ *       "amount": "50",
  *       "createdAt": "2016-05-11"
  *     }
  *  @apiErrorExample {json} Error-Response:
@@ -94,15 +94,56 @@ router.post("/:userId/bids", function(req, res, next){
 });
 
 
-//employer views currents bids
 /**
- *  @api {get} /api/user/jobs/:jobId/currentbids current biders and their amount.
- *  @apiName Get current bids
+ *  @api {get} /api/user/jobs/:jobId/currentbids employer views current bids.
+ *  @apiName GETBIDS
  *  @apiGroup Bids
  *  @apiVersion 1.0.0
- *  @apiParam {number} jobId currentJobId
- *  @apiDescription Method Description: 
- *  Employer uses this method to view the current bids.
+ *  @apiDescription Method Description : 
+ *  Users use this method to view currently getting bidded job.
+ *  @apiSampleRequest http://localhost:80/api/user/jobs/:jobId/currentbids
+ *  @apiSuccess {String} amount The amount of user's bid.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+        "bidId": 1,
+        "amount": 190,
+        "timestamp": "2016-05-10T07:13:25.000Z",
+        "createdAt": "2016-05-10T07:13:25.000Z",
+        "updatedAt": "2016-05-10T19:40:43.000Z",
+        "jobId": 3,
+        "userId": 1,
+        "user": {
+            "userId": 1,
+            "firstName": "tester",
+            "lastName": "",
+            "company": "GitHired",
+            "email": "lupabiwy@yahoo.com",
+            "linkedin": null
+        },
+        "job": {
+            "jobId": 3,
+            "jobTitle": "Application Developer",
+            "jobDescription": "Software Developer",
+            "minimumWage": 25,
+            "setWage": 30,
+            "jobType": "App Developer",
+            "position": "full time",
+            "startingDate": null
+            }
+        }
+    
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "amount": 50
+ *     }
  *  
  */
 router.get("/jobs/:jobId/currentbids", function(req, res, next){
@@ -129,6 +170,51 @@ router.get("/jobs/:jobId/currentbids", function(req, res, next){
 
 
 //employee views his/her current bid on specified job.
+/**
+ *  @api {get} /api/user/:userId/jobs/:jobId/currentbid/:bidId employee views his/her current bidding amount.
+ *  @apiName GETMYBIDS
+ *  @apiGroup Bids
+ *  @apiVersion 1.0.0
+ *  
+ *  @apiDescription Method Description : 
+ *  Employee uses this method to view his/her currently bidding amount on the job that belong to job id.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId/jobs/:jobId/currentbid/:bidId
+ *  @apiSuccess {String} amount The amount of user's bid.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+    "amount": 200,
+    "createdAt": "2016-05-10T20:32:48.000Z",
+    "updatedAt": "2016-05-11T00:00:29.000Z",
+    "job": {
+        "jobTitle": "tester",
+        "jobDescription": "qa skillz",
+        "minimumWage": 8,
+        "maximumWage": 12,
+        "jobType": null,
+        "position": null,
+        "startingDate": null,
+        "location": "396 Keyes St, San Jose, CA 95112, USA",
+        "user": {
+            "firstName": "Bhargava",
+            "lastName": "Ramisetty",
+            "company": "GitHired Inc.",
+            "email": "bhargava@email.com",
+            "linkedin": null
+        }
+    }
+}
+    
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  
+ *  
+ */
 router.get("/:userId/jobs/:jobId/currentbid/:bidId", function(req, res, next){
     res.setHeader('Content-Type','application/json');
     var userId = req.param('userId');
@@ -159,6 +245,35 @@ router.get("/:userId/jobs/:jobId/currentbid/:bidId", function(req, res, next){
 });
 
 //update job bids
+/**
+ *  @api {put} /api/user/:userId/jobs/:jobId/currentbid/:bidId/updatebid employee update his/her current bids.
+ *  @apiName UPDATECURRENTBID
+ *  @apiGroup Bids
+ *  @apiVersion 1.0.0
+ *  
+ *  @apiDescription Method Description : 
+ *  Employee uses this method to change his/her currently bidding amount on the job that belong to job id.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId/jobs/:jobId/currentbid/:bidId/updatebid
+ *  @apiSuccess {String} amount The amount of user's bid.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+         ammount updated!
+        }   
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParam {number} amount user amount
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "amount": 100
+ *     }
+ *  
+ */
 router.put("/:userId/jobs/:jobId/currentbid/:bidId/updatebid", function(req,res,next){
     res.setHeader('Content-Type', 'application/json');
     var userId = req.param('userId');
