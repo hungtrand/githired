@@ -8,7 +8,7 @@ var commentContext = require('./../models').comments;
 
 //view user's comments.
 /**
- *  @api {get} /api/user/:userId/comments user views comments.
+ *  @api {get} /api/user/:userId/jobs/:jobId/comments user views comments.
  *  @apiName View comments
  *  @apiGroup Comments
  *  @apiVersion 1.0.0
@@ -36,12 +36,14 @@ var commentContext = require('./../models').comments;
  *  @apiPermission required
  *  
  */
-router.get("/:userId/Comments", function(req,res,next){
+router.get("/:userId/jobs/:jobId/Comments", function(req,res,next){
 	res.setHeader('Content-Type', 'application/json');
 	var userId = req.param('userId');
+	var jobId = req.param('jobId');
 	var viewComments = commentContext.findAll({
 		
-		where: {userId: userId}
+		where: {userId: userId,
+		jobId: jobId}
 
 	}).then(function(comments){
 		if(comments){
@@ -69,6 +71,7 @@ router.get("/:userId/Comments", function(req,res,next){
  *     HTTP/1.1 200 OK
  *     {
     	"commentId": 2,
+    	"comment" : "It is a good experience working here."
     	"userId": "1",
     	"jobId": "2",
     	"timestamp": "2016-05-11T19:08:50.908Z",
@@ -83,7 +86,7 @@ router.get("/:userId/Comments", function(req,res,next){
  *  @apiPermission required
  *  @apiParamExample {json} Request-Example:
  *     {
- *       "comments": "It is a good experience working here."
+ *       "comment": "It is a good experience working here."
  *     }
  *  
  */
@@ -108,7 +111,6 @@ router.post("/:userId/jobs/:jobId/comments", function(req,res,next){
 		res.send(JSON.stringify(err));
 	});
 });
-
 
 
 

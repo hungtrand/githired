@@ -156,6 +156,76 @@ define({ "api": [
   },
   {
     "type": "put",
+    "url": "/api/user/:userId/offferedjobs/:acceptanceId",
+    "title": "employee update his/her finalized decision.",
+    "name": "UPDATE_EMPLOYEEMENT_STAGE",
+    "group": "Acceptance",
+    "version": "1.0.0",
+    "description": "<p>Method Description : Employee uses this method to change his/her currently accepted jobs.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/offeredjobs/:acceptanceId"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "Finalized",
+            "description": "<p>The yes or no decision from employee.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n    {\n     Decision has been changed!\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "boolean",
+            "optional": false,
+            "field": "finalized",
+            "description": "<p>user's decision</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"finalized\": 0\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./jobAcceptance.js",
+    "groupTitle": "Acceptance"
+  },
+  {
+    "type": "put",
     "url": "/api/user/:userId/acceptedjobs/:acceptanceId",
     "title": "employer update his/her finalized decision.",
     "name": "UPDATE_EMPLOYEEMENT_STAGE",
@@ -223,6 +293,65 @@ define({ "api": [
     },
     "filename": "./jobAcceptance.js",
     "groupTitle": "Acceptance"
+  },
+  {
+    "type": "post",
+    "url": "/api/user/",
+    "title": "user sign up an account.",
+    "name": "Create_an_account_",
+    "group": "Account",
+    "version": "1.0.0",
+    "description": "<p>Method\tDescription : \tUser uses this method to create a new account.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "The",
+            "description": "<p>user successfully created an account.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\t\tHTTP/1.1 200 OK\n\t\t{\n\t\t\t\"firstName\" : \"star\",\n\t\t\t\"lastName\" : \"green\",\n\t\t\t\"company\" : \"greeStar\",\n\t\t\t\"email\" : \"green.star@smejdsu.org\",\n\t\t\t\"success\" : \"Account creation is successful\"\n \t\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": " \t\tHTTP/1.1 401 Not Found\n \t\t{\n\t\t\t\"error\" : \"Unauthorized!\"\n \t\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n\t\"firstName\" : \"star\",\n\t\"lastName\" : \"green\",\n\t\"company\" : \"greenStar\",\n\t\"email\" : \"green.star.smejdsu.org\",\n\t\"password\" : \"*******\",\n\t\"isEmplyoee\" :  \"1\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./signup.js",
+    "groupTitle": "Account"
   },
   {
     "type": "Post",
@@ -705,7 +834,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n  \"comments\": \"It is a good experience working here.\"\n}",
+          "content": "{\n  \"comment\": \"It is a good experience working here.\"\n}",
           "type": "json"
         }
       ]
@@ -731,7 +860,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n    {\n    \t\"commentId\": 2,\n    \t\"userId\": \"1\",\n    \t\"jobId\": \"2\",\n    \t\"timestamp\": \"2016-05-11T19:08:50.908Z\",\n    \t\"createdAt\": \"2016-05-11T19:08:50.908Z\",\n    \t\"updatedAt\": \"2016-05-11T19:08:50.000Z\"\n\t\t}",
+          "content": "    HTTP/1.1 200 OK\n    {\n    \t\"commentId\": 2,\n    \t\"comment\" : \"It is a good experience working here.\"\n    \t\"userId\": \"1\",\n    \t\"jobId\": \"2\",\n    \t\"timestamp\": \"2016-05-11T19:08:50.908Z\",\n    \t\"createdAt\": \"2016-05-11T19:08:50.908Z\",\n    \t\"updatedAt\": \"2016-05-11T19:08:50.000Z\"\n\t\t}",
           "type": "json"
         }
       ]
@@ -755,7 +884,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/api/user/:userId/comments",
+    "url": "/api/user/:userId/jobs/:jobId/comments",
     "title": "user views comments.",
     "name": "View_comments",
     "group": "Comments",
@@ -1040,45 +1169,6 @@ define({ "api": [
     },
     "filename": "./user-skills.js",
     "groupTitle": "Skills"
-  },
-  {
-    "type": "get",
-    "url": "/api/user/:userId/userjobs",
-    "title": "user views current posted jobs.",
-    "name": "View_Jobs",
-    "group": "User_Jobs",
-    "version": "1.0.0",
-    "description": "<p>Method Description : Users use this method to view currently jobs.</p>",
-    "sampleRequest": [
-      {
-        "url": "http://localhost:80/api/user/:userId/userjobs"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n    {\n\t\t\"userId\": 1,\n\t\t\"jobId\" : 1,\n\t\t\"jobType\" : \"software engineer\" \n \t}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "examples": [
-        {
-          "title": "Error-Response:",
-          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "permission": [
-      {
-        "name": "required"
-      }
-    ],
-    "filename": "./userJobs.js",
-    "groupTitle": "User_Jobs"
   },
   {
     "type": "get",

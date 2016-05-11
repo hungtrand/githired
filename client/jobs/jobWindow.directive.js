@@ -18,6 +18,17 @@ module.exports = function(messenger, job_factory) {
                     $scope.job.userBid = b;
                 }
             });
+
+            $scope.addBid = function(job) {
+                $scope.bidding = true;
+                var bidAmount = $element.find('.bidAmount').val() || job.setWage;
+                $scope.user
+                    .createBid(job.jobId, bidAmount)
+                    .then(function(response) {
+                        $scope.job.userBid = response;
+                        $scope.bidding = false;
+                    });
+            }
         },
         controller: ['$scope', 'messenger_service', 'job_factory', controller]
     }
