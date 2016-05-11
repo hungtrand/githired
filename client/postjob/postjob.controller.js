@@ -2,6 +2,8 @@ module.exports = function($scope, messenger, trendySkills_service) {
     $scope.control = {};
     messenger.jobPostingForm.control = $scope.control;
     $scope.model = {};
+    $scope.model.skills = [];
+
 
     $scope.submitPostJob = function() {
         messenger
@@ -10,13 +12,14 @@ module.exports = function($scope, messenger, trendySkills_service) {
     }
 
     $scope.selected = null;
-    $scope.selectSkill = function($item, $model, $label, $event) {
+    $scope.selectRequiredSkill = function($item, $model, $label, $event) {
         $scope.selected = "";
+        console.log($model);
         $scope.model.skills.push({
             name: $model
         });
     }
-    
+
     $scope.removeSkill = function($index) {
         $scope.model.skills.splice($index, 1);
     }

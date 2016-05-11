@@ -92,6 +92,47 @@ router.get("", function(req, res, next){
 
 });
 
+router.post("", function(req, res, next){
+    res.setHeader('Content-Type', 'application/json');
+    var skills = req.body['skills'];
+    var skillsCond = [];
+    for (var i = 0, l = skills.length; i < l; i ++) {
+        var c = { name: { $like: skills[i] }};
+        skillsCond.push(c);
+    }
+
+    jobsContext.findAll({
+
+        attributes: ['jobId', 'jobTitle', 'jobDescription'
+        , 'minimumWage', 'maximumWage', 'setWage' 
+        , 'jobType', 'position', 'startingDate', 'endDate'
+        , 'location', 'userId'],
+        include: [
+            { 
+                model: skillsContext,
+                attributes: ['name', 'skillId'],
+                as: 'skills',
+                required: true,
+                where: {
+                    $or: skillsCond
+                }
+            }
+        ]
+    })
+    .then(function(jobs){
+        if (jobs){
+            res.send(JSON.stringify(jobs));
+        } else {
+            res.send(401, JSON.stringify(jobs));
+        }
+    })
+    .catch(function(err){
+        res.send(500, JSON.stringify(err));
+    })
+
+});
+
+
 
 module.exports = function(app) {
     app.use("/api/jobs", router);

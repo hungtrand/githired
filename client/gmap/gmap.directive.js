@@ -12,6 +12,7 @@ module.exports = function($compile, messenger) {
     function clearMarkers(markerList) {
         angular.forEach(markerList, function(marker, index) {
             marker.setMap(null);
+            delete markers[index];
         });
     }
 
@@ -35,7 +36,7 @@ module.exports = function($compile, messenger) {
             var infowindow = new google.maps.InfoWindow({
                 content: content[0] 
             });   
-                
+
             infowindow.open(map, newMarker);
         });
 
@@ -125,7 +126,7 @@ module.exports = function($compile, messenger) {
                 }
             }
 
-            google.maps.event.addListener(map, 'click', function(e) {
+            google.maps.event.addListener(map, 'dblclick', function(e) {
                 geocoder.geocode({
                     'latLng': e.latLng
                 },
@@ -149,31 +150,40 @@ module.exports = function($compile, messenger) {
 
             $scope.$watch("jobs", 
                     function(newJobsArray, oldJobsArray) {
-
+                        clearMarkers(markers);
                         // TODO (4/24/2016): remove all markers from the map to avoid stale markers.
-
+                        var i = 0;
+                        var timeout = 100;
                         function retrieveLatLngOfJobAndSetOnMap(job) {
+                            if (i >= newJobsArray.length) return;
+
                             geocoder.geocode({
                                 'address': job.location + ""
                             },
                             function(results, status) {
                                 if (status == google.maps.GeocoderStatus.OK) {
-                                    console.log(results);
+                                    //console.log(results);
                                     job.jobAddress = results[0].geometry.location;
                                     var marker = markerFactory(
                                         job,
                                         results[0].geometry.location,
                                         $scope
                                         );
+
+                                    markers.push(marker);
                                 } else {
                                     console.log("Geocode was not successful for the following reason: " + status);
                                 }
                             });
+                            
+                            if (i >= 9) timeout = 1000
+                            else timeout = 100;
+                            setTimeout(function() {
+                                retrieveLatLngOfJobAndSetOnMap(newJobsArray[++i]);
+                            }, timeout);
                         }
 
-                        for (var i = 0; i < newJobsArray.length; i++) {
-                            retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
-                        }
+                        retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
                     },
                     true);
         }

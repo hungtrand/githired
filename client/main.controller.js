@@ -1,5 +1,4 @@
 module.exports = function ($scope, messenger) {
-    console.log(messenger.joblist);
     if (sessionStorage.getItem("__githired.user.credentials__")) {
         var strCredentials = sessionStorage.getItem("__githired.user.credentials__");
         var email = strCredentials.split(":")[0];
@@ -15,4 +14,6 @@ module.exports = function ($scope, messenger) {
                 }
             );
     }
+
+    messenger.fetchJobs();
 }

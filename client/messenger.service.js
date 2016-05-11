@@ -39,7 +39,6 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             window.location.reload();
         },
         jobPostingForm: {}, 
-        jobs: [], 
         joblist: [],
         user: null, 
         gmap: {},
@@ -53,11 +52,11 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
         addJob: function(jobForm) {
             var self = this;
             // TODO job_factory
-            self.job = job_factory.createJob({userId: this.user.userId}, jobForm);
-            self.job.$promise
+            var job = job_factory.createJob({userId: this.user.userId}, jobForm);
+            job.$promise
                 .then(
                         function(newJob) {
-                            // self.setSession(signupForm);
+                            self.jobs.push(job);
                         }
                         ,
                         function(error) {
@@ -66,24 +65,29 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
 
             return self.job.$promise;
         }, 
-        fetchJobs: function() {
+        fetchJobs: function(arrSkills) {
             var self = this;
-            joblist_factory.query({}, function(response) {
-                // success
-                console.log("i'm in success");
-                console.log("Response:" + response);
+            var searchParams = { skills: arrSkills || [] };
+            var promise = null; 
+            if (arrSkills) {
+                promise = joblist_factory.search({}, searchParams, function(response) {
+                    angular.copy(response, self.joblist);
+                }, function(failure) {
+                    console.log(failure);
+                });
+            } else {
+                promise = joblist_factory.query({}, function(response) {
+                    angular.copy(response, self.joblist); // use angular copy to save reference
+                }, function(failure) {
+                    // failure
+                    console.log("Failure:" + failure);
+                });
 
-                // self.joblist.splice(0, self.joblist.length);
-                angular.copy(response, self.joblist); // use angular copy to save reference
-            }, function(failure) {
-                // failure
-                console.log("Failure:" + failure);
-            });
+            }
+
+            return promise.$promise;
         }
     }
-
-    // Display job markers on load
-    service.fetchJobs();
 
     return service;
 }
