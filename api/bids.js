@@ -27,10 +27,6 @@ var skillsContext = require('./../models').skills;
  *       "error": "Unauthorized!"
  *     }
  *  @apiPermission required
- *  @apiParamExample {json} Request-Example:
- *     {
- *       "amount": 50
- *     }
  *  
  */
 router.get("/:userId/bids", function(req, res, next) {
@@ -54,6 +50,32 @@ router.get("/:userId/bids", function(req, res, next) {
     });
 });
 
+/**
+ *  @api {post} /api/user/:userId/bids user creates new bids
+ *  @apiName    create new bids
+ *  @apiGroup   Bids
+ *  @apiVersion 1.0.0
+ *  @apiDescription Method Description:
+ *  User uses this method to create new bids with amount.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId/bids
+ *  @apiSuccess {String} amount The amount of user's bid.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "amount": "50",
+ *       "createdAt": "2016-05-11"
+ *     }
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "amount": 50
+ *     }
+ */
 router.post("/:userId/bids", function(req, res, next){
     var userId = req.param('userId');
     var created = Date.now();
@@ -94,6 +116,33 @@ router.post("/:userId/bids", function(req, res, next){
     });
 });
 
+
+/**
+ *  @api {put} /api/user/:userId/bids/:bidId user updates current bids rate. 
+ *  @apiName    Update current bids rate.
+ *  @apiGroup   Bids
+ *  @apiVersion 1.0.0
+ *  @apiDescription Method Description:
+ *  User uses this method to update his/her current rating.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId/bids
+ *  @apiSuccess {String} amount The amount of user's bid.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "rating": "5",
+ *       "createdAt": "2016-05-11"
+ *     }
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "rating": 5
+ *     }
+ */
 router.put("/:userId/bids/:bidId", function(req, res, next){
     var userId = req.params['userId'];
     var bidId = req.params['bidId'];
