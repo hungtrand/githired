@@ -11,19 +11,52 @@ var jobContext = require('./../models').jobs;
  *  @apiGroup Bids
  *  @apiVersion 1.0.0
  *  @apiParam {number} userId employeeId
+ *  @apiDescription Method Description : 
+ *  Users use this method to bid the job.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId/bids
+ *  @apiSuccess {String} amount The amount of user bid.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "amount": "200",
+ *       "createdAt": "2016-05-11"
+ *     }
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "amount": 50
+ *     }
  *  
  */
-router.post("/:userId/bids", function(req, res, next) {
-    res.setHeader('Content-Type', 'application/json');
+router.post("/:userId/bids", function(req, res, next){
+    var userId = req.param('userId');
     var created = Date.now();
-    var bid = bidsContext.build({
-        userId: req.params["userId"]
+    
+    var checker = bidsContext.findOne({
+        where: {
+            userId: userId,
+            jobId: req.body["jobId"]
+        }
+    }).then(function(result){
+        if(result !== null){
+            res.send(JSON.stringify("User already Bid!"));
+        }else{
+        
+        var bid = bidsContext.build({
+        userId: userId
         , jobId: req.body["jobId"]
         , timestamp: created
         , createdAt: created
         , updatedAt: created
         , amount: req.body["bidAmount"]
     });
+
+    
 
     // console.log(bid);
     bid
@@ -34,6 +67,10 @@ router.post("/:userId/bids", function(req, res, next) {
         .catch(function(err) {
             res.send(JSON.stringify(err));
         });
+        }
+    }).catch(function(err){
+        res.send(JSON.stringify(err));
+    });
 });
 
 
@@ -44,6 +81,8 @@ router.post("/:userId/bids", function(req, res, next) {
  *  @apiGroup Bids
  *  @apiVersion 1.0.0
  *  @apiParam {number} jobId currentJobId
+ *  @apiDescription Method Description: 
+ *  Employer uses this method to view the current bids.
  *  
  */
 router.get("/jobs/:jobId/currentbids", function(req, res, next){
@@ -123,6 +162,10 @@ router.put("/:userId/jobs/:jobId/currentbid/:bidId/updatebid", function(req,res,
         res.send(JSON.stringify(err));
     });
 });
+
+
+
+
 
 module.exports = function(app) {
     app.use("/api/user/", router);

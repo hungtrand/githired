@@ -19,6 +19,7 @@ define({ "api": [
         ]
       }
     },
+    "description": "<p>Method Description: Employer uses this method to view the current bids.</p>",
     "filename": "./bids.js",
     "groupTitle": "Bids"
   },
@@ -38,10 +39,65 @@ define({ "api": [
             "optional": false,
             "field": "userId",
             "description": "<p>employeeId</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "amount",
+            "defaultValue": "employerDefine",
+            "description": "<p>Request Body amount.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"amount\": 50\n}",
+          "type": "json"
+        }
+      ]
     },
+    "description": "<p>Method Description : Users use this method to bid the job.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/bids"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>The amount of user bid.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"amount\": \"200\",\n  \"createdAt\": \"2016-05-11\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
     "filename": "./bids.js",
     "groupTitle": "Bids"
   },

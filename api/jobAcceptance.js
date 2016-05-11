@@ -56,9 +56,6 @@ router.get("/:userId/acceptedJob/",function(req,res, next) {
 		
 		// include: [{model: usersContext
 		// }]
-		
-					
-
 
 	}).then(function(accepted){
 		if(!accepted){
@@ -72,7 +69,7 @@ router.get("/:userId/acceptedJob/",function(req,res, next) {
 
 });
 
-
+//employee views accepted jobs serves as offers
 router.get("/:userId/joboffers", function(req,res,next){
 	var userId = req.params['userId'];
 
@@ -98,7 +95,6 @@ router.get("/:userId/joboffers", function(req,res,next){
 		res.send(JSON.stringify(err));
 	});
 });
-
 
 
 module.exports = function(app) {
