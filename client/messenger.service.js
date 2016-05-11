@@ -79,7 +79,8 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
                 // failure
                 console.log("Failure:" + failure);
             });
-        }
+        },
+        bidsModal: {}
     }
 
     // Display job markers on load

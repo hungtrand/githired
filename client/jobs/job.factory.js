@@ -1,4 +1,4 @@
-module.exports = function($resource) {
+module.exports = function($resource, $rootScope) {
 	var url = "/api/jobs/:jobId";
 
 	// $resource will return a 'Class' object that can instantiated with 
