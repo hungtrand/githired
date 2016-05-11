@@ -28,12 +28,7 @@ module.exports =function(messenger) {
             $scope.control.hide = function() {
                 $element.toggleClass("toggled", false);
             }
-
-            $(document).on('dblclick', function() {
-                console.log($scope.userBids);
-                debugger
-            })
-        }
+       }
 
         , controller: ['$scope', 'messenger_service', 'bid_factory', controller]
     }

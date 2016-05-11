@@ -25,8 +25,15 @@
                                 label-success">{{ bid.amount}}</label>
                             
                         </div>
-                        <button type="button" class="btn btn-sm btn-success">Accept</button>
-                        <button type="button" class="btn btn-sm btn-danger">Decline</button>
+                        <button type="button" class="btn btn-sm"
+                            ng-class="{ 'btn-success': bid.accepted, 'btn-info':!bid.accepted }"
+                            ng-disabled="bid.accepted || bid.declined"
+                            ng-click="acceptBid(bid)">Accept</button>
+                        <button type="button" class="btn btn-sm btn-danger"
+                            ng-class="{ 'btn-danger': bid.declined,'btn-warning': !bid.declined }"
+
+                            ng-disabled="bid.declined || bid.accepted"
+                            ng-click="declineBid(bid)">Decline</button>
                     </div>
                 </div>
                 </div>
