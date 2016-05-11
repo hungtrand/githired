@@ -1,4 +1,4 @@
-module.exports = function(messenger) {
+module.exports = function(messenger, job_factory) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -13,12 +13,12 @@ module.exports = function(messenger) {
                 }
             });
 
-            $scope.addBid = function(job) {
-                console.log("you clicked on the bid button");
-                var bidAmount = $element.find(".bidAmount").val() || job.setWage;
-                $scope.user.createBid(job.jobId, bidAmount);
-            } 
+            angular.forEach(messenger.user.bids, function(b, i) {
+                if (b.jobId == $scope.jobId) {
+                    $scope.job.userBid = b;
+                }
+            });
         },
-        controller: ['$scope', 'messenger_service', controller]
+        controller: ['$scope', 'messenger_service', 'job_factory', controller]
     }
 }

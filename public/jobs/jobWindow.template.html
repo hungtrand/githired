@@ -49,8 +49,16 @@
                 </div>
                 
                 <button ng-if="job.userId != user.userId" 
-                    ng-click="addBid(job)"
-                    class="btn btn-sm btn-success"><i class="fa fa-send"></i> Apply</button>
+                    ng-click="addBid(job)" ng-disabled="job.userBid"
+                    class="btn btn-sm " ng-class="{ 'btn-success': !job.userBid,
+                    'btn-warning': job.userBid }">
+                        <span ng-if="!job.userBid"><i class="fa fa-send"></i> Apply</span>
+                        <span ng-if="job.userBid">Applied on
+                            {{ job.userBid.createdAt | date: 'MM/dd/yy' }}</span>
+                </button>
+                <button ng-if="job.userId == user.userId"
+                    ng-click="showBids(job, user)"
+                    class="btn btn-sm btn-info"><i class="fa fa-money"></i> View Bids</button>
                 <button ng-if="job.userId == user.userId"
                     ng-click="startEdit()"
                     class="btn btn-sm btn-warning"><i class="fa fa-edit"></i> Edit</button>

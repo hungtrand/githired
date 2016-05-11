@@ -29,16 +29,20 @@ module.exports = function($compile, messenger) {
 
             animation: google.maps.Animation.DROP,
             position: pos
-        }); 
+        });
 
-        newMarker.addListener('click', function() {
+        newMarker.openJobWindow = function() {
             var content = $compile("<gh-job-window job-id='" + job.jobId + "'></gh-job-window>")(scope);
 
             var infowindow = new google.maps.InfoWindow({
                 content: content[0] 
             });   
 
-            infowindow.open(map, newMarker);
+            infowindow.open(map, newMarker); 
+        }
+
+        newMarker.addListener('click', function() {
+           this.openJobWindow(); 
         });
 
         markerByJobId[job.jobId] = newMarker;
@@ -171,6 +175,11 @@ module.exports = function($compile, messenger) {
                 markerByJobId[job.jobId].setMap(null);
                 delete markerByJobId[job.jobId];
                 retrieveLatLngOfJobAndSetOnMap(job);
+            });
+
+            $scope.$on("jobWindow.open", function(evt, job) {
+                var marker = markerByJobId[job.jobId];
+                marker.openJobWindow();
             });
 
             $scope.$on("models.jobs.updated", 

@@ -33,7 +33,7 @@ window.init = function() {
         .factory('user_factory', ['$resource', '$rootScope', 'mySkills_factory', 'bid_factory', user_factory])
         .factory('joblist_factory', ['$resource', joblist_factory])
         .factory('mySkills_factory', ['$resource', mySkills_factory])
-        .factory('job_factory', ['$resource', '$rootScope', job_factory])
+        .factory('job_factory', ['$resource', '$rootScope', 'bidlist_factory', job_factory])
         .factory('bid_factory', ['$resource', bid_factory])
         .factory('bidlist_factory', ['$resource', bidlist_factory])
         ;
@@ -46,14 +46,14 @@ window.init = function() {
 
     app
         .directive('ghNavbar', [navbar_directive])
-        .directive('ghSidebar', [sidebar_directive])
+        .directive('ghSidebar', ['messenger_service', sidebar_directive])
         .directive('ghGmap', ["$compile", "messenger_service", gmap_directive])
         .directive('ghSearch', [searchInput_directive])
         .directive('ghSigninModal', [signin_directive])
         .directive('ghSignupForm', [signup_directive])
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-        .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
+        .directive('ghJobWindow', ['messenger_service', 'job_factory', jobWindow_directive])
         .directive('ghBids', [bids_directive])
         ;
 
@@ -81,21 +81,24 @@ module.exports = function($resource) {
 			bidId: "@bidId"
 		},
 		{
-			create: { method: 'POST' }	
+			create: { method: 'POST' },
+                        rate: { method: 'PUT'}
 		}
 	);
 	return resBid;
 }
+
 },{}],3:[function(require,module,exports){
 module.exports = function($resource) {
-	var url = "/api/user/:userId/:jobId/:request";
+	var url = "/api/user/:userId/:requestParam1/:jobId/:requestParam2";
 
 	var resBidList = $resource(
 		url,
 		{
 			userId: "@userId",
 			jobId: "@jobId",
-			request: "@aRequest"
+			requestParam1: "@aRequestParam1",
+			requestParam2: "@aRequestParam2"
 		},
 		{
 			fetchBids: { method: 'GET', params: { request: 'currentbids' } }
@@ -124,7 +127,10 @@ module.exports = function() {
 		, link: function($scope, $element, $attrs) {
 			var modal = $element.find('.modal');
 			
-			$scope.control.show = function() { modal.modal('show'); }
+			$scope.control.show = function(job) { 
+				$scope.bids = job.bids;
+				modal.modal('show'); 
+			}
 			$scope.control.hide = function() { modal.modal('hide'); }
 		}
 
@@ -173,16 +179,20 @@ module.exports = function($compile, messenger) {
 
             animation: google.maps.Animation.DROP,
             position: pos
-        }); 
+        });
 
-        newMarker.addListener('click', function() {
+        newMarker.openJobWindow = function() {
             var content = $compile("<gh-job-window job-id='" + job.jobId + "'></gh-job-window>")(scope);
 
             var infowindow = new google.maps.InfoWindow({
                 content: content[0] 
             });   
 
-            infowindow.open(map, newMarker);
+            infowindow.open(map, newMarker); 
+        }
+
+        newMarker.addListener('click', function() {
+           this.openJobWindow(); 
         });
 
         markerByJobId[job.jobId] = newMarker;
@@ -317,6 +327,11 @@ module.exports = function($compile, messenger) {
                 retrieveLatLngOfJobAndSetOnMap(job);
             });
 
+            $scope.$on("jobWindow.open", function(evt, job) {
+                var marker = markerByJobId[job.jobId];
+                marker.openJobWindow();
+            });
+
             $scope.$on("models.jobs.updated", 
                     function(event, data) {
                         clearMarkers(markers);
@@ -367,20 +382,40 @@ module.exports = function($compile, messenger) {
 }
 
 },{"./gmap.controller":6}],8:[function(require,module,exports){
-module.exports = function($scope, messenger) {
+module.exports = function($scope, messenger, job_factory) {
     $scope.jobs = messenger.joblist;
     $scope.user = messenger.user;
-
+    $scope.bidding = false;
     $scope.startEdit = function() {
         messenger.jobPostingForm.control.edit($scope.job);
     }
 
+    $scope.addBid = function(job) {
+        $scope.bidding = true;
+        var bidAmount = $scope.bidAmount || job.setWage;
+        $scope.user
+            .createBid(job.jobId, bidAmount)
+            .then(function(response) {
+                $scope.job.userBid = response;
+                $scope.bidding = false;
+            });
+    }
+
     $scope.showBids = function(job, user) {
-        messenger.bidsModal.control.show();
+    	// since job may be raw data from database, it might not have functions defined in job.factory.js
+    	// create a new job with values from job
+    	var objjob = new job_factory();
+    	angular.extend(objjob, job);
+
+    	// now fetch the jobs
+    	objjob.fetchBids();
+
+        messenger.bidsModal.control.show(objjob);
     }
 }
+
 },{}],9:[function(require,module,exports){
-module.exports = function(messenger) {
+module.exports = function(messenger, job_factory) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -395,13 +430,13 @@ module.exports = function(messenger) {
                 }
             });
 
-            $scope.addBid = function(job) {
-                console.log("you clicked on the bid button");
-                var bidAmount = $element.find(".bidAmount").val() || job.setWage;
-                $scope.user.createBid(job.jobId, bidAmount);
-            } 
+            angular.forEach(messenger.user.bids, function(b, i) {
+                if (b.jobId == $scope.jobId) {
+                    $scope.job.userBid = b;
+                }
+            });
         },
-        controller: ['$scope', 'messenger_service', controller]
+        controller: ['$scope', 'messenger_service', 'job_factory', controller]
     }
 }
 
@@ -425,6 +460,8 @@ module.exports = function ($scope, messenger) {
             .then(
                 function(response) {
                     messenger.user.fetchSkills();
+                    messenger.user.fetchBids();
+                    messenger.user.fetchJobs();
                 },
                 function(failure) {
                     console.log("Failed to load user. Error: " + failure);
@@ -643,7 +680,7 @@ module.exports = function() {
 }
 
 },{"./navbar.controller":13}],15:[function(require,module,exports){
-module.exports = function($resource, $rootScope) {
+module.exports = function($resource, $rootScope, bidlist_factory) {
     // define the class
     var resJob = $resource(
             '/api/jobs/:jobId/:request',
@@ -656,6 +693,22 @@ module.exports = function($resource, $rootScope) {
                 update: { method: 'PUT' }
             }
             );	
+
+    resJob.prototype.fetchBids = function() {
+        var self = this;
+        console.log(self.jobId);
+        self.bids = bidlist_factory.query( 
+            { 
+                requestParam1: 'jobs', 
+                requestParam2: 'currentbids',
+                jobId: self.jobId 
+            }, function(response) {
+                console.log("successfully retrieved bids for this job");
+            }, function(failure) {
+                console.log("Failure: " + failure);
+            }
+        );
+    }
 
     return resJob;
 }
@@ -849,29 +902,47 @@ module.exports = function() {
 }
 
 },{}],20:[function(require,module,exports){
-module.exports =function() {
-	var controller = function($scope, messenger) {
-		$scope.control = {};
-		messenger.sidebar.control = $scope.control;
-	}
-	return {
-		templateUrl: 'sidebar/sidebar.template.html'
-		, scope: {
+module.exports =function(messenger) {
+    var controller = function($scope, messenger, bid_factory) {
+        $scope.control = {};
+        messenger.sidebar.control = $scope.control;
+        $scope.userBids = messenger.user.bids;
+        $scope.maxRating = 5;
 
-		}
+        $scope.openJobWindow = function(aJob) {
+           $scope.$parent.$broadcast('jobWindow.open', aJob); 
+        }
+        
+        $scope.setRating = function(bid) {
+            bid_factory.rate({userId: messenger.user.userId, bidId: bid.bidId}, bid);    
+        }
+    }
+    return {
+        templateUrl: 'sidebar/sidebar.template.html'
+            , scope: {
 
-		, link: function($scope, $element, $attrs) {
-			$scope.control.show = function() {
-				$element.toggleClass("toggled", true);
-			}
-			$scope.control.hide = function() {
-				$element.toggleClass("toggled", false);
-			}
-		}
+            }
 
-		, controller: ['$scope', 'messenger_service', controller]
-	}
+        , link: function($scope, $element, $attrs) {
+            $scope.control.show = function() {
+                $scope.userBids = messenger.user.bids;
+                $scope.userJobs = messenger.user.jobs;
+                $element.toggleClass("toggled", true);
+            }
+            $scope.control.hide = function() {
+                $element.toggleClass("toggled", false);
+            }
+
+            $(document).on('dblclick', function() {
+                console.log($scope.userBids);
+                debugger
+            })
+        }
+
+        , controller: ['$scope', 'messenger_service', 'bid_factory', controller]
+    }
 }
+
 },{}],21:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
@@ -1144,7 +1215,7 @@ module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) 
             {
                 signup: { method: 'POST', params: { request: 'signup' } },
                 signin: { method: 'POST', params: { request: 'signin' } },
-                signout: { method: 'POST', params: { request: 'signout' } }
+                signout: { method: 'POST', params: { request: 'signout' }}
 
             }
     );
@@ -1164,17 +1235,41 @@ module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) 
         self.skills = mySkills_factory.query({ userId: self.userId });
     };
 
+    resUser.prototype.fetchJobs = function() {
+        var self = this;
+        var jobsUrl = '/api/user/:userId/userJobs';
+        var res = $resource(jobsUrl, {
+            userId: self.userId
+        });
+
+        self.jobs = res.query();
+    }
+
+    resUser.prototype.fetchBids = function() {
+        var self = this;
+        var bidUrl = '/api/user/:userId/bids/:bidId';
+        var res = $resource(bidUrl, {
+            userId: self.userId,
+            bidId: '@bidId'
+        });
+
+        self.bids = res.query();
+    }
+
     resUser.prototype.createBid = function(jobId, bidAmount) {
         var self = this;
         var userData = {
             userId: self.userId
         }
         var bid = bid_factory.create(userData, { jobId: jobId, bidAmount: bidAmount });
-        if (!angular.isArray(self.bids)) {
-            self.bids = [];
-        }
-        self.bids.push(bid);
-        console.log(bid);
+        bid.$promise.then(function() {
+            if (!angular.isArray(self.bids)) {
+                self.bids = [];
+            }
+            self.bids.push(bid);
+        })
+       
+        return bid.$promise;
     }
 
     return resUser;

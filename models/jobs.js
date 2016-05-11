@@ -20,7 +20,8 @@ module.exports = function(database, Sequelize) {
 		timestamp: {
 			type: Sequelize.DATE,
 			Timestamp: true
-		}
+		},
+                rating: Sequelize.DOUBLE
 	});
 
 	return jobsContext;

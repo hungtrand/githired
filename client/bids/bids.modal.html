@@ -7,13 +7,19 @@
             </div>
             <div class="modal-body">
                 <!-- fill in body data -->
-                <p>You are viewing the bid html</p>
-
+                <div ng-repeat="bid in bids">
+                    <p>Bid Id: {{ bid.bidId }}</p>
+                    <p>Amount: {{ bid.amount }}</p>
+                    <p>Employee Id: {{ bid.userId }}</p>
+                    <p>Job Id: {{ bid.jobId }}</p>
+                    <p>created at: {{ bid.createdAt }}</p>
+                    <button type="button" class="btn btn-default">Accept</button>
+                    <button type="button" class="btn btn-default">Decline</button>
+                </div>
             </div>
             <div class="modal-footer">
-
-            <!-- fill in footer data -->
-
+                <pre class="alert alert-danger" ng-if="error">{{ error }}</pre>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
         <!-- /.modal-content -->

@@ -33,6 +33,27 @@ var jobContext = require('./../models').jobs;
  *     }
  *  
  */
+router.get("/:userId/bids", function(req, res, next) {
+    var userId = req.params['userId'];
+    bidsContext.findAll({
+        where: { userId: userId },
+        include: [
+            { 
+                model: jobContext, 
+                as: 'job',
+                required: true,
+                include: [
+                    userContext
+                ]
+            }
+        ]
+    }).then(function(bids) {
+        res.send(200, bids);
+    }).catch(function(err) {
+        res.send(500, err);
+    });
+});
+
 router.post("/:userId/bids", function(req, res, next){
     var userId = req.param('userId');
     var created = Date.now();
@@ -73,6 +94,49 @@ router.post("/:userId/bids", function(req, res, next){
     });
 });
 
+router.put("/:userId/bids/:bidId", function(req, res, next){
+    var userId = req.params['userId'];
+    var bidId = req.params['bidId'];
+
+    var checker = bidsContext.findOne({
+        where: {
+            userId: userId,
+            bidId: bidId
+        }
+    }).then(function(bid){
+        bid.rating = req.body['rating'];
+        bid.save().then(function() {
+            bidsContext.findAll( {
+                attributes: ['rating'],
+                where: { jobId: bid.jobId }
+            }).then(function(bids) {
+                var sum = 0;
+                var count = 0;
+                for (var i = 0, l = bids.length; i < l; i++) {
+                   if (bids[i].rating) {
+                       sum += bids[i].rating;
+                       count++;
+                   }
+                }
+
+                avgRating = sum / count;
+
+                jobContext.findOne(
+                    { where: { jobId: bid.jobId }}
+                ).then(function(job) {
+                    job.rating = avgRating;
+                    job.save();
+                });
+            })
+
+            res.send(200, bid);
+        }).catch(function(err) {
+            res.send(500, err);
+        });
+    }).catch(function(err) {
+        res.send(500, err);
+    }); 
+});
 
 /**
  *  @api {get} /api/user/jobs/:jobId/currentbids employer views current bids.
