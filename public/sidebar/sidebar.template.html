@@ -1,7 +1,57 @@
 <ul class="sidebar-nav">
-	<li class="sidebar-brand">
-	</li>
-	<li>
-		<a href="#"></a>
-	</li>
+    <li class="sidebar-brand text-info" style="margin-top: 50px">
+        Jobs you applied
+    </li>
+    <li class="divider"></li>
+    <li class="userBids">
+        <div class="list-group">
+            <a href="" class="list-group-item" ng-repeat="bid in userBids">
+                    
+                    <label class="label label-success">{{ bid.job.jobTitle }}</label>
+                    <div>
+                        <label>Employer: </label>
+                        <em> {{ bid.job.user.company ||
+                            (bid.job.user.firstName + ' ' + bid.job.user.lastName)
+                            }}</em>
+                        <div class="text-center">
+                        <uib-rating 
+                                ng-model="bid.rating" 
+                                max="maxRating" 
+                                read-only="bid.rating" 
+                                on-hover="hoveringOver(value)" 
+                                on-leave="overStar = null" 
+                                titles="['one','two','three']" 
+                                aria-labelledby="default-rating"></uib-rating>
+                        </div>
+                        <div class="text-center">
+                            <label class="badge">{{ bid.createdAt | date: 'MM/dd/yy hh:mm:ss' }}</label>
+                        </div>
+                    </div>
+            </a>
+    </li>
+    <li class="sidebar-brand text-info">
+        Jobs you created:
+    </li>
+    <li class="userJobs">
+            <a href="" class="list-group-item list-group-item-success" ng-repeat="job in userJobs">
+                    
+                    <label class="label label-primary">{{ job.jobTitle }}</label>
+                    <div>
+                        <div class="text-center">
+                        <uib-rating 
+                                ng-model="job.rating" 
+                                max="maxRating" 
+                                read-only="true" 
+                                on-hover="hoveringOver(value)" 
+                                on-leave="overStar = null" 
+                                titles="['one','two','three']" 
+                                aria-labelledby="default-rating"></uib-rating>
+                        </div>
+                        <div class="text-center">
+                            <label class="badge">{{ job.createdAt | date: 'MM/dd/yy hh:mm:ss' }}</label>
+                        </div>
+                    </div>
+            </a>
+        </div>
+    </li>
 </ul>

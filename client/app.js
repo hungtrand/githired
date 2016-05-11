@@ -46,7 +46,7 @@ window.init = function() {
 
     app
         .directive('ghNavbar', [navbar_directive])
-        .directive('ghSidebar', [sidebar_directive])
+        .directive('ghSidebar', ['messenger_service', sidebar_directive])
         .directive('ghGmap', ["$compile", "messenger_service", gmap_directive])
         .directive('ghSearch', [searchInput_directive])
         .directive('ghSigninModal', [signin_directive])
@@ -370,15 +370,27 @@ module.exports = function($compile, messenger) {
 module.exports = function($scope, messenger) {
     $scope.jobs = messenger.joblist;
     $scope.user = messenger.user;
-
+    $scope.bidding = false;
     $scope.startEdit = function() {
         messenger.jobPostingForm.control.edit($scope.job);
+    }
+
+    $scope.addBid = function(job) {
+        $scope.bidding = true;
+        var bidAmount = $scope.bidAmount || job.setWage;
+        $scope.user
+            .createBid(job.jobId, bidAmount)
+            .then(function(response) {
+                $scope.job.userBid = response;
+                $scope.bidding = false;
+            });
     }
 
     $scope.showBids = function(job, user) {
         messenger.bidsModal.control.show();
     }
 }
+
 },{}],9:[function(require,module,exports){
 module.exports = function(messenger) {
     var controller = require('./jobWindow.controller.js');
@@ -395,11 +407,11 @@ module.exports = function(messenger) {
                 }
             });
 
-            $scope.addBid = function(job) {
-                console.log("you clicked on the bid button");
-                var bidAmount = $element.find(".bidAmount").val() || job.setWage;
-                $scope.user.createBid(job.jobId, bidAmount);
-            } 
+            angular.forEach(messenger.user.bids, function(b, i) {
+                if (b.jobId == $scope.jobId) {
+                    $scope.job.userBid = b;
+                }
+            });
         },
         controller: ['$scope', 'messenger_service', controller]
     }
@@ -425,6 +437,8 @@ module.exports = function ($scope, messenger) {
             .then(
                 function(response) {
                     messenger.user.fetchSkills();
+                    messenger.user.fetchBids();
+                    messenger.user.fetchJobs();
                 },
                 function(failure) {
                     console.log("Failed to load user. Error: " + failure);
@@ -849,29 +863,39 @@ module.exports = function() {
 }
 
 },{}],20:[function(require,module,exports){
-module.exports =function() {
-	var controller = function($scope, messenger) {
-		$scope.control = {};
-		messenger.sidebar.control = $scope.control;
-	}
-	return {
-		templateUrl: 'sidebar/sidebar.template.html'
-		, scope: {
+module.exports =function(messenger) {
+    var controller = function($scope, messenger) {
+        $scope.control = {};
+        messenger.sidebar.control = $scope.control;
+        $scope.userBids = messenger.user.bids;
+        $scope.maxRating = 5;
+    }
+    return {
+        templateUrl: 'sidebar/sidebar.template.html'
+            , scope: {
 
-		}
+            }
 
-		, link: function($scope, $element, $attrs) {
-			$scope.control.show = function() {
-				$element.toggleClass("toggled", true);
-			}
-			$scope.control.hide = function() {
-				$element.toggleClass("toggled", false);
-			}
-		}
+        , link: function($scope, $element, $attrs) {
+            $scope.control.show = function() {
+                $scope.userBids = messenger.user.bids;
+                $scope.userJobs = messenger.user.jobs;
+                $element.toggleClass("toggled", true);
+            }
+            $scope.control.hide = function() {
+                $element.toggleClass("toggled", false);
+            }
 
-		, controller: ['$scope', 'messenger_service', controller]
-	}
+            $(document).on('dblclick', function() {
+                console.log($scope.userBids);
+                debugger
+            })
+        }
+
+        , controller: ['$scope', 'messenger_service', controller]
+    }
 }
+
 },{}],21:[function(require,module,exports){
 module.exports = function($scope, messenger) {
     $scope.control = {};
@@ -1144,7 +1168,7 @@ module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) 
             {
                 signup: { method: 'POST', params: { request: 'signup' } },
                 signin: { method: 'POST', params: { request: 'signin' } },
-                signout: { method: 'POST', params: { request: 'signout' } }
+                signout: { method: 'POST', params: { request: 'signout' }}
 
             }
     );
@@ -1164,17 +1188,41 @@ module.exports = function($resource, $rootScope, mySkills_factory, bid_factory) 
         self.skills = mySkills_factory.query({ userId: self.userId });
     };
 
+    resUser.prototype.fetchJobs = function() {
+        var self = this;
+        var jobsUrl = '/api/user/:userId/userJobs';
+        var res = $resource(jobsUrl, {
+            userId: self.userId
+        });
+
+        self.jobs = res.query();
+    }
+
+    resUser.prototype.fetchBids = function() {
+        var self = this;
+        var bidUrl = '/api/user/:userId/bids/:bidId';
+        var res = $resource(bidUrl, {
+            userId: self.userId,
+            bidId: '@bidId'
+        });
+
+        self.bids = res.query();
+    }
+
     resUser.prototype.createBid = function(jobId, bidAmount) {
         var self = this;
         var userData = {
             userId: self.userId
         }
         var bid = bid_factory.create(userData, { jobId: jobId, bidAmount: bidAmount });
-        if (!angular.isArray(self.bids)) {
-            self.bids = [];
-        }
-        self.bids.push(bid);
-        console.log(bid);
+        bid.$promise.then(function() {
+            if (!angular.isArray(self.bids)) {
+                self.bids = [];
+            }
+            self.bids.push(bid);
+        })
+       
+        return bid.$promise;
     }
 
     return resUser;

@@ -104,7 +104,7 @@
 .sidebar-nav {
     position: absolute;
     top: 0;
-    width: 250px;
+    width: 300px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -115,20 +115,19 @@
 }
 
 .sidebar-nav li {
-    text-indent: 20px;
-    line-height: 40px;
+    text-indent: 5px;
 }
 
 .sidebar-nav li a {
     display: block;
     text-decoration: none;
-    color: #666;
+    color: #fff;
 }
 
 .sidebar-nav li a:hover {
     text-decoration: none;
     color: #fff;
-    background: rgba(255,255,255,0.2);
+    background: #333;
 }
 
 .sidebar-nav li a:active,

@@ -3,6 +3,7 @@ var router = express.Router();
 var usersContext = require('./../models').users;
 var skills = require('./../models').skills;
 var userSkills = require('./../models').userSkills;
+var jobContext = require('./../models').jobs;
 
 router.post("/signup", function(req, res, next) {
 	res.setHeader('Content-Type', 'application/json');
@@ -72,41 +73,33 @@ router.post("/:userId", function(req, res, next) {
     ;
 });
 
-/*
-router.get("/:userId/skills", function(req, res, next){
+router.get("/:userId/userjobs", function(req, res, next){
 	res.setHeader('Content-Type', 'application/json');
 	var id = req.param('userId');
-	var arr = new Array();
+	jobContext
+		.findAll({
+			where: {
+				userId: id	
+			},
+			attributes: ['jobId', 'jobTitle', 'jobDescription'
+				, 'minimumWage','maximumWage', 'jobType'
+				, 'position', 'createdAt', 'endDate'
+				, 'location', 'userId']
+		})
+		.then(function(jobs){
+			if(jobs){
+				res.send(JSON.stringify(jobs));
+			}else{
+				res.sendStatus(401);
+			}
+		})
+		.catch(function(err){
+			res.send(JSON.stringify(err));
+		})
 
-
-	skills.findAll({
-		
-		attributes:['name'],
-		include: [{model: usersContext, where: {userId: id}
-		,attributes: ['firstName', 'lastName', 'company', 'email']
-		,throught: [{model: userSkills
-		,attributes: ['description', 'yearsOfExperience']
-		}]}]
-
-	}).then(function(skills){
-		if(skills){
-			res.send(JSON.stringify(skills));
-		}else{
-			res.sendStatus(401);
-		}
-		
-	})
-	.catch(function(err){
-		res.send(JSON.stringify(err));
-	});
-
-
-		
 });
-*/
-		
-		
-	
+
+
 
 module.exports = function(app) {
     app.use("/api/user", router);

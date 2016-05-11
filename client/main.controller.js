@@ -8,6 +8,8 @@ module.exports = function ($scope, messenger) {
             .then(
                 function(response) {
                     messenger.user.fetchSkills();
+                    messenger.user.fetchBids();
+                    messenger.user.fetchJobs();
                 },
                 function(failure) {
                     console.log("Failed to load user. Error: " + failure);

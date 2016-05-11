@@ -33,6 +33,26 @@ var jobContext = require('./../models').jobs;
  *     }
  *  
  */
+router.get("/:userId/bids", function(req, res, next) {
+    var userId = req.params['userId'];
+    bidsContext.findAll({
+        where: { userId: userId },
+        include: [
+            { 
+                model: jobContext, 
+                as: 'job',
+                include: [
+                    userContext
+                ]
+            }
+        ]
+    }).then(function(bids) {
+        res.send(200, bids);
+    }).catch(function(err) {
+        res.send(500, err);
+    });
+});
+
 router.post("/:userId/bids", function(req, res, next){
     var userId = req.param('userId');
     var created = Date.now();

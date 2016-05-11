@@ -42,7 +42,6 @@ models.forEach(function(model) {
         }
     );
 
-
     m.jobAcceptances.belongsTo(
         m.jobs, {
             foreignKey: 'jobId',

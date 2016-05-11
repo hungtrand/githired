@@ -45,7 +45,7 @@ window.init = function() {
 
     app
         .directive('ghNavbar', [navbar_directive])
-        .directive('ghSidebar', [sidebar_directive])
+        .directive('ghSidebar', ['messenger_service', sidebar_directive])
         .directive('ghGmap', ["$compile", "messenger_service", gmap_directive])
         .directive('ghSearch', [searchInput_directive])
         .directive('ghSigninModal', [signin_directive])
