@@ -3,7 +3,7 @@ var router = express.Router();
 var bidsContext = require('./../models').bids;
 var userContext = require('./../models').users;
 var jobContext = require('./../models').jobs;
-
+var skillsContext = require('./../models').skills;
 
 /**
  *  @api {post} /api/user/:userId/bids biding amount.
@@ -246,6 +246,14 @@ router.get("/jobs/:jobId/currentbids", function(req, res, next){
         where: {jobid: jobId}, 
         include: [{model: userContext
             , attributes: ['userId','firstName', 'lastName', 'company', 'email', 'linkedin']
+            , include: [
+            { 
+                model: skillsContext,
+            attributes: ['name', 'skillId'],
+            as: 'skills',
+            required: false
+            }
+            ]
         }, 
         {model: jobContext, attributes: ['jobId','jobTitle', 'jobDescription', 'minimumWage', 'setWage', 'jobType', 'position', 'startingDate']}]
 

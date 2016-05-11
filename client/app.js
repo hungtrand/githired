@@ -116,6 +116,22 @@ module.exports = function($scope, messenger, $sce) {
     $scope.getSource = function(linkedin) {
         return "bids/linkedin-widget.html#/?profile=" + encodeURIComponent(linkedin);
     }
+
+    $scope.acceptBid = function(bid, index) {
+        bid.accepted = true;
+        setTimeout(function() {
+            bid.deleted = true;
+            $scope.$apply();
+        },3000);
+    }
+
+    $scope.declineBid = function(bid, index) {
+        bid.declined = true;
+        setTimeout(function() {
+            bid.deleted = true;
+            $scope.$apply();
+        },3000);
+    }
 }
 
 },{}],5:[function(require,module,exports){
@@ -937,12 +953,7 @@ module.exports =function(messenger) {
             $scope.control.hide = function() {
                 $element.toggleClass("toggled", false);
             }
-
-            $(document).on('dblclick', function() {
-                console.log($scope.userBids);
-                debugger
-            })
-        }
+       }
 
         , controller: ['$scope', 'messenger_service', 'bid_factory', controller]
     }
@@ -1033,7 +1044,10 @@ module.exports = function($scope, messenger) {
         $scope.formError = '';
         $scope.status = 'waiting';
 
-        if (!validate()) return false;
+        if (!validate())  {
+            return false;
+            $scope.waiting = 'standby';
+        }
 
         $scope.model.company = $scope.model.isEmployer ? $scope.model.company : '';
         $scope.model.firstName = $scope.model.isEmployee ? $scope.model.firstName : '';
