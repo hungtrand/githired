@@ -156,15 +156,15 @@ define({ "api": [
   },
   {
     "type": "put",
-    "url": "/api/user/:userId/offferedjobs/:acceptanceId",
-    "title": "employee update his/her finalized decision.",
+    "url": "/api/user/:userId/acceptedjobs/:acceptanceId",
+    "title": "employer update his/her finalized decision.",
     "name": "UPDATE_EMPLOYEEMENT_STAGE",
     "group": "Acceptance",
     "version": "1.0.0",
-    "description": "<p>Method Description : Employee uses this method to change his/her currently accepted jobs.</p>",
+    "description": "<p>Method Description : Employer uses this method to change his/her currently accepted jobs.</p>",
     "sampleRequest": [
       {
-        "url": "http://localhost:80/api/user/:userId/offeredjobs/:acceptanceId"
+        "url": "http://localhost:80/api/user/:userId/acceptedjobs/:acceptanceId"
       }
     ],
     "success": {
@@ -175,7 +175,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "Finalized",
-            "description": "<p>The yes or no decision from employee.</p>"
+            "description": "<p>The yes or no decision from employer.</p>"
           }
         ]
       },
@@ -226,15 +226,15 @@ define({ "api": [
   },
   {
     "type": "put",
-    "url": "/api/user/:userId/acceptedjobs/:acceptanceId",
-    "title": "employer update his/her finalized decision.",
+    "url": "/api/user/:userId/offferedjobs/:acceptanceId",
+    "title": "employee update his/her finalized decision.",
     "name": "UPDATE_EMPLOYEEMENT_STAGE",
     "group": "Acceptance",
     "version": "1.0.0",
-    "description": "<p>Method Description : Employer uses this method to change his/her currently accepted jobs.</p>",
+    "description": "<p>Method Description : Employee uses this method to change his/her currently accepted jobs.</p>",
     "sampleRequest": [
       {
-        "url": "http://localhost:80/api/user/:userId/acceptedjobs/:acceptanceId"
+        "url": "http://localhost:80/api/user/:userId/offeredjobs/:acceptanceId"
       }
     ],
     "success": {
@@ -245,7 +245,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "Finalized",
-            "description": "<p>The yes or no decision from employer.</p>"
+            "description": "<p>The yes or no decision from employee.</p>"
           }
         ]
       },
@@ -690,14 +690,7 @@ define({ "api": [
             "description": "<p>user amount</p>"
           }
         ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "{\n  \"amount\": 50\n}",
-          "type": "json"
-        }
-      ]
+      }
     },
     "description": "<p>Method Description : Users use this method to bid the job.</p>",
     "sampleRequest": [
@@ -805,6 +798,124 @@ define({ "api": [
         {
           "title": "Request-Example:",
           "content": "{\n  \"amount\": 100\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./bids.js",
+    "groupTitle": "Bids"
+  },
+  {
+    "type": "put",
+    "url": "/api/user/:userId/bids/:bidId",
+    "title": "user updates current bids rate.",
+    "name": "Update_current_bids_rate_",
+    "group": "Bids",
+    "version": "1.0.0",
+    "description": "<p>Method Description: User uses this method to update his/her current rating.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/bids"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>The amount of user's bid.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"rating\": \"5\",\n  \"createdAt\": \"2016-05-11\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"rating\": 5\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./bids.js",
+    "groupTitle": "Bids"
+  },
+  {
+    "type": "post",
+    "url": "/api/user/:userId/bids",
+    "title": "user creates new bids",
+    "name": "create_new_bids",
+    "group": "Bids",
+    "version": "1.0.0",
+    "description": "<p>Method Description: User uses this method to create new bids with amount.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/bids"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>The amount of user's bid.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"amount\": \"50\",\n  \"createdAt\": \"2016-05-11\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"amount\": 50\n}",
           "type": "json"
         }
       ]
