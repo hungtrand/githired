@@ -13,6 +13,7 @@ var models = [
     'jobAcceptances',
     'comments',
     'bids'
+    
 ];
 
 models.forEach(function(model) {
@@ -28,6 +29,12 @@ models.forEach(function(model) {
         }
     );
 
+    m.comments.belongsTo(
+        m.jobs,{
+            foreignKey: 'jobId',
+            targetKey: 'jobId'
+        }
+    );
     m.jobs.belongsTo(
         m.users, {
             foreignKey: 'userId',
@@ -84,6 +91,8 @@ models.forEach(function(model) {
             targetKey: 'userId'
         }
     );
+
+
 
    
     
