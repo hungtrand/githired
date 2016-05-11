@@ -7,13 +7,14 @@ module.exports = function() {
             link: function($scope, $element, $attrs) {
                 var modal = $element.find('.modal');
                 var resetModel = function() {
+                    $scope.model.jobId = null;
                     $scope.model.jobTitle = '';
                     $scope.model.jobDescription = '';
                     $scope.model.jobAddress = null;
                     $scope.model.jobWageType = null;
-                    $scope.model.jobMinWage = '';
-                    $scope.model.jobMaxWage = '';
-                    $scope.model.jobSetWage = '';
+                    $scope.model.minimumWage = '';
+                    $scope.model.maximumWage = '';
+                    $scope.model.setWage = '';
                     $scope.model.skills.splice(0, $scope.model.skills.length);
                 }
                 $scope.control.show = function(objAddress) {
@@ -25,6 +26,12 @@ module.exports = function() {
                 }
                 $scope.control.hide = function() {
                     modal.modal('hide');
+                }
+
+                $scope.control.edit = function(existingJob) {
+                    resetModel();
+                    angular.extend($scope.model, existingJob);
+                    modal.modal('show');
                 }
 
                 modal.on('hidden.bs.modal', function() {

@@ -56,15 +56,40 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             job.$promise
                 .then(
                         function(newJob) {
-                            self.jobs.push(job);
+                            newJob.skills = angular.copy(jobForm.skills);
+                            self.joblist.push(newJob);
+                            $rootScope.$broadcast('models.jobs.added', newJob);
                         }
                         ,
                         function(error) {
                             $rootScope.$broadcast('error', error);
                         });
 
-            return self.job.$promise;
-        }, 
+            return job.$promise;
+        },
+        updateJob: function(jobForm) {
+            var self = this;
+            var job = job_factory.update({ jobId: jobForm.jobId }, jobForm);
+            
+            job.$promise.then(
+                function() {
+                    angular.forEach(self.joblist, function(oldJob, index) {
+                        if ( oldJob.jobId == job.jobId ) {
+                            var oldLocation = oldJob.location;
+                            angular.copy(job, self.joblist[index]);
+                            if (oldLocation != job.location) {
+                                $rootScope.$broadcast('models.jobs.address.updated', self.joblist[index]);
+                            }
+                        }
+                    }); 
+                },
+                function(failure) {
+                    console.log(failure);
+                }
+            )
+            
+            return job.$promise;
+        },
         fetchJobs: function(arrSkills) {
             var self = this;
             var searchParams = { skills: arrSkills || [] };
@@ -72,12 +97,14 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             if (arrSkills) {
                 promise = joblist_factory.search({}, searchParams, function(response) {
                     angular.copy(response, self.joblist);
+                    $rootScope.$broadcast('models.jobs.updated');
                 }, function(failure) {
                     console.log(failure);
                 });
             } else {
                 promise = joblist_factory.query({}, function(response) {
-                    angular.copy(response, self.joblist); // use angular copy to save reference
+                    angular.copy(response, self.joblist); 
+                    $rootScope.$broadcast('models.jobs.updated');
                 }, function(failure) {
                     // failure
                     console.log("Failure:" + failure);

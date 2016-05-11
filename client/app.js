@@ -50,7 +50,7 @@ window.init = function() {
         .directive('ghSignupForm', [signup_directive])
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-        .directive('ghJobWindow', [jobWindow_directive])
+        .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
         ;
 
     app
@@ -103,6 +103,7 @@ module.exports = function($compile, messenger) {
 
     var map, geocoder;
     var markers = [];
+    var markerByJobId = {};
 
     function clearMarkers(markerList) {
         angular.forEach(markerList, function(marker, index) {
@@ -134,6 +135,8 @@ module.exports = function($compile, messenger) {
 
             infowindow.open(map, newMarker);
         });
+        
+        markerByJobId[job.jobId] = newMarker;
 
         return newMarker;
     }
@@ -196,30 +199,7 @@ module.exports = function($compile, messenger) {
             map = new google.maps.Map($element[0], mapOptions);
             geocoder = new google.maps.Geocoder();
 
-            $scope.control = {
-                addJob: function(job) {
-
-                    if (job.coordinates) {
-                        var lat = job.coordinates[0];
-                        var lng = job.coordinates[1];
-
-                        var pos = {
-                            lat: lat,
-                            lng: lng
-                        }
-                    } else if (job.jobAddress) {
-                        var pos = job.jobAddress.latLng;
-                    }
-
-
-                    var marker = markerFactory(job, pos, $scope);
-
-                    markers.push(marker);
-                    setTimeout(function() {
-                        $scope.$apply();
-                    }, 200);
-                }
-            }
+            $scope.control = {}
 
             google.maps.event.addListener(map, 'dblclick', function(e) {
                 geocoder.geocode({
@@ -243,45 +223,61 @@ module.exports = function($compile, messenger) {
                 });
             });
 
-            $scope.$watch("jobs", 
-                    function(newJobsArray, oldJobsArray) {
-                        if (angular.equals(newJobsArray, oldJobsArray)) return false;
+            $scope.$on("models.jobs.added", function(event, newJob) {
+                retrieveLatLngOfJobAndSetOnMap(newJob);
+            });
+
+            $scope.$on("models.jobs.address.updated", function(event, job) {
+                markerByJobId[job.jobId].setMap(null);
+                delete markerByJobId[job.jobId];
+                retrieveLatLngOfJobAndSetOnMap(job);
+            });
+
+            $scope.$on("models.jobs.updated", 
+                    function(event, data) {
                         clearMarkers(markers);
-                        
+
                         var i = 0;
-                        var timeout = 100;
-                        function retrieveLatLngOfJobAndSetOnMap(job) {
-                            if (i >= newJobsArray.length) return;
+                        var timeout = 200;
 
-                            geocoder.geocode({
-                                'address': job.location + ""
-                            },
-                            function(results, status) {
-                                if (status == google.maps.GeocoderStatus.OK) {
-                                    //console.log(results);
-                                    job.jobAddress = results[0].geometry.location;
-                                    var marker = markerFactory(
-                                        job,
-                                        results[0].geometry.location,
-                                        $scope
-                                        );
+                        var recurse = function(i) {
+                            if (i >= $scope.jobs.length) return false;
 
-                                    markers.push(marker);
-                                } else {
-                                    console.log("Geocode was not successful for the following reason: " + status);
-                                }
-                            });
-                            
                             if (i >= 9) timeout = 1000
-                            else timeout = 100;
+                            else timeout = 250;
                             setTimeout(function() {
-                                retrieveLatLngOfJobAndSetOnMap(newJobsArray[++i]);
+                                retrieveLatLngOfJobAndSetOnMap($scope.jobs[i]);
+                                recurse(++i);
                             }, timeout);
                         }
 
-                        retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
-                    },
-                    true);
+                        recurse(i);
+                    }
+                    );
+
+            function retrieveLatLngOfJobAndSetOnMap(job) {
+                geocoder.geocode({
+                    'address': job.location + ""
+                },
+                function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        var addressComponents = results[0]['address_components'];
+                        
+                        job.jobAddress = extractAddress(addressComponents);
+                        var marker = markerFactory(
+                            job,
+                            results[0].geometry.location,
+                            $scope
+                            );
+
+                        markers.push(marker);
+                    } else {
+                        console.log("Geocode was not successful for the following reason: " + status);
+                    }
+                });
+            }
+
+
         }
     }
 }
@@ -290,9 +286,14 @@ module.exports = function($compile, messenger) {
 module.exports = function($scope, messenger) {
     $scope.jobs = messenger.joblist;
     $scope.user = messenger.user;
+
+    $scope.startEdit = function() {
+        messenger.jobPostingForm.control.edit($scope.job);
+    }
 }
+
 },{}],6:[function(require,module,exports){
-module.exports = function() {
+module.exports = function(messenger) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -311,13 +312,7 @@ module.exports = function() {
                 console.log("you clicked on the bid button");
                 var bidAmount = $element.find(".bidAmount").val() || job.setWage;
                 $scope.user.createBid(job.jobId, bidAmount);
-            }
-
-            $scope.startEdit = function(job, user) {
-                console.log("you clicked on the edit button");
-                console.log(job);
-                console.log(user);
-            }
+            } 
         },
         controller: ['$scope', 'messenger_service', controller]
     }
@@ -412,15 +407,40 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             job.$promise
                 .then(
                         function(newJob) {
-                            self.jobs.push(job);
+                            newJob.skills = angular.copy(jobForm.skills);
+                            self.joblist.push(newJob);
+                            $rootScope.$broadcast('models.jobs.added', newJob);
                         }
                         ,
                         function(error) {
                             $rootScope.$broadcast('error', error);
                         });
 
-            return self.job.$promise;
-        }, 
+            return job.$promise;
+        },
+        updateJob: function(jobForm) {
+            var self = this;
+            var job = job_factory.update({ jobId: jobForm.jobId }, jobForm);
+            
+            job.$promise.then(
+                function() {
+                    angular.forEach(self.joblist, function(oldJob, index) {
+                        if ( oldJob.jobId == job.jobId ) {
+                            var oldLocation = oldJob.location;
+                            angular.copy(job, self.joblist[index]);
+                            if (oldLocation != job.location) {
+                                $rootScope.$broadcast('models.jobs.address.updated', self.joblist[index]);
+                            }
+                        }
+                    }); 
+                },
+                function(failure) {
+                    console.log(failure);
+                }
+            )
+            
+            return job.$promise;
+        },
         fetchJobs: function(arrSkills) {
             var self = this;
             var searchParams = { skills: arrSkills || [] };
@@ -428,12 +448,14 @@ module.exports = function($rootScope, user_factory, joblist_factory, job_factory
             if (arrSkills) {
                 promise = joblist_factory.search({}, searchParams, function(response) {
                     angular.copy(response, self.joblist);
+                    $rootScope.$broadcast('models.jobs.updated');
                 }, function(failure) {
                     console.log(failure);
                 });
             } else {
                 promise = joblist_factory.query({}, function(response) {
-                    angular.copy(response, self.joblist); // use angular copy to save reference
+                    angular.copy(response, self.joblist); 
+                    $rootScope.$broadcast('models.jobs.updated');
                 }, function(failure) {
                     // failure
                     console.log("Failure:" + failure);
@@ -529,19 +551,22 @@ module.exports = function() {
 
 },{"./navbar.controller":10}],12:[function(require,module,exports){
 module.exports = function($resource, $rootScope) {
-	// define the class
-	var resJob = $resource(
-		'/api/jobs/:request',
-		{
-			request: "@createJob"
-		},
-		{
-			createJob: { method: 'POST', params: { request: 'createJob' } }
-		}
-	);	
+    // define the class
+    var resJob = $resource(
+            '/api/jobs/:jobId/:request',
+            {
+                request: "@createJob",
+                jobId: "@jobId"
+            },
+            {
+                createJob: { method: 'POST', params: { request: 'createJob' } },
+                update: { method: 'PUT' }
+            }
+            );	
 
-	return resJob;
+    return resJob;
 }
+
 },{}],13:[function(require,module,exports){
 module.exports = function($scope, messenger, trendySkills_service) {
     $scope.control = {};
@@ -551,9 +576,23 @@ module.exports = function($scope, messenger, trendySkills_service) {
 
 
     $scope.submitPostJob = function() {
-        messenger
-            .addJob($scope.model)
-            .then(function() { $scope.control.hide() });
+        $scope.loading = true;
+        if ($scope.model.jobId) {
+           messenger
+               .updateJob($scope.model) 
+               .then(function() { 
+                   $scope.control.hide();
+                   $scope.loading = false;
+               });
+        } else {
+            messenger
+                .addJob($scope.model)
+                .then(function() { 
+                    $scope.control.hide();
+                    $scope.loading = false;
+                });
+        }
+       
     }
 
     $scope.selected = null;
@@ -566,7 +605,11 @@ module.exports = function($scope, messenger, trendySkills_service) {
     }
 
     $scope.removeSkill = function($index) {
-        $scope.model.skills.splice($index, 1);
+        if ($scope.model.jobId) {
+            $scope.model.skills[$index].delete = true;
+        } else {
+            $scope.model.skills.splice($index, 1);
+        }
     }
 
     $scope.getSkillSuggestions = function(query) {
@@ -609,13 +652,14 @@ module.exports = function() {
             link: function($scope, $element, $attrs) {
                 var modal = $element.find('.modal');
                 var resetModel = function() {
+                    $scope.model.jobId = null;
                     $scope.model.jobTitle = '';
                     $scope.model.jobDescription = '';
                     $scope.model.jobAddress = null;
                     $scope.model.jobWageType = null;
-                    $scope.model.jobMinWage = '';
-                    $scope.model.jobMaxWage = '';
-                    $scope.model.jobSetWage = '';
+                    $scope.model.minimumWage = '';
+                    $scope.model.maximumWage = '';
+                    $scope.model.setWage = '';
                     $scope.model.skills.splice(0, $scope.model.skills.length);
                 }
                 $scope.control.show = function(objAddress) {
@@ -627,6 +671,12 @@ module.exports = function() {
                 }
                 $scope.control.hide = function() {
                     modal.modal('hide');
+                }
+
+                $scope.control.edit = function(existingJob) {
+                    resetModel();
+                    angular.extend($scope.model, existingJob);
+                    modal.modal('show');
                 }
 
                 modal.on('hidden.bs.modal', function() {
@@ -690,7 +740,11 @@ module.exports = function() {
             }
 
             $scope.sendQuery = function() {
-                var filters = Object.keys($scope.searchLog);
+                var filters = [];
+                angular.forEach($scope.searchLog, function(isChecked, filter) {
+                    if (isChecked) filters.push(filter);
+                });
+
                 if (filters.length > 0) {
                     messenger.fetchJobs(filters);
                 } else {

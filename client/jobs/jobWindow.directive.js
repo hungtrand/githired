@@ -1,4 +1,4 @@
-module.exports = function() {
+module.exports = function(messenger) {
     var controller = require('./jobWindow.controller.js');
 
     return {
@@ -17,13 +17,7 @@ module.exports = function() {
                 console.log("you clicked on the bid button");
                 var bidAmount = $element.find(".bidAmount").val() || job.setWage;
                 $scope.user.createBid(job.jobId, bidAmount);
-            }
-
-            $scope.startEdit = function(job, user) {
-                console.log("you clicked on the edit button");
-                console.log(job);
-                console.log(user);
-            }
+            } 
         },
         controller: ['$scope', 'messenger_service', controller]
     }

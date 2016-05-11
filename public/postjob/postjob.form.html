@@ -77,7 +77,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">$</span>
                             <input type="number" id="minWage" class="form-control" 
-                            ng-model="model.jobMinWage"
+                            ng-model="model.minimumWage"
                             placeholder="Minimum Wage" required />
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">$</span>
                             <input type="number" id="maxWage" class="form-control" 
-                            ng-model="model.jobMaxWage"
+                            ng-model="model.maximumWage"
                             placeholder="Maximum Wage" required >
                         </div>
                     </div>
@@ -100,7 +100,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">$</span>
                             <input type="number" id="setWage" class="form-control" 
-                            ng-model="model.jobSetWage"
+                            ng-model="model.setWage"
                             placeholder="Set Wage" required />
                         </div>
                     </div>
@@ -146,9 +146,11 @@
             <div class="modal-footer">
                 <pre class="alert alert-danger" ng-if="error">{{ error }}</pre>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary"
+                    ng-disabled="loading">
                     <span>
-                        <i class="fa fa-send"></i> Post Job
+                        <i class="fa fa-spinner fa-spin" ng-if="loading"></i>
+                        <i class="fa fa-send" ng-if="!loading"></i> Post Job
                     </span>
                 </button>
             </div>

@@ -8,6 +8,7 @@ module.exports = function($compile, messenger) {
 
     var map, geocoder;
     var markers = [];
+    var markerByJobId = {};
 
     function clearMarkers(markerList) {
         angular.forEach(markerList, function(marker, index) {
@@ -39,6 +40,8 @@ module.exports = function($compile, messenger) {
 
             infowindow.open(map, newMarker);
         });
+        
+        markerByJobId[job.jobId] = newMarker;
 
         return newMarker;
     }
@@ -101,30 +104,7 @@ module.exports = function($compile, messenger) {
             map = new google.maps.Map($element[0], mapOptions);
             geocoder = new google.maps.Geocoder();
 
-            $scope.control = {
-                addJob: function(job) {
-
-                    if (job.coordinates) {
-                        var lat = job.coordinates[0];
-                        var lng = job.coordinates[1];
-
-                        var pos = {
-                            lat: lat,
-                            lng: lng
-                        }
-                    } else if (job.jobAddress) {
-                        var pos = job.jobAddress.latLng;
-                    }
-
-
-                    var marker = markerFactory(job, pos, $scope);
-
-                    markers.push(marker);
-                    setTimeout(function() {
-                        $scope.$apply();
-                    }, 200);
-                }
-            }
+            $scope.control = {}
 
             google.maps.event.addListener(map, 'dblclick', function(e) {
                 geocoder.geocode({
@@ -148,45 +128,61 @@ module.exports = function($compile, messenger) {
                 });
             });
 
-            $scope.$watch("jobs", 
-                    function(newJobsArray, oldJobsArray) {
-                        if (angular.equals(newJobsArray, oldJobsArray)) return false;
+            $scope.$on("models.jobs.added", function(event, newJob) {
+                retrieveLatLngOfJobAndSetOnMap(newJob);
+            });
+
+            $scope.$on("models.jobs.address.updated", function(event, job) {
+                markerByJobId[job.jobId].setMap(null);
+                delete markerByJobId[job.jobId];
+                retrieveLatLngOfJobAndSetOnMap(job);
+            });
+
+            $scope.$on("models.jobs.updated", 
+                    function(event, data) {
                         clearMarkers(markers);
-                        
+
                         var i = 0;
-                        var timeout = 100;
-                        function retrieveLatLngOfJobAndSetOnMap(job) {
-                            if (i >= newJobsArray.length) return;
+                        var timeout = 200;
 
-                            geocoder.geocode({
-                                'address': job.location + ""
-                            },
-                            function(results, status) {
-                                if (status == google.maps.GeocoderStatus.OK) {
-                                    //console.log(results);
-                                    job.jobAddress = results[0].geometry.location;
-                                    var marker = markerFactory(
-                                        job,
-                                        results[0].geometry.location,
-                                        $scope
-                                        );
+                        var recurse = function(i) {
+                            if (i >= $scope.jobs.length) return false;
 
-                                    markers.push(marker);
-                                } else {
-                                    console.log("Geocode was not successful for the following reason: " + status);
-                                }
-                            });
-                            
                             if (i >= 9) timeout = 1000
-                            else timeout = 100;
+                            else timeout = 250;
                             setTimeout(function() {
-                                retrieveLatLngOfJobAndSetOnMap(newJobsArray[++i]);
+                                retrieveLatLngOfJobAndSetOnMap($scope.jobs[i]);
+                                recurse(++i);
                             }, timeout);
                         }
 
-                        retrieveLatLngOfJobAndSetOnMap(newJobsArray[i]);
-                    },
-                    true);
+                        recurse(i);
+                    }
+                    );
+
+            function retrieveLatLngOfJobAndSetOnMap(job) {
+                geocoder.geocode({
+                    'address': job.location + ""
+                },
+                function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        var addressComponents = results[0]['address_components'];
+                        
+                        job.jobAddress = extractAddress(addressComponents);
+                        var marker = markerFactory(
+                            job,
+                            results[0].geometry.location,
+                            $scope
+                            );
+
+                        markers.push(marker);
+                    } else {
+                        console.log("Geocode was not successful for the following reason: " + status);
+                    }
+                });
+            }
+
+
         }
     }
 }

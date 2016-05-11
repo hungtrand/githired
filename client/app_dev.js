@@ -49,7 +49,7 @@ window.init = function() {
         .directive('ghSignupForm', [signup_directive])
         .directive('ghPostJobForm', [postjob_directive])
         .directive('ghMySkills', [mySkills_directive])
-        .directive('ghJobWindow', [jobWindow_directive])
+        .directive('ghJobWindow', ['messenger_service', jobWindow_directive])
         ;
 
     app
