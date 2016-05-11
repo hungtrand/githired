@@ -1,9 +1,17 @@
 module.exports =function(messenger) {
-    var controller = function($scope, messenger) {
+    var controller = function($scope, messenger, bid_factory) {
         $scope.control = {};
         messenger.sidebar.control = $scope.control;
         $scope.userBids = messenger.user.bids;
         $scope.maxRating = 5;
+
+        $scope.openJobWindow = function(aJob) {
+           $scope.$parent.$broadcast('jobWindow.open', aJob); 
+        }
+        
+        $scope.setRating = function(bid) {
+            bid_factory.rate({userId: messenger.user.userId, bidId: bid.bidId}, bid);    
+        }
     }
     return {
         templateUrl: 'sidebar/sidebar.template.html'
@@ -27,6 +35,6 @@ module.exports =function(messenger) {
             })
         }
 
-        , controller: ['$scope', 'messenger_service', controller]
+        , controller: ['$scope', 'messenger_service', 'bid_factory', controller]
     }
 }

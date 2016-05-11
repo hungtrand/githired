@@ -7,11 +7,12 @@ module.exports = function(database, Sequelize) {
 			allowNull: false
 		},
 		amount: Sequelize.DOUBLE,
+                rating: Sequelize.DOUBLE,
 		timestamp: {
 			type: Sequelize.DATE,
 			Timestamp: true
 		},
 	});
 	
-	return bidsContext;
+        return bidsContext;
 }

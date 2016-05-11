@@ -7,7 +7,8 @@ module.exports = function($resource) {
 			bidId: "@bidId"
 		},
 		{
-			create: { method: 'POST' }	
+			create: { method: 'POST' },
+                        rate: { method: 'PUT'}
 		}
 	);
 	return resBid;

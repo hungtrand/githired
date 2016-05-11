@@ -5,7 +5,7 @@
     <li class="divider"></li>
     <li class="userBids">
         <div class="list-group">
-            <a href="" class="list-group-item" ng-repeat="bid in userBids">
+            <a href="" ng-click="openJobWindow(bid.job)" class="list-group-item" ng-repeat="bid in userBids">
                     
                     <label class="label label-success">{{ bid.job.jobTitle }}</label>
                     <div>
@@ -20,7 +20,8 @@
                                 read-only="bid.rating" 
                                 on-hover="hoveringOver(value)" 
                                 on-leave="overStar = null" 
-                                titles="['one','two','three']" 
+                                titles="['one','two','three', 'four', 'five']" 
+                                ng-click="setRating(bid)"
                                 aria-labelledby="default-rating"></uib-rating>
                         </div>
                         <div class="text-center">
@@ -33,7 +34,7 @@
         Jobs you created:
     </li>
     <li class="userJobs">
-            <a href="" class="list-group-item list-group-item-success" ng-repeat="job in userJobs">
+            <a href="" ng-click="openJobWindow(job)" class="list-group-item list-group-item-success" ng-repeat="job in userJobs">
                     
                     <label class="label label-primary">{{ job.jobTitle }}</label>
                     <div>
@@ -44,7 +45,7 @@
                                 read-only="true" 
                                 on-hover="hoveringOver(value)" 
                                 on-leave="overStar = null" 
-                                titles="['one','two','three']" 
+                                titles="['one','two','three', 'four', 'five']" 
                                 aria-labelledby="default-rating"></uib-rating>
                         </div>
                         <div class="text-center">

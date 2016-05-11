@@ -84,7 +84,7 @@ router.get("/:userId/userjobs", function(req, res, next){
 			attributes: ['jobId', 'jobTitle', 'jobDescription'
 				, 'minimumWage','maximumWage', 'jobType'
 				, 'position', 'createdAt', 'endDate'
-				, 'location', 'userId']
+				, 'location', 'userId', 'rating']
 		})
 		.then(function(jobs){
 			if(jobs){
