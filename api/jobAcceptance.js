@@ -271,7 +271,7 @@ router.get("/:userId/joboffers", function(req,res,next){
 
 
 /**
- *  @api {put} /api/user/:userId/acceptedjobs/:acceptanceId employer update his/her finalized stage.
+ *  @api {put} /api/user/:userId/acceptedjobs/:acceptanceId employer update his/her finalized decision.
  *  @apiName UPDATE EMPLOYEEMENT STAGE
  *  @apiGroup Acceptance
  *  @apiVersion 1.0.0

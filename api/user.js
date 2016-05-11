@@ -4,6 +4,44 @@ var usersContext = require('./../models').users;
 var skills = require('./../models').skills;
 var userSkills = require('./../models').userSkills;
 
+/**
+ *  @api {Post} /api/user/signup   new user signup.
+ *  @apiName Sign up
+ *  @apiGroup Account
+ *  @apiVersion 1.0.0
+ *  
+ *  @apiDescription Method Description : 
+ *  User uses this method to create new account.
+ *  @apiSampleRequest http://localhost:80/api/user/signup
+ *  @apiSuccess {String} account The user is successfully signup an account.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+         "firstName" : "Med",
+         "lastName" : "Lee",
+         "company" : "Medicloud",
+         "email" : "med.lee@medicloudsjsu.org",
+         "account" : "Succcess"
+
+        }   
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParam {number} amount user amount
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "firstName": "med",
+ *		 "lastName" : "lee",
+ *		 "email" : "med.lee@medicloudsjsu.org",
+ *		 "password" : "********",
+ *		 "company" : "medicloud"
+ *     }
+ *  
+ */
 router.post("/signup", function(req, res, next) {
 	res.setHeader('Content-Type', 'application/json');
 
@@ -30,6 +68,39 @@ router.post("/signup", function(req, res, next) {
 });
 
 /* POST signin. Expecting params: @email, @password */
+/**
+ *  @api {Post} /api/user/signin   new user signup.
+ *  @apiName Sign In
+ *  @apiGroup Account
+ *  @apiVersion 1.0.0
+ *  
+ *  @apiDescription Method Description : 
+ *  User uses this method to log in to their account.
+ *  @apiSampleRequest http://localhost:80/api/user/signin
+ *  @apiSuccess {String} account The user is successfully logged into their account.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+         "User log in success!"
+
+        }   
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParam {number} amount user amount
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *      
+ *		 "email" : "med.lee@medicloudsjsu.org",
+ *		 "password" : "********"
+ *		 
+ *     }
+ *  
+ */
 router.post("/signin", function(req, res, next) {
 	res.setHeader('Content-Type', 'application/json');
 
@@ -57,6 +128,36 @@ router.post("/signin", function(req, res, next) {
 });
 
 /* POST update user profile */
+/**
+ *  @api {Post} /api/user/:userId user update profile.
+ *  @apiName Update profile
+ *  @apiGroup Account
+ *  @apiVersion 1.0.0
+ *  
+ *  @apiDescription Method Description : 
+ *  User uses this method to update personal information on their account.
+ *  @apiSampleRequest http://localhost:80/api/user/:userId
+ *  @apiSuccess {String} account The user is successfully updated profile.
+ *  @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     
+        {
+         "Profile is updated!"
+
+        }   
+ *  @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Not Found
+ *     {
+ *       "error": "Unauthorized!"
+ *     }
+ *  @apiPermission required
+ *  @apiParam {number} amount user amount
+ *  @apiParamExample {json} Request-Example:
+ *     {
+ *       "linkedin": "***********\/linkedin.com"
+ *     }
+ *  
+ */
 router.post("/:userId", function(req, res, next) {
     var userId = req.params['userId'];
     usersContext

@@ -157,7 +157,7 @@
   {
     "type": "put",
     "url": "/api/user/:userId/acceptedjobs/:acceptanceId",
-    "title": "employer update his/her finalized stage.",
+    "title": "employer update his/her finalized decision.",
     "name": "UPDATE_EMPLOYEEMENT_STAGE",
     "group": "Acceptance",
     "version": "1.0.0",
@@ -223,6 +223,216 @@
     },
     "filename": "./jobAcceptance.js",
     "groupTitle": "Acceptance"
+  },
+  {
+    "type": "Post",
+    "url": "/api/user/signin",
+    "title": "new user signup.",
+    "name": "Sign_In",
+    "group": "Account",
+    "version": "1.0.0",
+    "description": "<p>Method Description : User uses this method to log in to their account.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/signin"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The user is successfully logged into their account.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n    {\n     \"User log in success!\"\n\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>user amount</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "    {\n     \n\t\t \"email\" : \"med.lee@medicloudsjsu.org\",\n\t\t \"password\" : \"********\"\n\t\t \n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./user.js",
+    "groupTitle": "Account"
+  },
+  {
+    "type": "Post",
+    "url": "/api/user/signup",
+    "title": "new user signup.",
+    "name": "Sign_up",
+    "group": "Account",
+    "version": "1.0.0",
+    "description": "<p>Method Description : User uses this method to create new account.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/signup"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The user is successfully signup an account.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n    {\n     \"firstName\" : \"Med\",\n     \"lastName\" : \"Lee\",\n     \"company\" : \"Medicloud\",\n     \"email\" : \"med.lee@medicloudsjsu.org\",\n     \"account\" : \"Succcess\"\n\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>user amount</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "    {\n      \"firstName\": \"med\",\n\t\t \"lastName\" : \"lee\",\n\t\t \"email\" : \"med.lee@medicloudsjsu.org\",\n\t\t \"password\" : \"********\",\n\t\t \"company\" : \"medicloud\"\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./user.js",
+    "groupTitle": "Account"
+  },
+  {
+    "type": "Post",
+    "url": "/api/user/:userId",
+    "title": "user update profile.",
+    "name": "Update_profile",
+    "group": "Account",
+    "version": "1.0.0",
+    "description": "<p>Method Description : User uses this method to update personal information on their account.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>The user is successfully updated profile.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n    {\n     \"Profile is updated!\"\n\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>user amount</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"linkedin\": \"***********\\/linkedin.com\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./user.js",
+    "groupTitle": "Account"
   },
   {
     "type": "get",
@@ -472,6 +682,442 @@
     },
     "filename": "./bids.js",
     "groupTitle": "Bids"
+  },
+  {
+    "type": "post",
+    "url": "/api/user/:userId/jobs/:jobId/comments",
+    "title": "biding amount.",
+    "name": "Post_New_Comments",
+    "group": "Comments",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "comments",
+            "description": "<p>user creates some new comments.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"comments\": \"It is a good experience working here.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Method Description : Users use this method to give comments on the job.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/jobs/:jobId/comments"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "comment",
+            "description": "<p>The new comment has been created.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n    {\n    \t\"commentId\": 2,\n    \t\"userId\": \"1\",\n    \t\"jobId\": \"2\",\n    \t\"timestamp\": \"2016-05-11T19:08:50.908Z\",\n    \t\"createdAt\": \"2016-05-11T19:08:50.908Z\",\n    \t\"updatedAt\": \"2016-05-11T19:08:50.000Z\"\n\t\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "filename": "./comments.js",
+    "groupTitle": "Comments"
+  },
+  {
+    "type": "get",
+    "url": "/api/user/:userId/comments",
+    "title": "user views comments.",
+    "name": "View_comments",
+    "group": "Comments",
+    "version": "1.0.0",
+    "description": "<p>Method Description : Users use this method to view comments.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/comments"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n     [\n    \t{\n        \"commentId\": 1,\n        \"comment\": null,\n        \"timestamp\": \"2016-05-11T02:14:09.000Z\",\n        \"createdAt\": \"2016-05-11T02:14:09.000Z\",\n        \"updatedAt\": \"2016-05-11T02:14:09.000Z\",\n        \"userId\": 1,\n        \"jobId\": 1\n    \t}\n\t\t]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "filename": "./comments.js",
+    "groupTitle": "Comments"
+  },
+  {
+    "type": "get",
+    "url": "/api/user/jobs/",
+    "title": "user views current jobs.",
+    "name": "Get_jobs",
+    "group": "Jobs",
+    "version": "1.0.0",
+    "description": "<p>Method Description : Users use this method to view all the current jobs.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/jobs"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "jobs",
+            "description": "<p>The list of jobs that user's need.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n   [\n{\n    \"jobId\": 1,\n    \"jobTitle\": \"Software Engineering\",\n    \"jobDescription\": \"Testing\",\n    \"minimumWage\": 30,\n    \"maximumWage\": 50,\n    \"setWage\": 35,\n    \"jobType\": \"Engineering\",\n    \"position\": \"full time\",\n    \"startingDate\": null,\n    \"endDate\": null,\n    \"location\": \"San Jose\",\n    \"userId\": 1,\n    \"skills\": []\n},\n{\n    \"jobId\": 2,\n    \"jobTitle\": \"Software developer\",\n    \"jobDescription\": \"Develop web application\",\n    \"minimumWage\": 30,\n    \"maximumWage\": 60,\n    \"setWage\": 40,\n    \"jobType\": \"Web Developer\",\n    \"position\": \"full stack\",\n    \"startingDate\": null,\n    \"endDate\": null,\n    \"location\": \"2583 Brenford Drive, San Jose, California, \",\n    \"userId\": 2,\n    \"skills\": [\n        {\n            \"name\": \"AngularJS\",\n            \"skillId\": 22,\n            \"jobSkills\": {\n                \"importance\": null,\n                \"createdAt\": \"2016-05-11T05:07:45.000Z\",\n                \"updatedAt\": \"2016-05-11T05:07:45.000Z\",\n                \"jobJobId\": 2,\n                \"skillSkillId\": 22\n            }\n        }\n    ]\n},\n{\n    \"jobId\": 3,\n    \"jobTitle\": \"Application Developer\",\n    \"jobDescription\": \"Software Developer\",\n    \"minimumWage\": 25,\n    \"maximumWage\": 35,\n    \"setWage\": 30,\n    \"jobType\": \"App Developer\",\n    \"position\": \"full time\",\n    \"startingDate\": null,\n    \"endDate\": null,\n    \"location\": \"Fremont\",\n    \"userId\": 2,\n    \"skills\": []\n},\n{\n    \"jobId\": 4,\n    \"jobTitle\": \"Java Developer\",\n    \"jobDescription\": \"Must be able to handle pressure. \\nWrite clean code.\\nLive close by. Not a remote job.\",\n    \"minimumWage\": 40,\n    \"maximumWage\": 60,\n    \"setWage\": 0,\n    \"jobType\": null,\n    \"position\": null,\n    \"startingDate\": null,\n    \"endDate\": null,\n    \"location\": \"800 West Taylor Street, San Jose, California, 95126\",\n    \"userId\": 2,\n    \"skills\": [\n        {\n            \"name\": \"Java\",\n            \"skillId\": 4,\n            \"jobSkills\": {\n                \"importance\": null,\n                \"createdAt\": \"2016-05-11T05:03:13.000Z\",\n                \"updatedAt\": \"2016-05-11T05:03:13.000Z\",\n                \"jobJobId\": 4,\n                \"skillSkillId\": 4\n            }\n        }\n    ]\n}]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "filename": "./jobs.js",
+    "groupTitle": "Jobs"
+  },
+  {
+    "type": "post",
+    "url": "/api/jobs/createJob",
+    "title": "create new jobs.",
+    "name": "Post_a_New_job",
+    "group": "Jobs",
+    "version": "1.0.0",
+    "description": "<p>Method Description : Users use this method to create/add new jobs.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/jobs/createJob"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "job",
+            "description": "<p>The user is successfully create a new job.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"jobTitle\" : \"Software Process management.\",\n  \"jobDescription\" : \"Must be able to solve the problem with creative solution.\",\n  \"minimumWage\" : \"50\",\n  \"maximumWage\" : \"100\",\n  \"setWage\" : \"80\",\n  \"location\" : \"San Jose\",\n  \"jobcreation\" : \"job successfully created!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"jobTitle\" : \"Software Process management.\",\n  \"jobDescription\" : \"Must be able to solve the problem with creative solution.\",\n  \"minimumWage\" : \"50\",\n  \"maximumWage\" : \"100\",\n  \"setWage\" : \"80\",\n  \"location\" : \"San Jose\" \n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./jobs.js",
+    "groupTitle": "Jobs"
+  },
+  {
+    "type": "put",
+    "url": "/api/jobs/:jobId/",
+    "title": "user update his/her currently posted jobs.",
+    "name": "Update_current_posted_job",
+    "group": "Jobs",
+    "version": "1.0.0",
+    "description": "<p>Method Description : User uses this method to change his/her currently posting job that belong to job id.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/jobs/:jobId"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "jobs",
+            "description": "<p>The jobs is successfully updated.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n    {\n     Job is successfully updated!\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>user amount</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"jobTitle\" : \"Senior Software Engineer\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./jobs.js",
+    "groupTitle": "Jobs"
+  },
+  {
+    "type": "post",
+    "url": "/api/user/:userId/skills",
+    "title": "user creates/adds new skills.",
+    "name": "Add_user_s_new_skills",
+    "group": "Skills",
+    "version": "1.0.0",
+    "description": "<p>Method Description : User uses this method to add new skills in his/her profile.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/skills"
+      }
+    ],
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "skills",
+            "description": "<p>The added new skills.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n    {\n     New skills added!\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "amount",
+            "description": "<p>user amount</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n  \"skills\" : \"[Java, C++, keyboardwarrior]\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./user-skills.js",
+    "groupTitle": "Skills"
+  },
+  {
+    "type": "get",
+    "url": "/api/user/:userId/userjobs",
+    "title": "user views current posted jobs.",
+    "name": "View_Jobs",
+    "group": "User_Jobs",
+    "version": "1.0.0",
+    "description": "<p>Method Description : Users use this method to view currently jobs.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/userjobs"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n    {\n\t\t\"userId\": 1,\n\t\t\"jobId\" : 1,\n\t\t\"jobType\" : \"software engineer\" \n \t}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "filename": "./userJobs.js",
+    "groupTitle": "User_Jobs"
+  },
+  {
+    "type": "get",
+    "url": "/api/user/:userId/skills",
+    "title": "user views skills.",
+    "name": "View_skills",
+    "group": "User_Skills",
+    "version": "1.0.0",
+    "description": "<p>Method Description : Users use this method to view his/her skills.</p>",
+    "sampleRequest": [
+      {
+        "url": "http://localhost:80/api/user/:userId/skills"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n [\n        {\n        \"skillId\": 1,\n        \"name\": \"Software Engineering\",\n        \"userSkills\": {\n        \"userId\": 1,\n        \"yearsOfExperience\": 5\n            }\n        }\n    ]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 401 Not Found\n{\n  \"error\": \"Unauthorized!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "permission": [
+      {
+        "name": "required"
+      }
+    ],
+    "filename": "./user-skills.js",
+    "groupTitle": "User_Skills"
   },
   {
     "success": {
